@@ -202,5 +202,5 @@ export function formatBand(low: number, high: number): string {
   return `${formatUsd(low)} – ${formatUsd(high)}`;
 }
 
-export const ESTIMATOR_PROMPT_VERSION = "estimator-chat-v1";
+export const ESTIMATOR_PROMPT_VERSION = "estimator-chat-v2";
 export const PRICING_VERSION = "estimator-pricing-v1";

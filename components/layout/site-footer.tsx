@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
 import { services, site } from "@/lib/content";
+import { zac } from "@/lib/content/zac";
 
 const serviceLinks = services.map((s) => ({
   href: `/services/${s.slug}`,
@@ -8,8 +9,8 @@ const serviceLinks = services.map((s) => ({
 }));
 
 const aiToolLinks = [
-  { href: "/consultant", label: "AI Solution Consultant" },
-  { href: "/tools/estimator", label: "Project cost estimator" },
+  { href: "/consultant", label: zac.consultant.name },
+  { href: "/tools/estimator", label: zac.estimator.name },
   { href: "/portfolio", label: "Interactive demos" },
 ] as const;
 
@@ -116,7 +117,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <div className="footer__title">AI tools</div>
+            <div className="footer__title">ZAC tools</div>
             <ul>
               {aiToolLinks.map((link) => (
                 <li key={link.href}>

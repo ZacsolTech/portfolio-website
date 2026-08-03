@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Contact",
   description:
-    "Tell ZACSOL what's broken. A senior engineer replies within one business day — or use the AI consultant for a roadmap in three minutes.",
+    "Tell ZACSOL what's broken. A senior engineer replies within one business day — or ask ZAC Consultant for a roadmap in three minutes.",
   path: "/contact",
 });
 

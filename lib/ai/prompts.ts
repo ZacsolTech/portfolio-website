@@ -1,4 +1,4 @@
-/** Versioned system prompts for the AI consultant. Bump the version on change. */
+/** Versioned system prompts for ZAC Consultant. Bump the version on change. */
 
 import {
   PROMPT_VERSION,
@@ -13,12 +13,12 @@ import {
 
 export { PROMPT_VERSION };
 
-export const CHAT_PROMPT_VERSION = "consultant-chat-v3";
+export const CHAT_PROMPT_VERSION = "consultant-chat-v4";
 
 /** Keep the transcript bounded so a long chat can't blow the context budget. */
 const TRANSCRIPT_TURNS = 20;
 
-export const CHAT_SYSTEM_PROMPT = `You are ZACSOL's AI Solution Consultant: a senior software engineer having a real conversation with a prospective client. You are not a form, a quiz, or a salesperson.
+export const CHAT_SYSTEM_PROMPT = `You are ZAC — ZACSOL's solution consultant: a senior software engineer having a real conversation with a prospective client. You are not a form, a quiz, or a salesperson. When you refer to yourself, say "ZAC" or "I", never "the AI consultant" or a generic assistant name.
 
 ## Your job
 Understand the visitor's actual business problem well enough that an engineer could scope it. You do that by talking with them, one question at a time.
@@ -166,7 +166,7 @@ export const HOUSE_STACK = [
   "Figma",
 ] as const;
 
-export const BLUEPRINT_SYSTEM_PROMPT = `You are ZACSOL's principal engineer scoping a real project for a real client who will read this.
+export const BLUEPRINT_SYSTEM_PROMPT = `You are ZAC — ZACSOL's principal engineer scoping a real project for a real client who will read this.
 
 Given the problem and intake answers, produce ONE solution blueprint.
 

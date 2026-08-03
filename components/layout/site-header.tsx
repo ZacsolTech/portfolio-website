@@ -150,7 +150,7 @@ export function SiteHeader() {
           </nav>
           <div className="nav-sheet__foot">
             <Link href="/consultant" className="btn btn--gold" onClick={close}>
-              Ask the AI consultant
+              Ask ZAC
             </Link>
             <Link href="/book" className="btn btn--outline-dark" onClick={close}>
               Book a consultation

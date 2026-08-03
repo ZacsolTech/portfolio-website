@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { zac } from "@/lib/content/zac";
 
 export function AiFloat() {
   return (
-    <Link href="/consultant" className="ai-float" aria-label="Ask the AI consultant">
+    <Link href="/consultant" className="ai-float" aria-label={zac.consultant.ariaFloat}>
       <svg
         viewBox="0 0 24 24"
         width="20"
@@ -16,7 +17,7 @@ export function AiFloat() {
       >
         <path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4Z" />
       </svg>
-      <span>Ask AI</span>
+      <span>Ask {zac.name}</span>
     </Link>
   );
 }

@@ -51,7 +51,7 @@ export default function ThankYouPage() {
 
         <div className="btn-row" style={{ justifyContent: "center", marginTop: "2.75rem" }}>
           <Link href="/consultant" className="btn btn--gold btn--lg">
-            While you wait: try the AI consultant
+            While you wait: ask ZAC
           </Link>
           <Link href="/" className="btn btn--outline-dark btn--lg">
             Back home

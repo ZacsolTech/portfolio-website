@@ -12,11 +12,11 @@ import {
   type Slots,
 } from "@/lib/ai/schema";
 import { Console, ConsoleBar, ConsoleBody } from "@/components/ui";
+import { zac } from "@/lib/content/zac";
 
 const SESSION_KEY = "zacsol_consultant_session";
 
-const GREETING =
-  "I'm ZACSOL's solution consultant. Tell me what's slowing your business down, or the product you're trying to build — plain language is fine. I'll ask a few questions, then put together a solution blueprint with scope, timeline and cost.";
+const GREETING = zac.consultant.greeting;
 
 const STARTERS = [
   "Orders get lost on WhatsApp",
@@ -73,7 +73,7 @@ function Typing() {
   return (
     <div className="msg msg--bot">
       <div className="msg__avatar" aria-hidden>
-        AI
+        {zac.avatar}
       </div>
       <div className="msg__bubble">
         <span className="typing">
@@ -81,7 +81,7 @@ function Typing() {
           <span />
           <span />
         </span>
-        <span className="sr-only">The consultant is typing</span>
+        <span className="sr-only">{zac.consultant.ariaTyping}</span>
       </div>
     </div>
   );
@@ -441,7 +441,7 @@ export function ConsultantIntake() {
 
         if (!res.ok || !res.body) {
           const data = (await res.json().catch(() => ({}))) as { error?: string };
-          throw new Error(data.error || "The consultant is unavailable right now.");
+          throw new Error(data.error || `${zac.name} is unavailable right now.`);
         }
 
         const reader = res.body.getReader();
@@ -501,7 +501,7 @@ export function ConsultantIntake() {
           }
         }
 
-        if (!done) throw new Error("The consultant's reply was cut short. Try again.");
+        if (!done) throw new Error(`${zac.name}'s reply was cut short. Try again.`);
 
         openBubble();
         // Authoritative text — replaces whatever the stream assembled.
@@ -589,10 +589,10 @@ export function ConsultantIntake() {
 
   const barTitle =
     phase === "generating"
-      ? "AI Solution Consultant · generating"
+      ? `${zac.consultant.consoleTitle} · generating`
       : phase === "blueprint" || phase === "captured"
-        ? "AI Solution Consultant · blueprint"
-        : "AI Solution Consultant · chat";
+        ? `${zac.consultant.consoleTitle} · blueprint`
+        : `${zac.consultant.consoleTitle} · chat`;
 
   const showStarters = messages.length <= 1 && !typing && !busy && !restoring;
   const canSend = text.trim().length >= 2 && !busy;
@@ -613,14 +613,14 @@ export function ConsultantIntake() {
                 role="log"
                 aria-live="polite"
                 aria-atomic="false"
-                aria-label="Conversation with the AI consultant"
+                aria-label={zac.consultant.ariaChat}
               >
                 <div className="chat__inner">
                   <div className="chat__spacer" aria-hidden />
                   {messages.map((message) => (
                     <div key={message.id} className={`msg msg--${message.who}`}>
                       <div className="msg__avatar" aria-hidden>
-                        {message.who === "bot" ? "AI" : "YOU"}
+                        {message.who === "bot" ? zac.avatar : "YOU"}
                       </div>
                       <div className="msg__bubble">
                         {message.text}
@@ -716,7 +716,7 @@ export function ConsultantIntake() {
                 }}
               >
                 <label className="sr-only" htmlFor="consultant-input">
-                  Message the consultant
+                  Message {zac.name}
                 </label>
                 <textarea
                   id="consultant-input"
@@ -751,8 +751,8 @@ export function ConsultantIntake() {
             <div className="gate">
               <p className={`bp-source${usedFallback ? " bp-source--fallback" : ""}`}>
                 {usedFallback
-                  ? "Scoped from our delivered-project patterns (AI model unavailable)"
-                  : "Scoped by AI from your conversation"}
+                  ? "Scoped from our delivered-project patterns (model unavailable)"
+                  : "Scoped by ZAC from your conversation"}
               </p>
 
               <BlueprintTeaser blueprint={blueprint} />
@@ -876,7 +876,7 @@ export function ConsultantIntake() {
           <h3>How it works</h3>
           <ul>
             <li>Describe the real bottleneck</li>
-            <li>The consultant asks follow-ups, one at a time</li>
+            <li>{zac.consultant.name} asks follow-ups, one at a time</li>
             <li>You get a scoped roadmap on screen</li>
             <li>Unlock costs and phases with your email</li>
           </ul>
@@ -900,7 +900,7 @@ export function ConsultantIntake() {
           <h3>Other free tools</h3>
           <ul>
             <li>
-              <Link href="/tools/estimator">Project cost estimator</Link>
+              <Link href="/tools/estimator">{zac.estimator.name}</Link>
             </li>
           </ul>
         </div>

@@ -30,6 +30,8 @@ export const site: SiteInfo = {
     "mobile app development",
     "Next.js development",
     "AI solution consultant",
+    "ZAC Consultant",
+    "ZAC Estimator",
     "business process automation",
     "software agency remote",
     "LLM automation",
@@ -241,6 +243,6 @@ export const contactExpectations = [
   },
   {
     title: "Response window",
-    body: "Within one business day. In a hurry? The AI consultant answers in three minutes.",
+    body: "Within one business day. In a hurry? ZAC Consultant answers in three minutes.",
   },
 ] as const;

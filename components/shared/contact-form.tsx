@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Check, Field, Input, Panel, Select, Textarea } from "@/components/ui";
 import { contactExpectations, services, site } from "@/lib/content";
+import { zac } from "@/lib/content/zac";
 
 export function ContactForm() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export function ContactForm() {
         <p className="body-sm" style={{ margin: "0 0 1.25rem" }}>
           In a hurry?{" "}
           <Link href="/consultant" className="link-u">
-            The AI consultant answers in three minutes
+            {zac.consultant.name} answers in three minutes
           </Link>
           .
         </p>

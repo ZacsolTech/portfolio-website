@@ -42,7 +42,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Tool inputs</strong> — problem descriptions, answers and selections in the AI
-              consultant and cost estimator.
+              ZAC Consultant and ZAC Estimator.
             </li>
             <li>
               <strong>Technical data</strong> — IP address, browser type, pages viewed, referrer and

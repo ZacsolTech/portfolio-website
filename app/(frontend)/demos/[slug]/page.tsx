@@ -109,7 +109,7 @@ export default async function DemoPage({ params }: Props) {
         title={
           <>
             Want this for your business?{" "}
-            <span className="em-serif text-accent">Ask the consultant.</span>
+            <span className="em-serif text-accent">Ask ZAC.</span>
           </>
         }
       />

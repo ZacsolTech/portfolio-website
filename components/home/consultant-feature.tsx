@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Reveal } from "@/components/motion/reveal";
 import { consultantSteps } from "@/lib/content";
+import { zac } from "@/lib/content/zac";
 
 export function ConsultantFeature() {
   return (
@@ -15,13 +16,13 @@ export function ConsultantFeature() {
               <span className="em-serif">We ask what&apos;s broken.</span>
             </h2>
             <p className="lead" style={{ marginTop: "1.5rem" }}>
-              Our AI Business Consultant is a real working tool, not a chatbot widget. Describe the
+              {zac.consultant.name} is a real working tool, not a chatbot widget. Describe the
               problem in your own words and it produces a project roadmap you can take to your board
               — whether or not you hire us.
             </p>
             <div className="btn-row" style={{ marginTop: "2.25rem" }}>
               <Link href="/consultant" className="btn btn--gold">
-                Try it now — free
+                {zac.consultant.ctaTry}
               </Link>
               <Link href="/book" className="btn btn--outline-dark">
                 Talk to a human instead

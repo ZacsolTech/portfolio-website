@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { zac } from "@/lib/content/zac";
 
 type FinalCtaProps = {
   overline?: string;
@@ -16,7 +17,7 @@ export function FinalCta({
       <span className="em-serif text-accent">We&apos;ll bring the software.</span>
     </>
   ),
-  lead = "Three minutes with the AI consultant gets you a recommended solution, a feature list, a timeline and a cost band. Then decide whether you want to talk to us.",
+  lead = `Three minutes with ${zac.consultant.name} gets you a recommended solution, a feature list, a timeline and a cost band. Then decide whether you want to talk to us.`,
   showSteps = true,
 }: FinalCtaProps) {
   return (
@@ -52,7 +53,7 @@ export function FinalCta({
 
           <div className="btn-row" style={{ justifyContent: "center", marginTop: "2.75rem" }}>
             <Link href="/consultant" className="btn btn--gold btn--lg">
-              Start with the AI consultant
+              {zac.consultant.ctaLong}
             </Link>
             <Link href="/book" className="btn btn--ink btn--lg">
               Book a consultation

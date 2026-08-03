@@ -1,6 +1,8 @@
+import { zac } from "@/lib/content/zac";
+
 export const mainNav = [
   { href: "/services", label: "Services", id: "services" },
-  { href: "/consultant", label: "AI Consultant", id: "ai-consultant" },
+  { href: "/consultant", label: zac.consultant.navLabel, id: "ai-consultant" },
   { href: "/portfolio", label: "Portfolio", id: "work" },
   { href: "/industries", label: "Industries", id: "industries" },
   { href: "/about", label: "About", id: "about" },

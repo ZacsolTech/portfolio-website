@@ -59,10 +59,10 @@ export default async function CaseStudyPage({ params }: Props) {
           item.interactive
             ? [
                 { href: `/demos/${item.slug}`, label: "Try the live demo", variant: "gold" },
-                { href: "/consultant", label: "Ask the consultant", variant: "outline-dark" },
+                { href: "/consultant", label: "Ask ZAC", variant: "outline-dark" },
               ]
             : [
-                { href: "/consultant", label: "Ask the AI consultant", variant: "gold" },
+                { href: "/consultant", label: "Ask ZAC", variant: "gold" },
                 { href: "/book", label: "Book a consultation", variant: "outline-dark" },
               ]
         }

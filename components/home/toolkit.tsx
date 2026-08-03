@@ -6,7 +6,7 @@ import { Icon } from "./icon";
 const tools = [
   {
     icon: "Gauge",
-    title: "AI project cost estimator",
+    title: "ZAC Estimator",
     body: "Five questions on scope, platform and timeline. A cost band with assumptions written out so you can challenge them.",
     href: "/tools/estimator",
     cta: "Estimate my project",

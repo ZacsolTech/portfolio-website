@@ -43,7 +43,7 @@ export default async function AboutPage() {
         }
         lead={site.description}
         ctas={[
-          { href: "/consultant", label: "Ask the AI consultant", variant: "gold" },
+          { href: "/consultant", label: "Ask ZAC", variant: "gold" },
           { href: "/book", label: "Book a consultation", variant: "outline-dark" },
         ]}
       />

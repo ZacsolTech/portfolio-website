@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { faqs } from "@/lib/content";
+import { zac } from "@/lib/content/zac";
 
 export function Faq() {
   return (
@@ -14,10 +15,10 @@ export function Faq() {
               Answers <span className="em-serif">before you ask</span>.
             </h2>
             <p className="body-sm" style={{ marginTop: "1rem", maxWidth: "22rem" }}>
-              Still unsure? Ask the AI consultant, or email us — a senior engineer replies.
+              Still unsure? {zac.consultant.cta}, or email us — a senior engineer replies.
             </p>
             <Link href="/consultant" className="link-u" style={{ display: "inline-block", marginTop: "1rem" }}>
-              Ask the AI consultant →
+              {zac.consultant.cta} →
             </Link>
           </Reveal>
 

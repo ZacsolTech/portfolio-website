@@ -12,7 +12,7 @@ export const insights: Insight[] = [
     readingTime: "6 min",
     body: [
       "The default pattern on software agency sites is familiar: describe your problem, leave your details, wait for a sales call. The visitor does unpaid work and gets nothing until a human decides they're qualified.",
-      "We flipped it. The AI consultant on this site returns a recommended solution, features, timeline and cost band **on screen** before we ask for a name. Contact details unlock the PDF — not the insight.",
+      "We flipped it. ZAC Consultant on this site returns a recommended solution, features, timeline and cost band **on screen** before we ask for a name. Contact details unlock the PDF — not the insight.",
       "That isn't generosity theatre. It's qualification. People who finish a useful artefact and still want to talk are better leads than people who filled a form to 'see pricing'.",
       "### What we measure",
       "The number that matters is the drop between blueprint viewed and gate submitted. If that gap is huge, the ask is too expensive relative to the value just shown. If it's tiny, the gate is priced right.",

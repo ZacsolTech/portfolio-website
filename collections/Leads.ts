@@ -14,7 +14,7 @@ export const Leads: CollectionConfig = {
     useAsTitle: 'email',
     defaultColumns: ['email', 'name', 'solutionTitle', 'status', 'createdAt'],
     group: 'Sales',
-    description: 'Blueprint requests captured by the AI consultant.',
+    description: 'Blueprint requests captured by ZAC Consultant.',
   },
   access: {
     read: ({ req }) => Boolean(req.user),

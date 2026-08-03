@@ -254,7 +254,7 @@ export default function StyleguidePage() {
             <ConsoleBody>
               <div className="chat">
                 <div className="msg msg--bot">
-                  <div className="msg__avatar">AI</div>
+                  <div className="msg__avatar">ZAC</div>
                   <div className="msg__bubble">
                     Tell me what&apos;s slowing your business down.
                   </div>

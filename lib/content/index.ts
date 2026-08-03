@@ -44,3 +44,5 @@ export {
   site,
   techStackCategories,
 } from "./site";
+export { zac } from "./zac";
+export type { ZacBrand } from "./zac";

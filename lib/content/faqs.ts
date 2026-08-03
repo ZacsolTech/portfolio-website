@@ -2,7 +2,7 @@ import type { SiteFaq } from "./types";
 
 export const faqs: SiteFaq[] = [
   {
-    q: "Is the AI consultant actually free?",
+    q: "Is ZAC Consultant actually free?",
     a: "Yes, and you see the recommendation, feature list and timeline on screen before we ask for anything. Contact details are only needed to email you the full roadmap document.",
   },
   {
@@ -23,6 +23,6 @@ export const faqs: SiteFaq[] = [
   },
   {
     q: "Do you build AI features, or just use AI?",
-    a: "We build them. The consultant on this site is our own work — retrieval, evaluation, guardrails and all. We scope every AI feature to a measurable saving before writing code, because most don't survive that test.",
+    a: "We build them. ZAC on this site is our own work — retrieval, evaluation, guardrails and all. We scope every AI feature to a measurable saving before writing code, because most don't survive that test.",
   },
 ];

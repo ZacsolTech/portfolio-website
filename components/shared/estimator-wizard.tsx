@@ -17,11 +17,11 @@ import {
   type LeverOverrides,
   type RequiredSlotKey,
 } from "@/lib/estimator/schema";
+import { zac } from "@/lib/content/zac";
 
 const SESSION_KEY = "zacsol_estimator_session";
 
-const GREETING =
-  "I price software builds for a living. Tell me what you want built and I'll give you a real cost range — what drives it, where it could go over, and what's included. Completely free, no email, nothing held back.";
+const GREETING = zac.estimator.greeting;
 
 const STARTERS = [
   "A booking system for my clinic",
@@ -71,7 +71,7 @@ function Typing() {
   return (
     <div className="msg msg--bot">
       <div className="msg__avatar" aria-hidden>
-        AI
+        {zac.avatar}
       </div>
       <div className="msg__bubble">
         <span className="typing">
@@ -79,7 +79,7 @@ function Typing() {
           <span />
           <span />
         </span>
-        <span className="sr-only">The estimator is typing</span>
+        <span className="sr-only">{zac.estimator.ariaTyping}</span>
       </div>
     </div>
   );
@@ -708,10 +708,10 @@ export function EstimatorWizard() {
 
   const barTitle =
     phase === "pricing"
-      ? "Project cost estimator · pricing"
+      ? zac.estimator.consoleTitlePricing
       : phase === "estimate"
-        ? "Project cost estimator · result"
-        : "Project cost estimator · chat";
+        ? zac.estimator.consoleTitleResult
+        : zac.estimator.consoleTitleChat;
 
   return (
     <Console>
@@ -726,14 +726,14 @@ export function EstimatorWizard() {
               ref={chatRef}
               role="log"
               aria-live="polite"
-              aria-label="Conversation with the cost estimator"
+              aria-label={zac.estimator.ariaChat}
             >
               <div className="chat__inner">
                 <div className="chat__spacer" aria-hidden />
                 {messages.map((message) => (
                   <div key={message.id} className={`msg msg--${message.who}`}>
                     <div className="msg__avatar" aria-hidden>
-                      {message.who === "bot" ? "AI" : "YOU"}
+                      {message.who === "bot" ? zac.avatar : "YOU"}
                     </div>
                     <div className="msg__bubble">
                       {message.text}

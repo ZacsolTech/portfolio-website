@@ -78,7 +78,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         title={service.title}
         lead={service.blurb}
         ctas={[
-          { href: "/consultant", label: "Ask the AI consultant", variant: "gold" },
+          { href: "/consultant", label: "Ask ZAC", variant: "gold" },
           { href: "/book", label: "Book a consultation", variant: "outline-dark" },
         ]}
       >
@@ -263,10 +263,10 @@ export default async function ServiceDetailPage({ params }: Props) {
                 About {service.shortTitle.toLowerCase()}
               </h2>
               <p className="body-sm" style={{ marginTop: "1rem", maxWidth: "22rem" }}>
-                Not sure this is the right service? Ask the consultant.
+                Not sure this is the right service? Ask ZAC.
               </p>
               <Link href="/consultant" className="link-u" style={{ display: "inline-block", marginTop: "1rem" }}>
-                Ask the AI consultant →
+                Ask ZAC →
               </Link>
             </div>
             <FaqList items={service.faqs} />
@@ -278,7 +278,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         title={
           <>
             Not sure this is the right service?{" "}
-            <span className="em-serif text-accent">Ask the consultant.</span>
+            <span className="em-serif text-accent">Ask ZAC.</span>
           </>
         }
       />

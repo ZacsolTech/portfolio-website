@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Reveal, RevealGroup } from "@/components/motion/reveal";
 import { Card, CardNum, CardTop, Chip, IconTile } from "@/components/ui";
 import { services } from "@/lib/content";
+import { zac } from "@/lib/content/zac";
 import { Icon } from "./icon";
 
 /** Homepage teaser — six lines + consultant tile; full catalogue on /services */
@@ -64,15 +65,15 @@ export function Services() {
                 Not sure which you need?
               </h3>
               <p className="body-sm" style={{ color: "rgba(255,255,255,.68)" }}>
-                Describe the problem instead of the solution. Our AI consultant maps it to the right
-                line.
+                Describe the problem instead of the solution. {zac.consultant.name} maps it to the
+                right line.
               </p>
               <Link
                 href="/consultant"
                 className="btn btn--gold btn--sm"
                 style={{ marginTop: "1.5rem", alignSelf: "flex-start" }}
               >
-                Ask the AI consultant
+                {zac.consultant.cta}
               </Link>
             </Card>
           </Reveal>

@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Badge, Console, ConsoleBar, ConsoleBody, LiveDot } from "@/components/ui";
 import { heroStats } from "@/lib/content";
+import { zac } from "@/lib/content/zac";
 
 const QUICK_REPLIES = [
   {
@@ -65,7 +66,7 @@ export function Hero() {
         <div className="grid-a grid-a--hero">
           <div className="hero__lede">
             <Badge variant="dark">
-              <span className="dot" /> AI consultant · live now
+              <span className="dot" /> {zac.consultant.badge}
             </Badge>
             <h1 className="d1" id="hero-title">
               Describe your business problem.
@@ -75,13 +76,13 @@ export function Hero() {
               before you write a spec.
             </h1>
             <p className="lead">
-              ZACSOL builds web, mobile, AI automation and custom software. Start with our AI
-              consultant — it asks a few questions, then returns a recommended solution, the
+              ZACSOL builds web, mobile, AI automation and custom software. Start with{" "}
+              {zac.consultant.name} — it asks a few questions, then returns a recommended solution, the
               features it needs, a timeline and a cost range. Free, and in about three minutes.
             </p>
             <div className="btn-row">
               <Link href="/consultant" className="btn btn--gold">
-                Start with the AI consultant
+                {zac.consultant.ctaLong}
                 <ArrowRight aria-hidden />
               </Link>
               <Link href="/book" className="btn btn--outline-dark">
@@ -97,7 +98,7 @@ export function Hero() {
             <Console>
               <ConsoleBar>
                 <LiveDot />
-                <span className="console__title">ZACSOL AI Consultant</span>
+                <span className="console__title">{zac.consultant.consoleTitle}</span>
                 <span style={{ marginLeft: "auto" }}>
                   <Badge variant="dark">Free</Badge>
                 </span>
@@ -105,7 +106,7 @@ export function Hero() {
               <ConsoleBody>
                 <div className="chat">
                   <div className="msg msg--bot">
-                    <div className="msg__avatar">AI</div>
+                    <div className="msg__avatar">{zac.avatar}</div>
                     <div className="msg__bubble">
                       Tell me what&apos;s slowing your business down — or the product you want to
                       build. I&apos;ll map it to a solution, features, timeline and budget range.

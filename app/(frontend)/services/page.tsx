@@ -36,7 +36,7 @@ export default async function ServicesPage() {
         }
         lead="Senior engineers. Weekly deployables. Clean handover. Pick a line of work — or describe the problem and let the consultant route you."
         ctas={[
-          { href: "/consultant", label: "Ask the AI consultant", variant: "gold" },
+          { href: "/consultant", label: "Ask ZAC", variant: "gold" },
           { href: "/book", label: "Book a consultation", variant: "outline-dark" },
         ]}
       />
@@ -94,12 +94,12 @@ export default async function ServicesPage() {
             Send the problem, <span className="em-serif">not the spec</span>.
           </h2>
           <p className="lead" style={{ margin: "1.25rem auto 0", color: "var(--text-on-dark-body)" }}>
-            The AI consultant maps your bottleneck to a service line, features, timeline and cost
+            ZAC Consultant maps your bottleneck to a service line, features, timeline and cost
             band — before you talk to anyone.
           </p>
           <div className="btn-row" style={{ justifyContent: "center", marginTop: "2rem" }}>
             <Link href="/consultant" className="btn btn--gold btn--lg">
-              Start with the AI consultant
+              Start with ZAC
             </Link>
           </div>
         </div>
