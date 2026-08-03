@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo } from "@/components/layout/logo";
 import { isNavActive, mainNav } from "@/lib/nav";
@@ -28,6 +28,14 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const burgerRef = useRef<HTMLButtonElement | null>(null);
+
+  /*
+    aria-modal="true" is a promise the sheet was not keeping: Tab walked
+    straight out into the page behind it, and closing dropped focus to the
+    document. Both are fixed here.
+  */
   useEffect(() => {
     if (!open) {
       document.body.classList.remove("nav-open");
@@ -36,14 +44,47 @@ export function SiteHeader() {
 
     document.body.classList.add("nav-open");
 
+    const panel = panelRef.current;
+    // Captured now: the burger outlives the sheet, but reading .current in
+    // cleanup is a stale-node hazard the linter is right to flag.
+    const trigger = burgerRef.current;
+    const focusables = () =>
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((el) => el.offsetParent !== null);
+
+    focusables()[0]?.focus();
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const items = focusables();
+      if (items.length === 0) return;
+
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || !panel?.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       document.body.classList.remove("nav-open");
+      trigger?.focus();
     };
   }, [open]);
 
@@ -77,6 +118,7 @@ export function SiteHeader() {
             </Link>
             <button
               type="button"
+              ref={burgerRef}
               className="burger"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
@@ -106,7 +148,13 @@ export function SiteHeader() {
         aria-hidden={!open}
       >
         <div className="nav-sheet__backdrop" onClick={close} />
-        <div className="nav-sheet__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+        <div
+          className="nav-sheet__panel"
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+        >
           <div className="nav-sheet__head">
             <Logo onDark />
             <button

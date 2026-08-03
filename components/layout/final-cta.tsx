@@ -1,12 +1,24 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 import { zac } from "@/lib/content/zac";
+
+const STEPS = [
+  { n: "01", t: "Describe the problem" },
+  { n: "02", t: "Get your roadmap" },
+  { n: "03", t: "Book a consultation" },
+] as const;
 
 type FinalCtaProps = {
   overline?: string;
   title?: ReactNode;
   lead?: ReactNode;
   showSteps?: boolean;
+  /**
+   * `ink` closes the page on a dark band regardless of theme. Other pages
+   * keep the paper close so a dark section above doesn't run into it.
+   */
+  surface?: "paper-alt" | "ink";
 };
 
 export function FinalCta({
@@ -19,13 +31,22 @@ export function FinalCta({
   ),
   lead = `Three minutes with ${zac.consultant.name} gets you a recommended solution, a feature list, a timeline and a cost band. Then decide whether you want to talk to us.`,
   showSteps = true,
+  surface = "paper-alt",
 }: FinalCtaProps) {
+  const onInk = surface === "ink";
+
   return (
-    <section className="section section--paper-alt final-cta" style={{ textAlign: "center" }}>
+    <section
+      className={cn(
+        "section final-cta",
+        onInk ? "section--ink section--persist on-dark" : "section--paper-alt",
+      )}
+      aria-labelledby="final-cta-title"
+    >
       <div className="container">
-        <div style={{ maxWidth: "48rem", marginInline: "auto" }}>
-          <span className="overline">{overline}</span>
-          <h2 className="d2" style={{ marginTop: "0.75rem" }}>
+        <div className="final-cta__inner">
+          <span className={onInk ? "overline overline--gold" : "overline"}>{overline}</span>
+          <h2 className="d2" id="final-cta-title" style={{ marginTop: "0.75rem" }}>
             {title}
           </h2>
           {lead ? (
@@ -35,27 +56,24 @@ export function FinalCta({
           ) : null}
 
           {showSteps ? (
-            <div className="steps steps--on-paper">
-              <div className="step">
-                <div className="step__n">01</div>
-                <div className="step__t">Describe the problem</div>
-              </div>
-              <div className="step">
-                <div className="step__n">02</div>
-                <div className="step__t">Get your roadmap</div>
-              </div>
-              <div className="step">
-                <div className="step__n">03</div>
-                <div className="step__t">Book a consultation</div>
-              </div>
-            </div>
+            <ol className={cn("steps", !onInk && "steps--on-paper")}>
+              {STEPS.map((step) => (
+                <li className="step" key={step.n}>
+                  <span className="step__n">{step.n}</span>
+                  <span className="step__t">{step.t}</span>
+                </li>
+              ))}
+            </ol>
           ) : null}
 
-          <div className="btn-row" style={{ justifyContent: "center", marginTop: "2.75rem" }}>
+          <div className="btn-row final-cta__actions">
             <Link href="/consultant" className="btn btn--gold btn--lg">
               {zac.consultant.ctaLong}
             </Link>
-            <Link href="/book" className="btn btn--ink btn--lg">
+            <Link
+              href="/book"
+              className={cn("btn btn--lg", onInk ? "btn--outline-dark" : "btn--ink")}
+            >
               Book a consultation
             </Link>
           </div>

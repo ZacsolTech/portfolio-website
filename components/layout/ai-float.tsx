@@ -1,7 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { zac } from "@/lib/content/zac";
 
+/**
+ * Hidden where it would be noise rather than help:
+ * - `/` opens on a working ZAC console, so the bubble is a second copy of an
+ *   offer already on screen — parked on top of the content.
+ * - `/consultant` and the estimator *are* ZAC.
+ */
+const HIDDEN_ON = ["/", "/consultant", "/tools/estimator"];
+
 export function AiFloat() {
+  const pathname = usePathname();
+  if (HIDDEN_ON.includes(pathname)) return null;
+
   return (
     <Link href="/consultant" className="ai-float" aria-label={zac.consultant.ariaFloat}>
       <svg

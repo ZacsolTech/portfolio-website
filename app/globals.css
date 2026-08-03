@@ -909,3 +909,166 @@ a.ind__c,
     padding-left: 0.75rem;
   }
 }
+
+/* ==========================================================================
+   Homepage composition v2
+   ========================================================================== */
+
+/* ---- Hero ----
+   No .reveal here: the h1 is the LCP element and must paint from server HTML.
+   Entrance motion is transform-only so nothing is ever at opacity 0. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__lede > *,
+  .hero__console {
+    animation: heroRise 0.75s var(--ease-out) both;
+  }
+  .hero__lede > *:nth-child(2) { animation-delay: 0.04s; }
+  .hero__lede > *:nth-child(3) { animation-delay: 0.08s; }
+  .hero__lede > *:nth-child(4) { animation-delay: 0.12s; }
+  .hero__lede > *:nth-child(5) { animation-delay: 0.16s; }
+  .hero__console { animation-delay: 0.1s; }
+}
+@keyframes heroRise {
+  from { transform: translateY(14px); }
+  to   { transform: none; }
+}
+
+.hero__lede > * + * { margin-top: 1.75rem; }
+.hero__lede .btn-row,
+.hero__lede .trust-line { margin-top: 0; }
+.hero__lede .btn-row { padding-top: 0.5rem; }
+
+/* Film grain — kills the banding a wide blur gradient shows on dark panels
+   and is the difference between "gradient" and "lit room". */
+.hero__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Stat bands ----
+   <dl> keeps label→value in the DOM (the term names the number);
+   column-reverse puts the number on top, where the eye expects it. */
+.hero-stats,
+.stat-band { margin-inline: 0; }
+.hero-stats > div,
+.stat-band > div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.hero-stats dd,
+.stat-band dd { margin: 0; }
+.hero-stats .stat__label,
+.stat-band .stat__label { margin-top: 0; }
+
+/* ---- Thin band (logo strip) ---- */
+.band-thin { padding-block: 3.5rem; }
+@media (min-width: 640px) {
+  .band-thin { padding-block: 4.5rem; }
+}
+.band-thin__head { text-align: center; margin-bottom: 2rem; }
+.band-thin__foot { display: flex; justify-content: center; }
+
+/* ---- Inverted tile (the ZAC card inside the services grid) ---- */
+.card--invert {
+  background: var(--ink-900);
+  border-color: var(--ink-900);
+  color: rgba(255, 255, 255, 0.72);
+}
+.card--invert:hover { border-color: var(--ink-900); }
+.card--invert .d4 { color: #fff; }
+.card--invert .body-sm { color: rgba(255, 255, 255, 0.72); }
+.card--invert .card__num { color: rgba(255, 255, 255, 0.45); }
+.card--invert__cta { margin-top: auto; align-self: flex-start; }
+/* Push the CTA to the card floor so it lines up with the row's other cards */
+.card--invert .body-sm { margin-bottom: 1.5rem; }
+
+/* ---- Tool cards ---- */
+.tool-card__title { margin-top: 1.25rem; }
+.tool-card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+.tool-card__meta {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
+/* ---- Work cards ----
+   Titles align across the row via a shared grid track rather than the
+   min-height guess that broke as soon as one wrapped to three lines. */
+.work-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+.work-card__title { margin-top: 1rem; }
+.work-card__summary { flex: 1; }
+.work-card__metric {
+  margin-top: 1rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-ink);
+}
+.work-card__cta { margin-top: 1rem; }
+.grid-3 > .reveal:has(.work-card) { align-items: stretch; }
+@media (min-width: 1024px) {
+  .grid-3:has(.work-card) { align-items: start; }
+}
+
+/* ---- Testimonial cards ---- */
+.quote-card__fig { margin: 0; display: flex; flex-direction: column; height: 100%; }
+.quote-card__label { margin-top: 0.5rem; }
+.quote-card__quote {
+  margin: 1.25rem 0 0;
+  flex: 1;
+}
+.attrib__name { display: block; font-size: 0.875rem; font-weight: 600; }
+.attrib__role { display: block; }
+
+/* ---- Leak baseline figure ---- */
+.surface-note { margin-block: 2.5rem 0; }
+.surface-note__value {
+  margin-top: 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: var(--track-tight);
+  color: var(--accent-fg);
+}
+
+/* ---- Consultant flow list ---- */
+.flow { margin: 0; padding: 0; list-style: none; }
+.flow__body { display: block; }
+.flow__t { display: block; }
+.flow__d { display: block; margin-top: 0.375rem; }
+
+/* ---- Industry tiles (spans, so they need to be block) ---- */
+.ind__t,
+.ind__s { display: block; }
+
+/* ---- Closing CTA ---- */
+.final-cta { text-align: center; }
+.final-cta__inner { max-width: 48rem; margin-inline: auto; }
+.final-cta__actions { justify-content: center; margin-top: 2.75rem; }
+.final-cta .steps { margin: 3rem 0 0; padding: 0; list-style: none; }
+.final-cta .step__n,
+.final-cta .step__t { display: block; }
+
+.faq__link { display: inline-block; margin-top: 1rem; }

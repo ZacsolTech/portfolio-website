@@ -2,15 +2,20 @@ import Link from "next/link";
 import { Reveal } from "@/components/motion/reveal";
 import { consultantSteps } from "@/lib/content";
 import { zac } from "@/lib/content/zac";
+import { sectionClass, type Surface } from "./surface";
 
-export function ConsultantFeature() {
+export function ConsultantFeature({ surface = "ink" }: { surface?: Surface }) {
   return (
-    <section className="section section--ink on-dark" id="ai-consultant">
+    <section
+      className={sectionClass(surface)}
+      id="ai-consultant"
+      aria-labelledby="consultant-title"
+    >
       <div className="container">
         <div className="grid-a grid-a--wide">
           <Reveal>
             <span className="overline overline--gold">Flagship feature</span>
-            <h2 className="d2" style={{ marginTop: "0.75rem" }}>
+            <h2 className="d2" id="consultant-title" style={{ marginTop: "0.75rem" }}>
               Most agencies ask for your budget.
               <br />
               <span className="em-serif">We ask what&apos;s broken.</span>
@@ -31,19 +36,19 @@ export function ConsultantFeature() {
           </Reveal>
 
           <Reveal index={1}>
-            <div className="flow">
+            <ol className="flow">
               {consultantSteps.map((step) => (
-                <div className="flow__i" key={step.number}>
-                  <div className="flow__n">{step.number}</div>
-                  <div>
-                    <div className="flow__t">{step.title}</div>
-                    <p className="body-sm tone-soft" style={{ margin: "0.375rem 0 0" }}>
-                      {step.body}
-                    </p>
-                  </div>
-                </div>
+                <li className="flow__i" key={step.number}>
+                  <span className="flow__n" aria-hidden>
+                    {step.number}
+                  </span>
+                  <span className="flow__body">
+                    <span className="flow__t">{step.title}</span>
+                    <span className="body-sm tone-soft flow__d">{step.body}</span>
+                  </span>
+                </li>
               ))}
-            </div>
+            </ol>
           </Reveal>
         </div>
       </div>

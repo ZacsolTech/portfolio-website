@@ -1,15 +1,16 @@
 import { Reveal, RevealGroup } from "@/components/motion/reveal";
 import { Card } from "@/components/ui";
 import { leakBaseline, leaks } from "@/lib/content";
+import { sectionClass, type Surface } from "./surface";
 
-export function Leaks() {
+export function Leaks({ surface = "ink" }: { surface?: Surface }) {
   return (
-    <section className="section section--ink on-dark">
+    <section className={sectionClass(surface)} aria-labelledby="leaks-title">
       <div className="container">
         <div className="grid-a grid-a--wide">
           <Reveal>
             <span className="overline overline--gold">The problem</span>
-            <h2 className="d2" style={{ marginTop: "0.75rem" }}>
+            <h2 className="d2" id="leaks-title" style={{ marginTop: "0.75rem" }}>
               Most builds don&apos;t fail loudly.
               <br />
               <span className="em-serif">They leak.</span>
@@ -18,16 +19,14 @@ export function Leaks() {
               Budget and timeline rarely disappear in one bad decision. They drain through four
               predictable gaps that nobody owns until it&apos;s too late to correct them.
             </p>
-            <div className="surface-note">
+            <figure className="surface-note">
               <span className="overline tone-faint">Industry baseline</span>
-              <div className="stat__value" style={{ marginTop: "0.75rem" }}>
-                {leakBaseline.value}
-              </div>
-              <p className="body-sm tone-soft" style={{ marginTop: "0.5rem" }}>
+              <div className="surface-note__value">{leakBaseline.value}</div>
+              <figcaption className="body-sm tone-soft" style={{ marginTop: "0.5rem" }}>
                 {leakBaseline.body}{" "}
                 <span className="tone-faint">— {leakBaseline.source}</span>
-              </p>
-            </div>
+              </figcaption>
+            </figure>
           </Reveal>
 
           <RevealGroup className="leak-grid">

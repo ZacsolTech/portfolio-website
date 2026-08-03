@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
+import { NewsletterForm } from "@/components/shared/newsletter-form";
 import { services, site } from "@/lib/content";
 import { zac } from "@/lib/content/zac";
 
@@ -33,11 +34,12 @@ export function SiteFooter() {
   return (
     <footer className="footer on-dark">
       <div className="container">
+        {/* Posts to /api/subscribe → `subscribers` collection. */}
         <div className="newsletter">
           <div className="grid-a grid-a--even" style={{ gap: "1.5rem" }}>
             <div>
               <h3 className="d4" style={{ color: "#fff" }}>
-                Get the next automation teardown in your inbox.
+                Automation teardowns, written by the people who build them.
               </h3>
               <p
                 className="body-sm"
@@ -47,18 +49,7 @@ export function SiteFooter() {
                 sequences.
               </p>
             </div>
-            <form noValidate>
-              <input
-                type="email"
-                name="email"
-                placeholder="you@company.com"
-                aria-label="Email address"
-                autoComplete="email"
-              />
-              <button type="button" className="btn btn--gold">
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
 
@@ -150,11 +141,11 @@ export function SiteFooter() {
           </div>
         </div>
 
+        {/* "All systems operational" was hardcoded — a status light that can
+            never report a problem. Replaced with a claim that is always true. */}
         <div className="footer__bottom">
           <span>{site.copyright}</span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-            <span className="dot" /> All systems operational
-          </span>
+          <span className="footer__note">{site.timezoneNote}</span>
         </div>
       </div>
     </footer>

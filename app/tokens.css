@@ -1710,8 +1710,13 @@ body.nav-open { overflow: hidden; }
    Footer
    ========================================================================== */
 .footer { background: var(--ink-900); color: var(--text-on-dark-body); padding-block: 4rem 2rem; }
-.footer a { color: rgba(255,255,255,0.68); transition: color 0.2s; font-size: 0.875rem; }
-.footer a:hover { color: #fff; }
+/*
+  `:not(.btn)` matters. `.footer a` (0,2,0) outranks `.btn--gold` (0,1,0), so
+  any button rendered as a link inside the footer had its label repainted
+  translucent white — lime pill, ~1.7:1 text. Buttons keep their own colour.
+*/
+.footer a:not(.btn) { color: rgba(255,255,255,0.68); transition: color 0.2s; font-size: 0.875rem; }
+.footer a:not(.btn):hover { color: #fff; }
 .footer__title {
   font-family: var(--font-mono); font-size: 0.6875rem; text-transform: uppercase;
   letter-spacing: var(--track-label); color: var(--accent-fg); margin-bottom: 1rem;
@@ -1721,6 +1726,7 @@ body.nav-open { overflow: hidden; }
   display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;
   font-size: 0.8125rem; color: var(--text-on-dark-muted);
 }
+.footer__note { max-width: 34rem; }
 .footer__grid { display: grid; gap: 2.5rem; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .footer__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) { .footer__grid { grid-template-columns: 1.6fr repeat(4, 1fr); } }
@@ -1730,12 +1736,16 @@ body.nav-open { overflow: hidden; }
   border-radius: var(--r-2xl); background: rgba(255,255,255,0.04);
   border: 1px solid var(--line-on-dark); padding: 2rem; margin-bottom: 3rem;
 }
-.newsletter form {
+.newsletter form,
+.newsletter__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
   margin-top: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .newsletter__actions { margin-top: 0; align-content: center; }
 }
 .newsletter input {
   flex: 1 1 12rem;
@@ -1753,6 +1763,36 @@ body.nav-open { overflow: hidden; }
 }
 .newsletter input::placeholder { color: rgba(255,255,255,0.4); }
 .newsletter input:focus { outline: none; border-color: var(--gold); }
+.newsletter input[aria-invalid] { border-color: rgba(248,113,113,0.55); }
+.newsletter input:disabled { opacity: 0.6; cursor: not-allowed; }
+.newsletter .btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+.newsletter__error {
+  flex-basis: 100%;
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: #fca5a5;
+}
+.newsletter__done {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-on-dark-body);
+}
+.newsletter__check {
+  display: flex; align-items: center; justify-content: center;
+  width: 1.5rem; height: 1.5rem; border-radius: 50%; flex: none;
+  margin-top: 0.0625rem;
+  background: rgba(var(--accent-rgb), 0.18);
+  border: 1px solid rgba(var(--accent-rgb), 0.45);
+  color: var(--gold);
+}
+@media (min-width: 1024px) {
+  .newsletter__done { align-items: center; }
+}
 @media (max-width: 639px) {
   .newsletter form {
     flex-direction: column;
@@ -1762,10 +1802,12 @@ body.nav-open { overflow: hidden; }
     flex: none;
     width: 100%;
   }
-  .newsletter form .btn {
+  .newsletter form .btn,
+  .newsletter__actions .btn {
     width: 100%;
     flex: none;
   }
+  .newsletter__actions { flex-direction: column; align-items: stretch; }
 }
 
 .socials { display: flex; gap: 0.5rem; margin-top: 1.5rem; }

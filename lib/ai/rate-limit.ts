@@ -139,6 +139,38 @@ export async function limitConsultant(opts: {
 }
 
 /**
+ * Newsletter sign-up limit — IP only, since there is no session to key on.
+ * Cheap endpoint, so the cap only needs to stop scripted list-stuffing.
+ */
+const SUBSCRIBE_BUDGET = { max: 5, windowMs: 60 * 60 * 1000 };
+
+let subscribeLimiter: Ratelimit | null = null;
+
+export async function limitSubscribe(ip: string): Promise<boolean> {
+  if (!hasUpstash()) {
+    return memoryLimit(`subscribe:${ip}`, SUBSCRIBE_BUDGET.max, SUBSCRIBE_BUDGET.windowMs)
+      .success;
+  }
+
+  try {
+    if (!subscribeLimiter) {
+      subscribeLimiter = new Ratelimit({
+        redis: Redis.fromEnv(),
+        limiter: Ratelimit.slidingWindow(SUBSCRIBE_BUDGET.max, "1 h"),
+        prefix: "zacsol:subscribe:ip",
+        analytics: true,
+      });
+    }
+    const res = await subscribeLimiter.limit(ip || "unknown");
+    return res.success;
+  } catch (err) {
+    console.error("[subscribe] rate limit backend failed, using memory:", err);
+    return memoryLimit(`subscribe:${ip}`, SUBSCRIBE_BUDGET.max, SUBSCRIBE_BUDGET.windowMs)
+      .success;
+  }
+}
+
+/**
  * Client IP from proxy headers.
  *
  * `x-forwarded-for` is caller-controlled unless a trusted proxy overwrote it,

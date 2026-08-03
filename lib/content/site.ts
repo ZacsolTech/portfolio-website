@@ -45,11 +45,20 @@ export const site: SiteInfo = {
   },
 };
 
+/*
+  heroStats and resultsStats appear on the same scroll and used to share two
+  entries verbatim ("50+ Projects delivered", "12 Industries served"), so the
+  page repeated the same two numbers to the same reader.
+
+  The hero band now answers "what happens if I engage?" — it sits directly
+  under a CTA, so every figure is about the buyer's next few minutes. The
+  results band keeps the track record.
+*/
 export const heroStats: SiteStat[] = [
+  { value: "~3 min", label: "To a costed roadmap" },
+  { value: "$0", label: "To find out" },
+  { value: "<1 day", label: "Human reply" },
   { value: "8", label: "Service lines" },
-  { value: "50+", label: "Projects delivered" },
-  { value: "12", label: "Industries served" },
-  { value: "<1 day", label: "Response time" },
 ];
 
 export const resultsStats: SiteStat[] = [

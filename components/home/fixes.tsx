@@ -2,16 +2,17 @@ import { Reveal } from "@/components/motion/reveal";
 import { Badge, IconTile, Panel, PanelRow } from "@/components/ui";
 import { leakFixes } from "@/lib/content";
 import { Icon } from "./icon";
+import { sectionClass, type Surface } from "./surface";
 
 const FIX_ICONS = ["ClipboardCheck", "FileText", "TrendingUp", "GitBranch"] as const;
 
-export function Fixes() {
+export function Fixes({ surface = "paper" }: { surface?: Surface }) {
   return (
-    <section className="section section--paper">
+    <section className={sectionClass(surface)} aria-labelledby="fixes-title">
       <div className="container">
         <Reveal className="sec-head" style={{ maxWidth: "44rem" }}>
           <span className="overline">The fix</span>
-          <h2 className="d3">
+          <h2 className="d3" id="fixes-title">
             Every leak has a fix. Here&apos;s <span className="em-serif">what changes</span>.
           </h2>
           <p className="lead">

@@ -4,18 +4,23 @@ import { Card, CardNum, CardTop, Chip, IconTile } from "@/components/ui";
 import { services } from "@/lib/content";
 import { zac } from "@/lib/content/zac";
 import { Icon } from "./icon";
+import { sectionClass, type Surface } from "./surface";
 
-/** Homepage teaser — six lines + consultant tile; full catalogue on /services */
-const HOME_SERVICES = services.slice(0, 6);
+/**
+ * Five lines + the ZAC tile = six cards, which fills the 3-column grid
+ * exactly. Six + tile left one orphan card on a row of its own.
+ * Full catalogue lives on /services.
+ */
+const HOME_SERVICES = services.slice(0, 5);
 
-export function Services() {
+export function Services({ surface = "paper-alt" }: { surface?: Surface }) {
   return (
-    <section className="section section--paper" id="services">
+    <section className={sectionClass(surface)} id="services" aria-labelledby="services-title">
       <div className="container">
         <Reveal className="sec-head sec-head--split">
           <div>
             <span className="overline">Services</span>
-            <h2 className="d3">
+            <h2 className="d3" id="services-title">
               Ways we build, <span className="em-serif">one team</span>.
             </h2>
           </div>
@@ -48,31 +53,19 @@ export function Services() {
           ))}
 
           <Reveal>
-            <Card
-              style={{
-                background: "var(--ink-900)",
-                borderColor: "var(--ink-900)",
-                color: "#fff",
-              }}
-            >
+            <Card className="card--invert">
               <CardTop>
                 <IconTile size="sm" variant="gold">
                   <Icon name="Sparkles" size={20} />
                 </IconTile>
-                <CardNum style={{ color: "rgba(255,255,255,.45)" }}>—</CardNum>
+                <CardNum>—</CardNum>
               </CardTop>
-              <h3 className="d4" style={{ color: "#fff" }}>
-                Not sure which you need?
-              </h3>
-              <p className="body-sm" style={{ color: "rgba(255,255,255,.68)" }}>
+              <h3 className="d4">Not sure which you need?</h3>
+              <p className="body-sm">
                 Describe the problem instead of the solution. {zac.consultant.name} maps it to the
                 right line.
               </p>
-              <Link
-                href="/consultant"
-                className="btn btn--gold btn--sm"
-                style={{ marginTop: "1.5rem", alignSelf: "flex-start" }}
-              >
+              <Link href="/consultant" className="btn btn--gold btn--sm card--invert__cta">
                 {zac.consultant.cta}
               </Link>
             </Card>
