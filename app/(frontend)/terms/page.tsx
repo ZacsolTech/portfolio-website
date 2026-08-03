@@ -30,8 +30,8 @@ export default function TermsPage() {
 
           <h2>The site and tools</h2>
           <p>
-            Content, demos and AI tools (consultant, estimator, readiness assessment) are provided
-            for informational and evaluation purposes. Outputs are indicative — not proposals,
+            Content, demos and AI tools (consultant and cost estimator) are provided for
+            informational and evaluation purposes. Outputs are indicative — not proposals,
             warranties or professional advice. Confirmed scope, timeline and pricing follow a
             discovery engagement.
           </p>

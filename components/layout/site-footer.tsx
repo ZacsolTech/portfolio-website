@@ -10,7 +10,6 @@ const serviceLinks = services.map((s) => ({
 const aiToolLinks = [
   { href: "/consultant", label: "AI Solution Consultant" },
   { href: "/tools/estimator", label: "Project cost estimator" },
-  { href: "/tools/readiness", label: "AI readiness assessment" },
   { href: "/portfolio", label: "Interactive demos" },
 ] as const;
 

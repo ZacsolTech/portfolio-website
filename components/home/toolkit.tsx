@@ -2,7 +2,7 @@ import { Reveal, RevealGroup } from "@/components/motion/reveal";
 import { Card, IconTile, LinkArrow } from "@/components/ui";
 import { Icon } from "./icon";
 
-/** Two free tools on home — demos live under portfolio */
+/** Free tools on home — demos live under portfolio */
 const tools = [
   {
     icon: "Gauge",
@@ -10,13 +10,6 @@ const tools = [
     body: "Five questions on scope, platform and timeline. A cost band with assumptions written out so you can challenge them.",
     href: "/tools/estimator",
     cta: "Estimate my project",
-  },
-  {
-    icon: "ClipboardCheck",
-    title: "AI readiness assessment",
-    body: "Twelve questions across four pillars. A scored snapshot and a 90-day action list — no call required.",
-    href: "/tools/readiness",
-    cta: "Check readiness",
   },
 ] as const;
 

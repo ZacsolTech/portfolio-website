@@ -42,7 +42,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Tool inputs</strong> — problem descriptions, answers and selections in the AI
-              consultant, cost estimator and readiness assessment.
+              consultant and cost estimator.
             </li>
             <li>
               <strong>Technical data</strong> — IP address, browser type, pages viewed, referrer and
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
 
           <h2>Why we use it</h2>
           <ul>
-            <li>To respond to enquiries and deliver roadmaps, estimates or assessment results by email.</li>
+            <li>To respond to enquiries and deliver roadmaps or estimates by email.</li>
             <li>To schedule consultations and send calendar-related confirmations.</li>
             <li>To improve our products, prompts and site performance (aggregated where possible).</li>
             <li>To prevent abuse, enforce rate limits and keep systems secure.</li>

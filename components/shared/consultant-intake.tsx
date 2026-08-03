@@ -112,9 +112,6 @@ export function ConsultantIntake() {
             <li>
               <Link href="/tools/estimator">Project cost estimator</Link>
             </li>
-            <li>
-              <Link href="/tools/readiness">AI readiness assessment</Link>
-            </li>
           </ul>
         </div>
       </aside>
