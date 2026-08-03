@@ -13,7 +13,7 @@ const UPDATED = "2 August 2026";
 
 export default function PrivacyPage() {
   return (
-    <section className="section section--paper" style={{ paddingBlockStart: "8rem" }}>
+    <section className="section section--paper section--after-nav">
       <div className="container">
         <article className="legal">
           <span className="overline">Legal</span>

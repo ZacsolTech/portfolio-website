@@ -19,7 +19,7 @@ export function ConsultantFeature() {
               problem in your own words and it produces a project roadmap you can take to your board
               — whether or not you hire us.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "2.25rem" }}>
+            <div className="btn-row" style={{ marginTop: "2.25rem" }}>
               <Link href="/consultant" className="btn btn--gold">
                 Try it now — free
               </Link>

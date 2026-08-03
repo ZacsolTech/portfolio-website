@@ -50,15 +50,7 @@ export function FinalCta({
             </div>
           ) : null}
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "0.75rem",
-              justifyContent: "center",
-              marginTop: "2.75rem",
-            }}
-          >
+          <div className="btn-row" style={{ justifyContent: "center", marginTop: "2.75rem" }}>
             <Link href="/consultant" className="btn btn--gold btn--lg">
               Start with the AI consultant
             </Link>

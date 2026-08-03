@@ -34,7 +34,7 @@ export default async function DemoPage({ params }: Props) {
 
   return (
     <>
-      <section className="section section--paper" style={{ paddingBlockStart: "8rem" }}>
+      <section className="section section--paper section--after-nav">
         <div className="container">
           <div
             style={{
@@ -84,7 +84,7 @@ export default async function DemoPage({ params }: Props) {
                 Build time · {item.timeline ?? "—"}
               </p>
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "2rem" }}>
+              <div className="btn-row" style={{ marginTop: "2rem" }}>
                 <Link href="/consultant" className="btn btn--gold">
                   Want this for your business?
                 </Link>

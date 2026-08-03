@@ -11,7 +11,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default function ContactPage() {
   return (
-    <section className="section section--paper" style={{ paddingBlockStart: "8rem" }}>
+    <section className="section section--paper section--after-nav">
       <div className="container">
         <div
           style={{

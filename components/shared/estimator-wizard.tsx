@@ -299,29 +299,31 @@ function EstimateView({
 
       <section className="est__section">
         <h4 className="est__h">Where the money goes</h4>
-        <table className="est__table">
-          <thead>
-            <tr>
-              <th scope="col">Workstream</th>
-              <th scope="col">Effort</th>
-              <th scope="col">Range</th>
-            </tr>
-          </thead>
-          <tbody>
-            {estimate.breakdown.map((line) => (
-              <tr key={line.name}>
-                <th scope="row">
-                  <span className="est__bar" aria-hidden>
-                    <span style={{ width: `${(line.share / maxShare) * 100}%` }} />
-                  </span>
-                  {line.name}
-                </th>
-                <td>{line.weeks} wk</td>
-                <td>{formatBand(line.lowUsd, line.highUsd)}</td>
+        <div className="est__table-wrap">
+          <table className="est__table">
+            <thead>
+              <tr>
+                <th scope="col">Workstream</th>
+                <th scope="col">Effort</th>
+                <th scope="col">Range</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {estimate.breakdown.map((line) => (
+                <tr key={line.name}>
+                  <th scope="row">
+                    <span className="est__bar" aria-hidden>
+                      <span style={{ width: `${(line.share / maxShare) * 100}%` }} />
+                    </span>
+                    {line.name}
+                  </th>
+                  <td>{line.weeks} wk</td>
+                  <td>{formatBand(line.lowUsd, line.highUsd)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {estimate.drivers.length > 0 ? (

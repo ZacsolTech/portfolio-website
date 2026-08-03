@@ -33,7 +33,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default function BookPage() {
   return (
-    <section className="section section--paper" style={{ paddingBlockStart: "8rem" }}>
+    <section className="section section--paper section--after-nav">
       <div className="container">
         <BookingPanel />
       </div>

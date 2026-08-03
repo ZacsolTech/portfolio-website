@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { SiteShell } from "@/components/layout/site-shell";
 import { SiteJsonLd } from "@/components/seo/json-ld";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -8,9 +8,10 @@ import { site } from "@/lib/content";
 import { absoluteUrl, defaultKeywords, defaultOgImage, siteUrl } from "@/lib/seo";
 import "../globals.css";
 
+/* 700 was loaded but never used — nothing in the system goes above 600. */
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   variable: "--font-space-grotesk",
   display: "swap",
   preload: true,
@@ -24,6 +25,16 @@ const jetbrainsMono = JetBrains_Mono({
   preload: true,
 });
 
+/* The single contrast voice — accented phrases inside headlines only. */
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic", "normal"],
+  variable: "--font-instrument-serif",
+  display: "swap",
+  preload: true,
+});
+
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f4f4f5" },
@@ -33,6 +44,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -105,7 +117,7 @@ export default function FrontendLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <head>
         <ThemeScript />

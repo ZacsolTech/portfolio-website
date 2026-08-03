@@ -13,11 +13,42 @@ import {
 } from "react";
 import { cn } from "@/lib/cn";
 
-const STAGGER_MS = 70;
+const STAGGER_MS = 65;
 const OBSERVER_OPTS: IntersectionObserverInit = {
-  threshold: 0.12,
-  rootMargin: "0px 0px -60px 0px",
+  threshold: 0.1,
+  rootMargin: "0px 0px -56px 0px",
 };
+
+/**
+ * One observer for the whole document rather than one per element.
+ * A homepage carries ~35 Reveal instances; 35 IntersectionObservers is 35
+ * separate sets of layout bookkeeping for what is a single scroll question.
+ */
+let observer: IntersectionObserver | null = null;
+
+function getObserver(): IntersectionObserver | null {
+  if (typeof IntersectionObserver === "undefined") return null;
+  if (observer) return observer;
+
+  observer = new IntersectionObserver((entries, io) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const el = entry.target as HTMLElement;
+      io.unobserve(el);
+
+      const parsed = Number(el.dataset.revealIndex);
+      const delay = Number.isFinite(parsed) ? parsed * STAGGER_MS : 0;
+
+      if (delay <= 0) {
+        el.classList.add("is-in");
+      } else {
+        window.setTimeout(() => el.classList.add("is-in"), delay);
+      }
+    }
+  }, OBSERVER_OPTS);
+
+  return observer;
+}
 
 export type RevealProps = HTMLAttributes<HTMLElement> & {
   as?: ElementType;
@@ -45,23 +76,15 @@ export function Reveal({
       return;
     }
 
-    const fromAttr = el.dataset.revealIndex;
-    const delay =
-      (fromAttr != null ? Number(fromAttr) : staggerIndex) * STAGGER_MS;
-
-    const io = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        window.setTimeout(() => {
-          entry.target.classList.add("is-in");
-        }, Number.isFinite(delay) ? delay : 0);
-        io.unobserve(entry.target);
-      }
-    }, OBSERVER_OPTS);
+    const io = getObserver();
+    if (!io) {
+      el.classList.add("is-in");
+      return;
+    }
 
     io.observe(el);
-    return () => io.disconnect();
-  }, [staggerIndex]);
+    return () => io.unobserve(el);
+  }, []);
 
   return (
     <Tag

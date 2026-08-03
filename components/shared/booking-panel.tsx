@@ -66,10 +66,7 @@ export function BookingPanel() {
   }
 
   return (
-    <div
-      style={{ display: "grid", gap: "2.5rem", gridTemplateColumns: "1fr" }}
-      className="book-grid"
-    >
+    <div className="book-grid">
       <div>
         <span className="overline">Consultation</span>
         <h1 className="d2" style={{ marginTop: "0.75rem" }}>
@@ -132,7 +129,7 @@ export function BookingPanel() {
         </ul>
       </div>
 
-      <Panel style={{ padding: "1.75rem" }}>
+      <Panel className="booking-panel" style={{ padding: "1.25rem" }}>
         <p className="overline">November 2026</p>
         <div
           className="cal"

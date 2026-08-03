@@ -116,8 +116,15 @@ html {
 .trust-line {
   margin-top: 1.5rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  line-height: 1.55;
   color: rgba(255, 255, 255, 0.5);
+  max-width: 36rem;
+}
+@media (min-width: 640px) {
+  .trust-line {
+    font-size: 0.75rem;
+  }
 }
 
 .dot {
@@ -131,15 +138,22 @@ html {
 
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin-top: 5rem;
-  padding-block: 2.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 1rem;
+  margin-top: 3.5rem;
+  padding-block: 2rem;
   border-top: 1px solid var(--line-on-dark);
+}
+@media (min-width: 640px) {
+  .hero-stats {
+    gap: 2rem;
+    margin-top: 5rem;
+    padding-block: 2.5rem;
+  }
 }
 @media (min-width: 768px) {
   .hero-stats {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -287,15 +301,22 @@ html {
 
 .stat-band {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin-top: 4rem;
-  padding-top: 2.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 1rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
   border-top: 1px solid var(--line-on-dark);
+}
+@media (min-width: 640px) {
+  .stat-band {
+    gap: 2rem;
+    margin-top: 4rem;
+    padding-top: 2.5rem;
+  }
 }
 @media (min-width: 768px) {
   .stat-band {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 [data-theme="light"] .section--ink:not(.section--persist) .stat-band {
@@ -376,8 +397,13 @@ html {
 
 .ind {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
+}
+@media (min-width: 480px) {
+  .ind {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 @media (min-width: 768px) {
   .ind {
@@ -775,8 +801,8 @@ a.ind__c,
 
 .scale-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.375rem;
 }
 .scale-btn {
   height: 2.75rem;
@@ -789,6 +815,8 @@ a.ind__c,
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s var(--ease);
+  min-width: 0;
+  padding-inline: 0.25rem;
 }
 .scale-btn:hover {
   border-color: rgba(255, 255, 255, 0.28);
@@ -797,6 +825,16 @@ a.ind__c,
   border-color: var(--gold);
   background: rgba(var(--accent-rgb), 0.14);
   color: #fff;
+}
+@media (max-width: 479px) {
+  .scale-row {
+    gap: 0.25rem;
+  }
+  .scale-btn {
+    height: 2.5rem;
+    font-size: 0.75rem;
+    padding-inline: 0;
+  }
 }
 
 .pillar-bar {
@@ -827,12 +865,47 @@ a.ind__c,
     text-align: center;
   }
   .hero {
-    padding-block: 7.5rem 0;
+    padding-block: 6.25rem 0;
   }
   .hero h1 {
-    font-size: clamp(2.25rem, 9.5vw, 2.75rem);
+    font-size: clamp(2.1rem, 9vw, 2.6rem);
+    line-height: 1.08;
+  }
+  .hero .lead {
+    font-size: 1rem;
+  }
+  .hero__lede,
+  .hero__console {
+    min-width: 0;
   }
   .contact-panel {
-    padding: 1.25rem;
+    padding: 1.125rem;
+  }
+  .booking-panel {
+    padding: 1.125rem !important;
+  }
+  .ind__c {
+    padding: 1.125rem;
+  }
+  .ind__t {
+    font-size: 0.875rem;
+  }
+  .quote-metric {
+    font-size: clamp(1.5rem, 8vw, 2rem);
+  }
+  .page-hero h1 {
+    font-size: clamp(2rem, 9vw, 2.5rem);
+    line-height: 1.08;
+  }
+}
+
+/* Very small phones — keep multi-col bands readable */
+@media (max-width: 379px) {
+  .hero-stats,
+  .stat-band {
+    grid-template-columns: 1fr;
+  }
+  .nav {
+    padding-left: 0.75rem;
   }
 }

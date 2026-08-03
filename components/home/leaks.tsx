@@ -20,7 +20,7 @@ export function Leaks() {
             </p>
             <div className="surface-note">
               <span className="overline tone-faint">Industry baseline</span>
-              <div className="stat__value" style={{ marginTop: "0.75rem", fontSize: "3rem" }}>
+              <div className="stat__value" style={{ marginTop: "0.75rem" }}>
                 {leakBaseline.value}
               </div>
               <p className="body-sm tone-soft" style={{ marginTop: "0.5rem" }}>

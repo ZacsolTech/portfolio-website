@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Badge, Console, ConsoleBar, ConsoleBody, LiveDot } from "@/components/ui";
-import { Reveal } from "@/components/motion/reveal";
 import { heroStats } from "@/lib/content";
 
 const QUICK_REPLIES = [
@@ -36,6 +35,12 @@ function goToConsultant(router: ReturnType<typeof useRouter>, seed: string) {
   router.push(`/consultant#${encodeURIComponent(trimmed)}`);
 }
 
+/**
+ * Deliberately not wrapped in <Reveal>. The h1 is the LCP element; gating it
+ * behind hydration + IntersectionObserver meant the fold stayed blank until
+ * the bundle landed. Entrance motion here is CSS-only and transform-driven,
+ * so the text is paintable from the server HTML.
+ */
 export function Hero() {
   const router = useRouter();
   const [seed, setSeed] = useState("");
@@ -46,29 +51,30 @@ export function Hero() {
   }
 
   return (
-    <header className="hero on-dark">
+    <section className="hero on-dark" aria-labelledby="hero-title">
+      <div className="hero__grain" aria-hidden />
       <div
         className="blob blob--gold"
-        style={{ width: "26rem", height: "26rem", top: "-6rem", right: "-8rem" }}
+        style={{ width: "30rem", height: "30rem", top: "-8rem", right: "-10rem" }}
       />
       <div
         className="blob blob--mist"
-        style={{ width: "22rem", height: "22rem", bottom: "2rem", left: "-6rem" }}
+        style={{ width: "24rem", height: "24rem", bottom: "2rem", left: "-7rem" }}
       />
       <div className="container">
         <div className="grid-a grid-a--hero">
-          <Reveal>
+          <div className="hero__lede">
             <Badge variant="dark">
               <span className="dot" /> AI consultant · live now
             </Badge>
-            <h1 className="d1" style={{ marginTop: "1.75rem" }}>
+            <h1 className="d1" id="hero-title">
               Describe your business problem.
               <span className="em-serif em-serif--block text-accent">
                 Get the software answer
               </span>
-              before you spend a rupee.
+              before you write a spec.
             </h1>
-            <p className="lead" style={{ marginTop: "1.75rem" }}>
+            <p className="lead">
               ZACSOL builds web, mobile, AI automation and custom software. Start with our AI
               consultant — it asks a few questions, then returns a recommended solution, the
               features it needs, a timeline and a cost range. Free, and in about three minutes.
@@ -85,9 +91,9 @@ export function Hero() {
             <p className="trust-line">
               No sales call to get your roadmap · Reply within one business day · NDA on request
             </p>
-          </Reveal>
+          </div>
 
-          <Reveal index={1}>
+          <div className="hero__console">
             <Console>
               <ConsoleBar>
                 <LiveDot />
@@ -131,18 +137,18 @@ export function Hero() {
                 </form>
               </ConsoleBody>
             </Console>
-          </Reveal>
+          </div>
         </div>
 
-        <Reveal index={2} className="hero-stats">
+        <dl className="hero-stats">
           {heroStats.map((stat) => (
             <div key={stat.label}>
-              <div className="stat__value">{stat.value}</div>
-              <div className="stat__label">{stat.label}</div>
+              <dt className="stat__label">{stat.label}</dt>
+              <dd className="stat__value">{stat.value}</dd>
             </div>
           ))}
-        </Reveal>
+        </dl>
       </div>
-    </header>
+    </section>
   );
 }
