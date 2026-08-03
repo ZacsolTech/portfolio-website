@@ -15,30 +15,33 @@ const EstimatorWizard = dynamic(
 export const metadata: Metadata = pageMetadata({
   title: "AI project cost estimator",
   description:
-    "Five questions. An indicative cost band, duration and team shape — with assumptions you can challenge.",
+    "Describe your project in plain language. Get a real cost range, a breakdown of where the money goes, and adjustable assumptions — free, no email required.",
   path: "/tools/estimator",
   keywords: [
     "software project cost estimator",
     "AI project cost",
     "web development cost estimate",
     "app development budget calculator",
+    "free software quote calculator",
   ],
 });
 
 export default function EstimatorPage() {
   return (
     <div className="consultant-page on-dark">
-      <div className="container" style={{ maxWidth: "44rem" }}>
+      <div className="container" style={{ maxWidth: "48rem" }}>
         <header style={{ marginBottom: "2.5rem" }}>
-          <span className="overline overline--gold">Free tool</span>
+          <span className="overline overline--gold">Free · no email required</span>
           <h1 className="d2" style={{ marginTop: "0.75rem", color: "#fff" }}>
-            Project cost <span className="em-serif">estimator</span>
+            What will it actually <span className="em-serif">cost?</span>
           </h1>
           <p
             className="lead"
             style={{ marginTop: "1.25rem", color: "var(--text-on-dark-body)" }}
           >
-            Five steps. A cost band with the assumptions listed so you can push back.
+            Describe the project in your own words. You get a real range, a breakdown of
+            where the money goes, and every assumption laid out — adjustable, so you can
+            see what actually moves the number.
           </p>
         </header>
         <EstimatorWizard />
