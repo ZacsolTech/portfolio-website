@@ -81,12 +81,6 @@ importers:
       eslint-config-next:
         specifier: 16.2.12
         version: 16.2.12(@typescript-eslint/parser@8.65.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
-      playwright:
-        specifier: ^1.62.1
-        version: 1.62.1
-      playwright-core:
-        specifier: ^1.62.1
-        version: 1.62.1
       tailwindcss:
         specifier: ^4
         version: 4.3.3
@@ -7437,13 +7431,15 @@ snapshots:
       sonic-boom: 4.2.1
       thread-stream: 3.2.0
 
-  playwright-core@1.62.1: {}
+  playwright-core@1.62.1:
+    optional: true
 
   playwright@1.62.1:
     dependencies:
       playwright-core: 1.62.1
     optionalDependencies:
       fsevents: 2.3.2
+    optional: true
 
   pluralize@8.0.0: {}
 
