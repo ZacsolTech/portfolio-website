@@ -41,6 +41,18 @@ async function getPayloadClient() {
   }
 }
 
+/** When Draft Mode is on, fetch unpublished versions and bypass public access. */
+async function draftQuery() {
+  try {
+    const { draftMode } = await import('next/headers')
+    const { isEnabled } = await draftMode()
+    if (!isEnabled) return { draft: false as const }
+    return { draft: true as const, overrideAccess: true as const }
+  } catch {
+    return { draft: false as const }
+  }
+}
+
 // ── Services ──────────────────────────────────────────────
 
 export async function getServices(): Promise<Service[]> {
@@ -52,6 +64,7 @@ export async function getServices(): Promise<Service[]> {
       collection: 'services',
       limit: 100,
       sort: 'title',
+      ...(await draftQuery()),
     })
 
     return docs.map(mapService)
@@ -69,6 +82,7 @@ export async function getService(slug: string): Promise<Service | undefined> {
       collection: 'services',
       where: { slug: { equals: slug } },
       limit: 1,
+      ...(await draftQuery()),
     })
 
     return docs[0] ? mapService(docs[0]) : staticGetService(slug)
@@ -109,6 +123,7 @@ export async function getIndustries(): Promise<Industry[]> {
       collection: 'industries',
       limit: 100,
       sort: 'name',
+      ...(await draftQuery()),
     })
 
     return docs.map(mapIndustry)
@@ -126,6 +141,7 @@ export async function getIndustry(slug: string): Promise<Industry | undefined> {
       collection: 'industries',
       where: { slug: { equals: slug } },
       limit: 1,
+      ...(await draftQuery()),
     })
 
     return docs[0] ? mapIndustry(docs[0]) : staticGetIndustry(slug)
@@ -158,6 +174,7 @@ export async function getPortfolio(): Promise<PortfolioItem[]> {
       collection: 'portfolio',
       limit: 100,
       sort: 'title',
+      ...(await draftQuery()),
     })
 
     return docs.map(mapPortfolio)
@@ -175,6 +192,7 @@ export async function getPortfolioItem(slug: string): Promise<PortfolioItem | un
       collection: 'portfolio',
       where: { slug: { equals: slug } },
       limit: 1,
+      ...(await draftQuery()),
     })
 
     return docs[0] ? mapPortfolio(docs[0]) : staticGetPortfolioItem(slug)
@@ -214,6 +232,7 @@ export async function getInsights(): Promise<Insight[]> {
       collection: 'insights',
       limit: 100,
       sort: '-date',
+      ...(await draftQuery()),
     })
 
     return docs.map(mapInsight)
@@ -231,6 +250,7 @@ export async function getInsight(slug: string): Promise<Insight | undefined> {
       collection: 'insights',
       where: { slug: { equals: slug } },
       limit: 1,
+      ...(await draftQuery()),
     })
 
     return docs[0] ? mapInsight(docs[0]) : staticGetInsight(slug)

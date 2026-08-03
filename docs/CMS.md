@@ -41,11 +41,23 @@ Pages call `lib/cms.ts` helpers (`getServices`, `getPortfolioItem`, …). Flow:
 1. Try Payload Local API
 2. On failure / empty DB → fall back to `lib/content/*`
 
+## Draft preview
+
+Services, Industries, Portfolio and Insights support **drafts** + **autosave**.
+
+1. Set `PREVIEW_SECRET` in `.env` (see `.env.example`)
+2. In `/admin`, open a document → click **Preview** (or open Live Preview)
+3. That hits `/api/preview`, turns on Next.js Draft Mode, and shows unpublished content on the real page
+4. A gold **Draft preview** bar appears at the top — use **Exit preview** when done
+
+Frontend queries pass `draft: true` only while Draft Mode is enabled, so anonymous visitors never see unpublished content.
+
 ## Required env
 
 ```
 DATABASE_URL=        # Neon connection string
-PAYLOAD_SECRET=      # random 32+ chars (auto-generated locally)
+PAYLOAD_SECRET=      # random 32+ chars
+PREVIEW_SECRET=      # Draft / Live Preview (admin Preview button)
 GEMINI_API_KEY=      # Sprint 4 AI (health-checked at /api/health)
 NEXT_PUBLIC_APP_URL=
 ```
