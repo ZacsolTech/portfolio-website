@@ -885,6 +885,45 @@ body.nav-open { overflow: hidden; }
 .chat { display: flex; flex-direction: column; gap: 1rem; }
 .chat__scroll { max-height: 30rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.25rem; }
 
+/* Consultant chat pane — auto-scroll to latest; scrollbar to revisit older messages */
+.chat--pane {
+  height: min(28rem, 58vh);
+  min-height: 16rem;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.06);
+}
+.chat--pane::-webkit-scrollbar {
+  width: 8px;
+}
+.chat--pane::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+.chat--pane::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+}
+.chat--pane::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+.chat__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 100%;
+}
+/* Pushes short threads to the bottom without breaking scroll-up */
+.chat__spacer {
+  flex: 1 0 auto;
+  min-height: 0;
+}
+.chat__end { width: 100%; height: 1px; flex: none; }
+
 .msg { display: flex; gap: 0.75rem; max-width: 88%; }
 @media (max-width: 639px) { .msg { max-width: 94%; } }
 .msg--bot { align-self: flex-start; }
@@ -1015,22 +1054,404 @@ body.nav-open { overflow: hidden; }
            font-family: var(--font-mono); font-size: 0.5625rem; color: var(--gold); }
 .tl__wk { font-family: var(--font-mono); font-size: 0.6875rem; color: rgba(255,255,255,0.45); }
 
-/* ---- Lead gate — the blur-and-capture moment ---- */
-.gate { position: relative; }
-.gate__veiled { filter: blur(7px); opacity: 0.55; pointer-events: none; user-select: none; }
-.gate__panel {
-  position: absolute; inset-inline: 0; bottom: 0; padding: 1.75rem;
-  border-radius: var(--r-2xl) var(--r-2xl) 0 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.55), var(--ink-950) 32%);
-  border-top: 1px solid rgba(var(--accent-rgb), 0.28);
+/* Visible to screen readers only — labels for inputs that show a placeholder */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
+
+/* ---- Lead gate — the blur-and-capture moment ----
+   Two tiers: the teaser above stays sharp so the visitor can see the
+   recommendation is real and specific to them; only the priced detail below
+   is veiled. Blurring the whole document gives them nothing to want. */
+.gate { position: relative; }
+
+.gate__locked {
+  position: relative;
+  margin-top: 1rem;
+  /* Cap the veiled run so the gate panel is on screen without scrolling
+     past a wall of blur. Removed the moment it unlocks. */
+  max-height: 34rem;
+  overflow: hidden;
+  border-radius: var(--r-2xl);
+}
+.gate__locked.is-unlocked {
+  max-height: none;
+  overflow: visible;
+}
+
+.gate__veiled {
+  filter: blur(9px) saturate(0.8);
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+  /* Blur samples transparent pixels at the edges; scaling up hides the halo. */
+  transform: scale(1.02);
+  transform-origin: top center;
+}
+
+.gate__panel {
+  position: absolute; inset-inline: 0; bottom: 0; padding: 1.75rem 1.5rem 1.5rem;
+  border-radius: var(--r-2xl);
+  background: linear-gradient(180deg, rgba(9,9,11,0) 0%, rgba(9,9,11,0.86) 22%, var(--ink-950) 52%);
+  animation: gateRise 0.5s var(--ease) both;
+}
+.gate__panel::before {
+  content: ''; position: absolute; inset-inline: 1.5rem; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.5), transparent);
+}
+@media (min-width: 640px) { .gate__panel { padding: 2rem; } }
+
+.gate__panel--waiting {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  text-align: center;
+}
+
+@keyframes gateRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.gate__title { color: #fff; margin-top: 0.5rem; }
+.gate__copy { color: rgba(255,255,255,0.68); margin-top: 0.5rem; }
+.gate__form { margin-top: 1.25rem; }
+.gate__submit { width: 100%; margin-top: 0.25rem; }
+.gate__fine {
+  margin-top: 0.75rem; text-align: center;
+  font-size: 0.75rem; color: rgba(255,255,255,0.42);
+}
+
 .gate__field {
   width: 100%; height: 2.75rem; padding-inline: 1.125rem; margin-bottom: 0.625rem;
   border-radius: var(--r-pill); background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.14); color: #fff; font-size: 0.875rem;
 }
 .gate__field::placeholder { color: rgba(255,255,255,0.38); }
-.gate__field:focus { outline: none; border-color: var(--gold); }
+.gate__field:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,0.09); }
+
+.gate__success {
+  display: flex; gap: 1rem; align-items: flex-start; margin-top: 1.75rem;
+  padding: 1.25rem; border-radius: var(--r-xl);
+  background: rgba(var(--accent-rgb), 0.10);
+  border: 1px solid rgba(var(--accent-rgb), 0.30);
+}
+.gate__check {
+  width: 2.25rem; height: 2.25rem; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(var(--accent-rgb), 0.20); border: 1px solid rgba(var(--accent-rgb), 0.45);
+  color: var(--gold); font-size: 1.125rem;
+}
+.gate__actions { justify-content: flex-start; margin-top: 1.75rem; }
+
+/* Provenance line above the blueprint */
+.bp-source {
+  margin-bottom: 1rem; font-family: var(--font-mono); font-size: 0.6875rem;
+  letter-spacing: 0.08em; color: rgba(134,239,172,0.85);
+}
+.bp-source--fallback { color: rgba(252,211,77,0.9); }
+
+/* Blueprint prose bits */
+.bp-why { margin: 0; color: rgba(255,255,255,0.78); font-size: 0.9375rem; line-height: 1.55; }
+.bp-row__v--sm { font-size: 1rem; }
+.bp-list {
+  margin: 0.35rem 0 0; padding-left: 1.1rem;
+  color: rgba(255,255,255,0.7); font-size: 0.875rem; line-height: 1.6;
+}
+.bp-list li { margin-bottom: 0.35rem; }
+.bp-meta { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 720px) { .bp-meta { grid-template-columns: repeat(3, 1fr); } }
+.feat--muted span {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+}
+.tl__name { font-size: 0.875rem; color: rgba(255,255,255,0.86); }
+
+/* Intake progress — shows the visitor the conversation is going somewhere */
+.intake { margin-bottom: 1.25rem; }
+.intake__bar {
+  height: 0.1875rem; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.10); overflow: hidden;
+}
+.intake__bar span {
+  display: block; height: 100%; border-radius: inherit;
+  background: var(--gold); transition: width 0.5s var(--ease);
+}
+.intake__slots {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+  margin: 0.75rem 0 0; padding: 0; list-style: none;
+  font-family: var(--font-mono); font-size: 0.625rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.35);
+}
+.intake__slots li { display: flex; align-items: center; gap: 0.375rem; }
+.intake__slots li.is-filled { color: rgba(255,255,255,0.72); }
+.intake__tick { color: rgba(255,255,255,0.25); }
+.intake__slots li.is-filled .intake__tick { color: var(--gold); }
+
+/* Streaming caret on the bubble currently being written */
+.caret {
+  display: inline-block; width: 0.5rem; height: 1em; margin-left: 0.125rem;
+  vertical-align: text-bottom; background: var(--gold);
+  animation: caretBlink 1s steps(2, start) infinite;
+}
+@keyframes caretBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* "Build my blueprint" — the only way into generation */
+.consultant-cta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem;
+  margin-top: 1.25rem; padding: 1.125rem 1.25rem;
+  border-radius: var(--r-xl);
+  background: rgba(var(--accent-rgb), 0.10);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  animation: gateRise 0.4s var(--ease) both;
+}
+.consultant-cta--soft {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.12);
+}
+.consultant-cta__head { flex: 1 1 16rem; }
+.consultant-cta__note {
+  flex: 1 1 12rem; margin: 0;
+  font-size: 0.875rem; color: rgba(255,255,255,0.78);
+}
+.consultant-cta__recap {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0;
+}
+.consultant-cta__recap div { display: flex; align-items: baseline; gap: 0.4rem; }
+.consultant-cta__recap dt {
+  font-family: var(--font-mono); font-size: 0.5625rem;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.4);
+}
+.consultant-cta__recap dd {
+  margin: 0; font-size: 0.8125rem; color: #fff; font-weight: 500;
+}
+
+.consultant-error {
+  margin-top: 1rem; padding: 0.75rem 1rem; border-radius: var(--r-md);
+  background: rgba(248,113,113,0.10); border: 1px solid rgba(248,113,113,0.28);
+  color: #fca5a5; font-size: 0.875rem;
+}
+
+/* Generating panel */
+.consultant-generating { text-align: center; padding: 2.5rem 1rem; }
+.consultant-generating__note { color: rgba(255,255,255,0.62); margin-top: 0.5rem; }
+.consultant-generating__orb {
+  width: 3rem; height: 3rem; margin: 0 auto 1.25rem; border-radius: 50%;
+  border: 2px solid rgba(var(--accent-rgb), 0.35); border-top-color: var(--gold);
+  animation: consultantSpin 0.9s linear infinite;
+}
+.consultant-generating__bar {
+  margin: 1.5rem auto 0; width: min(16rem, 80%); height: 0.25rem;
+  border-radius: var(--r-pill); background: rgba(255,255,255,0.08); overflow: hidden;
+}
+.consultant-generating__bar span {
+  display: block; height: 100%; width: 40%; border-radius: inherit;
+  background: var(--gold); animation: consultantSlide 1.2s ease-in-out infinite;
+}
+@keyframes consultantSpin { to { transform: rotate(360deg); } }
+@keyframes consultantSlide {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+/* ==========================================================================
+   Cost estimator result
+   Free and ungated: everything is visible, nothing is blurred.
+   ========================================================================== */
+
+.est { display: grid; gap: 2rem; }
+.est--stale { opacity: 0.6; transition: opacity 0.2s var(--ease); }
+
+.est__headline { text-align: center; padding-bottom: 0.5rem; }
+.est__band {
+  margin-top: 0.5rem;
+  font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(2.25rem, 7vw, 3.25rem); line-height: 1.05; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.est__meta {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.25rem;
+  margin-top: 0.875rem;
+  font-family: var(--font-mono); font-size: 0.6875rem;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.55);
+}
+.est__meta span { display: inline-flex; align-items: center; gap: 0.5rem; }
+.est__meta span + span::before {
+  content: ''; width: 3px; height: 3px; border-radius: 50%;
+  background: rgba(255,255,255,0.28);
+}
+
+.est__confidence {
+  display: inline-flex; align-items: center; gap: 0.625rem; margin-top: 1rem;
+  padding: 0.375rem 0.875rem 0.375rem 0.625rem; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+}
+.est__confidence-bar {
+  width: 3.5rem; height: 0.25rem; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.14); overflow: hidden;
+}
+.est__confidence-bar span {
+  display: block; height: 100%; border-radius: inherit; background: var(--gold);
+  transition: width 0.35s var(--ease);
+}
+.est__confidence-label {
+  font-family: var(--font-mono); font-size: 0.625rem;
+  text-transform: uppercase; letter-spacing: 0.16em; color: rgba(255,255,255,0.72);
+}
+
+/* What was actually priced — makes wrong inputs obvious at a glance */
+.est__inputs {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
+  margin: 0; padding: 0; list-style: none;
+}
+.est__inputs li {
+  padding: 0.3125rem 0.75rem; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+  font-size: 0.75rem; color: rgba(255,255,255,0.7);
+}
+
+.est__narrative {
+  margin: 0; padding: 1.25rem; border-radius: var(--r-lg);
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.82); font-size: 0.9375rem; line-height: 1.65;
+}
+
+.est__section { display: grid; gap: 0.75rem; }
+.est__h {
+  margin: 0; font-family: var(--font-mono); font-size: 0.625rem;
+  text-transform: uppercase; letter-spacing: 0.2em; color: rgba(255,255,255,0.45);
+  font-weight: 500;
+}
+
+/* Breakdown table — scrolls on its own rather than widening the page */
+.est__table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.875rem; color: rgba(255,255,255,0.82);
+}
+.est__table th, .est__table td { text-align: left; padding: 0.625rem 0.5rem; }
+.est__table thead th {
+  font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.16em; color: rgba(255,255,255,0.38);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.est__table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.06); }
+.est__table tbody tr:last-child { border-bottom: 0; }
+.est__table tbody th { font-weight: 500; position: relative; padding-left: 0.5rem; }
+.est__table td { white-space: nowrap; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.68); }
+.est__table td:last-child { text-align: right; color: #fff; }
+
+.est__bar {
+  position: absolute; left: 0; bottom: 0.25rem; height: 2px; width: 100%;
+  border-radius: var(--r-pill); background: transparent;
+}
+.est__bar span {
+  display: block; height: 100%; border-radius: inherit;
+  background: rgba(var(--accent-rgb), 0.55); transition: width 0.35s var(--ease);
+}
+
+.est__drivers { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.est__drivers li {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.5rem 0.75rem; border-radius: var(--r-md);
+  background: rgba(255,255,255,0.04); font-size: 0.875rem; color: rgba(255,255,255,0.8);
+}
+.est__eff {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+  color: var(--gold); font-variant-numeric: tabular-nums;
+}
+.est__eff--down { color: rgba(134,239,172,0.9); }
+
+.est__cols { display: grid; gap: 2rem; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .est__cols { grid-template-columns: 1fr 1fr; } }
+
+.est__list {
+  margin: 0; padding-left: 1.1rem;
+  color: rgba(255,255,255,0.7); font-size: 0.875rem; line-height: 1.6;
+}
+.est__list li { margin-bottom: 0.4rem; }
+.est__list--yes, .est__list--no, .est__list--risk { list-style: none; padding-left: 0; }
+.est__list--yes li, .est__list--no li, .est__list--risk li {
+  display: grid; grid-template-columns: 1rem 1fr; gap: 0.5rem; align-items: start;
+}
+.est__list--yes li::before { content: '✓'; color: var(--gold); }
+.est__list--no li::before { content: '×'; color: rgba(255,255,255,0.35); }
+.est__list--risk li::before { content: '!'; color: rgba(252,211,77,0.9); font-weight: 700; }
+
+.est__basis {
+  margin: 0.5rem 0 0; font-size: 0.8125rem; line-height: 1.6;
+  color: rgba(255,255,255,0.5); font-style: italic;
+}
+.est__fine {
+  margin: 0.75rem 0 0; font-size: 0.75rem; line-height: 1.6;
+  color: rgba(255,255,255,0.42);
+}
+.est__actions { justify-content: flex-start; margin-top: 2rem; }
+
+/* ---- Interactive levers: re-price without re-answering ---- */
+.levers {
+  display: grid; gap: 1.25rem; margin-top: 2rem; padding: 1.5rem;
+  border-radius: var(--r-xl);
+  background: rgba(var(--accent-rgb), 0.07);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+}
+.levers__head { display: grid; gap: 0.25rem; }
+.levers__title {
+  margin: 0; font-family: var(--font-display); font-size: 1.0625rem;
+  font-weight: 600; color: #fff;
+}
+.levers__note { margin: 0; font-size: 0.8125rem; color: rgba(255,255,255,0.6); }
+
+.lever { display: grid; gap: 0.5rem; }
+.lever > label {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  font-family: var(--font-mono); font-size: 0.625rem;
+  text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.55);
+}
+.lever__value {
+  font-size: 0.8125rem; color: var(--gold); letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.lever select {
+  width: 100%; height: 2.625rem; padding-inline: 0.875rem;
+  border-radius: var(--r-md); background: var(--ink-950);
+  border: 1px solid rgba(255,255,255,0.16); color: #fff; font-size: 0.875rem;
+  font-family: var(--font-body); cursor: pointer;
+}
+.lever select:focus-visible { outline: none; border-color: var(--gold); }
+.lever select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.lever input[type="range"] {
+  width: 100%; height: 1.25rem; cursor: pointer;
+  accent-color: var(--gold); background: transparent;
+}
+
+.lever--switch {
+  grid-template-columns: 1fr auto; align-items: center; gap: 1rem;
+}
+.lever--switch > label { text-transform: none; letter-spacing: 0.02em; font-size: 0.8125rem; }
+.lever--switch input[type="checkbox"] {
+  width: 1.125rem; height: 1.125rem; accent-color: var(--gold); cursor: pointer;
+}
+
+/* Consultant page layout */
+.consultant-layout { display: grid; gap: 2rem; grid-template-columns: 1fr; }
+@media (min-width: 1100px) {
+  .consultant-layout { grid-template-columns: 1.5fr 0.85fr; align-items: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consultant-generating__orb,
+  .consultant-generating__bar span,
+  .caret,
+  .gate__panel,
+  .consultant-cta { animation: none; }
+  .intake__bar span,
+  .est__confidence-bar span,
+  .est__bar span,
+  .est--stale { transition: none; }
+}
 
 /* ---- AI consultant float ---- */
 .ai-float {
