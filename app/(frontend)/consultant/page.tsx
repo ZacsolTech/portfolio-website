@@ -45,8 +45,8 @@ export default function ConsultantPage() {
             className="lead"
             style={{ margin: "1.25rem auto 0", color: "var(--text-on-dark-body)", maxWidth: "36rem" }}
           >
-            Describe the bottleneck. Get a solution roadmap on screen — then decide whether you want
-            the PDF or a human conversation.
+            Describe the bottleneck in a conversation. Get a solution roadmap on screen — then
+            decide whether you want the PDF or a human conversation.
           </p>
         </header>
 

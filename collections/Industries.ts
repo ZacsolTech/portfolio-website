@@ -1,13 +1,13 @@
 import type { CollectionConfig } from 'payload'
+import { draftVersions, previewCollectionConfig } from '../lib/preview'
 
 export const Industries: CollectionConfig = {
   slug: 'industries',
   admin: {
     useAsTitle: 'name',
+    ...previewCollectionConfig('industries'),
   },
-  versions: {
-    drafts: true,
-  },
+  versions: draftVersions,
   fields: [
     {
       name: 'slug',
