@@ -1,5 +1,3 @@
-import type { AdminViewProps } from 'payload'
-
 import { NotFoundPage, generatePageMetadata } from '@payloadcms/next/views'
 import { importMap } from '../importMap'
 import configPromise from '@payload-config'
