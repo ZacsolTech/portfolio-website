@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(rm -f \"./tsc.tmp.log\")",
+      "Bash(node \"./flowtest3.tmp.mjs\")",
+      "Bash(node \"./flowtest4.tmp.mjs\")",
+      "Bash(npx tsx *)",
+      "Bash(rm -f flowtest*.tmp.mjs gatetest.tmp.mjs)",
+      "Bash(npx eslint *)",
+      "Bash(rm -f \"./lint.tmp.log\")",
+      "Bash(echo \"TSC=$?\")",
+      "Bash(curl -s http://localhost:3000/consultant --max-time 25 -o \"./page.tmp.html\" -w \"status=%{http_code} size=%{size_download}\\\\n\")",
+      "Bash(echo \"LINT=$?\")",
+      "Bash(rm -f \"./t.tmp.log\")",
+      "Bash(node \"./est.tmp.mjs\")",
+      "Bash(npx next *)",
+      "Bash(rm -f build.tmp.log est.tmp.mjs)",
+      "Bash(curl -s http://localhost:3000/tools/estimator --max-time 30 -o \"./p.tmp.html\" -w \"status=%{http_code} size=%{size_download}\\\\n\")",
+      "Bash(echo \"BUILD=$?\")",
+      "Bash(curl -s http://localhost:3000/ --max-time 30 -o \"./h.tmp.html\" -w \"status=%{http_code}\\\\n\")",
+      "Bash(curl -s -o /dev/null -w \"admin=%{http_code}\\\\n\" http://localhost:3000/admin --max-time 30)",
+      "Bash(curl -s -o /dev/null -w \"admin=%{http_code} time=%{time_total}s\\\\n\" http://localhost:3000/admin --max-time 180)",
+      "Bash(git check-ignore *)",
+      "Bash(grep -iE \"^\\\\.env|\\\\.env$|\\\\.env\\\\.\")",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)"
+    ]
+  }
+}
