@@ -16,7 +16,10 @@ importers:
         version: 16.2.12
       '@payloadcms/db-postgres':
         specifier: ^3.87.0
-        version: 3.87.0(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(supports-color@7.2.0)
+        version: 3.87.0(@upstash/redis@1.38.1)(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(supports-color@7.2.0)
+      '@payloadcms/live-preview-react':
+        specifier: ^3.87.0
+        version: 3.87.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@payloadcms/next':
         specifier: ^3.87.0
         version: 3.87.0(@types/react@19.2.18)(graphql@17.0.2)(monaco-editor@0.56.0)(next@16.2.12(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(supports-color@7.2.0)(typescript@5.9.3)
@@ -26,6 +29,12 @@ importers:
       '@payloadcms/ui':
         specifier: ^3.87.0
         version: 3.87.0(@types/react@19.2.18)(monaco-editor@0.56.0)(next@16.2.12(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(supports-color@7.2.0)(typescript@5.9.3)
+      '@upstash/ratelimit':
+        specifier: ^2.0.8
+        version: 2.0.8(@upstash/redis@1.38.1)
+      '@upstash/redis':
+        specifier: ^1.38.1
+        version: 1.38.1
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -1240,6 +1249,15 @@ packages:
       graphql: ^16.8.1
       payload: 3.87.0
 
+  '@payloadcms/live-preview-react@3.87.0':
+    resolution: {integrity: sha512-feJ7j3T85qJD7e3EsAFeGlzvoiwHCbeFUJEOrV8oI5+MXVY+IPP1fvSeE6WiylbabxN4tVit35IlVwYLs6pEgQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1
+
+  '@payloadcms/live-preview@3.87.0':
+    resolution: {integrity: sha512-kR8G/G5dTs3J7p5kdIf5YSbVwP5JyQj0gsvKMvhL6UKoDx3Blx99fMNATxQYAL7IqPtRaB/DUlgLC34UyAOX6g==}
+
   '@payloadcms/next@3.87.0':
     resolution: {integrity: sha512-kMXzuHbS8yH/rCvpvpRq1Qvwd6+/uOoT6OWY2YZHofiLbz08S60an6mG21eAJCVXRmzJ2g1M2cEDLC0oysvOfg==}
     engines: {node: ^18.20.2 || >=20.9.0}
@@ -1668,6 +1686,18 @@ packages:
     resolution: {integrity: sha512-nAB74NfSNKknqQ1RrYj6uz8FcXEomu/MATJZxh/x+BArzN2U3JbOYC0APYzUIGhVY3m5hRxA8VPNdPBoG8txlA==}
     cpu: [x64]
     os: [win32]
+
+  '@upstash/core-analytics@0.0.10':
+    resolution: {integrity: sha512-7qJHGxpQgQr9/vmeS1PktEwvNAF7TI4iJDi8Pu2CFZ9YUGHZH4fOP5TfYlZ4aVxfopnELiE4BS4FBjyK7V1/xQ==}
+    engines: {node: '>=16.0.0'}
+
+  '@upstash/ratelimit@2.0.8':
+    resolution: {integrity: sha512-YSTMBJ1YIxsoPkUMX/P4DDks/xV5YYCswWMamU8ZIfK9ly6ppjRnVOyBhMDXBmzjODm4UQKcxsJPvaeFAijp5w==}
+    peerDependencies:
+      '@upstash/redis': ^1.34.3
+
+  '@upstash/redis@1.38.1':
+    resolution: {integrity: sha512-hVqkWmhqobH7hpdzSCSrOwK7gWNASOAdf85l6/yxdB+giCYNYfl8FkSKxnqW2sqCdLDP7HzRTvy/ILC1AjBMUA==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -3793,6 +3823,9 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
+  uncrypto@0.1.3:
+    resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
+
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
@@ -4904,13 +4937,13 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@payloadcms/db-postgres@3.87.0(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(supports-color@7.2.0)':
+  '@payloadcms/db-postgres@3.87.0(@upstash/redis@1.38.1)(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(supports-color@7.2.0)':
     dependencies:
-      '@payloadcms/drizzle': 3.87.0(@types/pg@8.20.0)(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(pg@8.20.0)
+      '@payloadcms/drizzle': 3.87.0(@types/pg@8.20.0)(@upstash/redis@1.38.1)(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(pg@8.20.0)
       '@types/pg': 8.20.0
       console-table-printer: 2.12.1
       drizzle-kit: 0.31.7(supports-color@7.2.0)
-      drizzle-orm: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)
+      drizzle-orm: 0.45.2(@types/pg@8.20.0)(@upstash/redis@1.38.1)(pg@8.20.0)
       payload: 3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3)
       pg: 8.20.0
       prompts: 2.4.2
@@ -4947,11 +4980,11 @@ snapshots:
       - sqlite3
       - supports-color
 
-  '@payloadcms/drizzle@3.87.0(@types/pg@8.20.0)(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(pg@8.20.0)':
+  '@payloadcms/drizzle@3.87.0(@types/pg@8.20.0)(@upstash/redis@1.38.1)(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(pg@8.20.0)':
     dependencies:
       console-table-printer: 2.12.1
       dequal: 2.0.3
-      drizzle-orm: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)
+      drizzle-orm: 0.45.2(@types/pg@8.20.0)(@upstash/redis@1.38.1)(pg@8.20.0)
       payload: 3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3)
       prompts: 2.4.2
       to-snake-case: 1.0.0
@@ -4997,6 +5030,14 @@ snapshots:
       tsx: 4.22.4
     transitivePeerDependencies:
       - typescript
+
+  '@payloadcms/live-preview-react@3.87.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@payloadcms/live-preview': 3.87.0
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+
+  '@payloadcms/live-preview@3.87.0': {}
 
   '@payloadcms/next@3.87.0(@types/react@19.2.18)(graphql@17.0.2)(monaco-editor@0.56.0)(next@16.2.12(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(payload@3.87.0(graphql@17.0.2)(supports-color@7.2.0)(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(supports-color@7.2.0)(typescript@5.9.3)':
     dependencies:
@@ -5463,6 +5504,19 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
+  '@upstash/core-analytics@0.0.10':
+    dependencies:
+      '@upstash/redis': 1.38.1
+
+  '@upstash/ratelimit@2.0.8(@upstash/redis@1.38.1)':
+    dependencies:
+      '@upstash/core-analytics': 0.0.10
+      '@upstash/redis': 1.38.1
+
+  '@upstash/redis@1.38.1':
+    dependencies:
+      uncrypto: 0.1.3
+
   acorn-jsx@5.3.2(acorn@8.18.0):
     dependencies:
       acorn: 8.18.0
@@ -5835,9 +5889,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.45.2(@types/pg@8.20.0)(pg@8.20.0):
+  drizzle-orm@0.45.2(@types/pg@8.20.0)(@upstash/redis@1.38.1)(pg@8.20.0):
     optionalDependencies:
       '@types/pg': 8.20.0
+      '@upstash/redis': 1.38.1
       pg: 8.20.0
 
   dunder-proto@1.0.1:
@@ -8002,6 +8057,8 @@ snapshots:
       has-bigints: 1.1.0
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
+
+  uncrypto@0.1.3: {}
 
   undici-types@6.21.0: {}
 

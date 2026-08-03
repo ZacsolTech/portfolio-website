@@ -9,15 +9,19 @@
     "lint": "eslint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "generate:types": "payload generate:types",
-    "seed": "curl -X POST http://localhost:3000/api/seed"
+    "seed": "curl -X POST http://localhost:3000/api/seed",
+    "eval:consultant": "tsx scripts/eval-consultant.ts"
   },
   "dependencies": {
     "@google/genai": "^2.15.0",
     "@next/env": "^16.2.12",
     "@payloadcms/db-postgres": "^3.87.0",
+    "@payloadcms/live-preview-react": "^3.87.0",
     "@payloadcms/next": "^3.87.0",
     "@payloadcms/richtext-lexical": "^3.87.0",
     "@payloadcms/ui": "^3.87.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.1",
     "dotenv": "^17.4.2",
     "graphql": "^17.0.2",
     "lucide-react": "^1.28.0",
