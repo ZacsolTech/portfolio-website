@@ -15,6 +15,7 @@ import {
   Team,
   Testimonials,
   Faqs,
+  Leads,
 } from './collections'
 import { normalizeDatabaseUrl } from './lib/db'
 
@@ -43,6 +44,7 @@ export default buildConfig({
     Team,
     Testimonials,
     Faqs,
+    Leads,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
