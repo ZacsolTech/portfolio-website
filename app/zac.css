@@ -137,7 +137,7 @@
 }
 
 /* Desktop: a floating card, in the same language as the consoles elsewhere. */
-@media (min-width: 720px) {
+@media (min-width: 768px) {
   .zac-dock {
     padding: 1rem;
   }
@@ -150,7 +150,7 @@
 }
 
 /* Mobile: a bottom sheet, and the only case where the dock is modal. */
-@media (max-width: 719px) {
+@media (max-width: 767px) {
   .zac-dock {
     align-items: flex-end;
   }
@@ -187,7 +187,7 @@ body.zac-locked {
 .zac-dock__grip {
   display: none;
 }
-@media (max-width: 719px) {
+@media (max-width: 767px) {
   .zac-dock__grip {
     display: block;
     flex: none;
@@ -196,6 +196,11 @@ body.zac-locked {
     margin: 0.625rem auto 0;
     border-radius: var(--r-pill);
     background: var(--line-strong);
+  }
+  /* Close and expand sit next to each other in the sheet header. */
+  .zac-dock__icon {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
 
@@ -416,6 +421,23 @@ body.zac-locked {
   justify-content: center;
 }
 
+/*
+  The shared AI surfaces are written against the *viewport*, but inside the
+  dock they live in a ~27rem panel. On a 1280px desktop that meant a
+  three-column blueprint meta row and a two-column estimate at about 8rem per
+  column. The panel is narrow at every viewport, so it is always one column.
+*/
+.zac-dock__panel .bp-meta,
+.zac-dock__panel .est__cols,
+.zac-dock__panel .doc-list,
+.zac-dock__panel .doc-dl {
+  grid-template-columns: 1fr;
+}
+.zac-dock__panel .est__meta,
+.zac-dock__panel .est__inputs {
+  justify-content: flex-start;
+}
+
 /* Answers carried across by an estimator → consultant handoff. */
 .zac-carried {
   margin: 0 0 1rem;
@@ -439,14 +461,14 @@ body.zac-locked {
 }
 
 .consultant-page--app {
-  --zac-page-top: 6.5rem;
+  --zac-page-top: calc(var(--nav-space) + 1.75rem);
   display: flex;
   min-height: 100dvh;
   padding-block: var(--zac-page-top) 2.5rem;
 }
 @media (min-width: 1024px) {
   .consultant-page--app {
-    --zac-page-top: 7.5rem;
+    --zac-page-top: calc(var(--nav-space) + 2.25rem);
   }
 }
 .consultant-page--app > .container {

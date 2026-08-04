@@ -44,19 +44,11 @@ export function InsightsBrowser({ items }: Props) {
           className="card-link"
           style={{ marginTop: "2.5rem" }}
         >
-          <Card
-            variant="media"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr",
-              overflow: "hidden",
-            }}
-            className="insights-featured"
-          >
-            <CardMedia style={{ height: "16rem" }}>
+          <Card variant="media" className="insights-featured">
+            <CardMedia>
               <div className={`thumb ${thumbClass(0)}`} data-label={featured.category} />
             </CardMedia>
-            <CardBody style={{ padding: "2rem" }}>
+            <CardBody>
               <Badge variant="gold">{featured.category}</Badge>
               <h2 className="d3" style={{ marginTop: "0.75rem" }}>
                 {featured.title}
@@ -96,30 +88,18 @@ export function InsightsBrowser({ items }: Props) {
         ))}
       </div>
 
-      <div
-        className="section section--ink section--persist on-dark"
-        style={{
-          marginTop: "4rem",
-          borderRadius: "var(--r-2xl)",
-          padding: "2.5rem",
-        }}
-      >
+      <div className="section section--ink section--persist on-dark insights-news">
         <span className="overline overline--gold">Newsletter</span>
         <h2 className="d3" style={{ marginTop: "0.75rem", color: "#fff" }}>
           {site.newsletterBlurb}
         </h2>
-        <form
-          noValidate
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-            marginTop: "1.5rem",
-            maxWidth: "28rem",
-          }}
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <Field htmlFor="insights-email" className="newsletter-field">
+        {/*
+          The email field used to be a `flex: 1 1 14rem` input inside a block
+          <label>, so the flex value applied to nothing and the control
+          shrink-wrapped to its placeholder. The label is the flex item now.
+        */}
+        <form noValidate className="insights-news__form" onSubmit={(e) => e.preventDefault()}>
+          <Field htmlFor="insights-email" className="insights-news__field">
             <Input
               id="insights-email"
               type="email"
@@ -127,16 +107,7 @@ export function InsightsBrowser({ items }: Props) {
               placeholder="you@company.com"
               aria-label="Email address"
               autoComplete="email"
-              style={{
-                height: "2.75rem",
-                borderRadius: "var(--r-pill)",
-                background: "rgba(255,255,255,.06)",
-                border: "1px solid var(--line-on-dark)",
-                color: "#fff",
-                paddingInline: "1.25rem",
-                width: "100%",
-                flex: "1 1 14rem",
-              }}
+              className="insights-news__input"
             />
           </Field>
           <button type="button" className="btn btn--gold">
@@ -144,18 +115,6 @@ export function InsightsBrowser({ items }: Props) {
           </button>
         </form>
       </div>
-
-      <style>{`
-        @media (min-width: 900px) {
-          .insights-featured {
-            grid-template-columns: 1.1fr 1fr !important;
-          }
-          .insights-featured .card__img {
-            height: 100% !important;
-            min-height: 18rem;
-          }
-        }
-      `}</style>
     </div>
   );
 }

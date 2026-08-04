@@ -48,38 +48,24 @@ export default async function ServicesPage() {
             <Panel>
               {services.map((service) => (
                 <PanelRow key={service.slug}>
-                  <Link
-                    href={`/services/${service.slug}`}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "auto 1fr auto",
-                      gap: "1.25rem",
-                      alignItems: "center",
-                      width: "100%",
-                      color: "inherit",
-                      textDecoration: "none",
-                    }}
-                  >
-                    <IconTile>
+                  {/* Grid areas rather than a fixed `auto 1fr auto`: on a phone
+                      the icon and arrow left the copy about 140px to live in,
+                      so the title wrapped to four lines. Below md the blurb
+                      drops to its own full-width row instead. */}
+                  <Link href={`/services/${service.slug}`} className="svc-row">
+                    <IconTile className="svc-row__icon">
                       <ServiceIcon name={service.icon} />
                     </IconTile>
-                    <div>
-                      <h2 className="d4" style={{ margin: 0 }}>
-                        {service.title}
-                      </h2>
-                      <p className="body-sm" style={{ margin: "0.5rem 0 0", maxWidth: "42rem" }}>
-                        {service.blurb}
-                      </p>
-                      <div
-                        className="chips"
-                        style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginTop: "0.875rem" }}
-                      >
+                    <h2 className="d4 svc-row__title">{service.title}</h2>
+                    <ArrowRight aria-hidden className="svc-row__arrow" />
+                    <div className="svc-row__body">
+                      <p className="body-sm">{service.blurb}</p>
+                      <div className="chips">
                         {service.tech.map((t) => (
                           <Chip key={t}>{t}</Chip>
                         ))}
                       </div>
                     </div>
-                    <ArrowRight aria-hidden style={{ color: "var(--text-muted)", flexShrink: 0 }} />
                   </Link>
                 </PanelRow>
               ))}

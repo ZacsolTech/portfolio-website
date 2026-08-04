@@ -62,12 +62,21 @@
   --track-widest:   0.1em;
   --track-label:    0.2em;
 
-  /* ---------- Layout ---------- */
+  /* ---------- Layout ----------
+     --gutter, --section-y, --section-y-lg and --nav-h step with the viewport;
+     their values live in the mobile-first block further down so there is one
+     place to read them from. */
   --container: 1280px;
-  --gutter: 1rem;
-  --section-y: 6rem;
-  --section-y-lg: 8rem;
-  --nav-h: 4.25rem;
+  /* Distance from the top of the viewport to the floating pill's own top.
+     `--nav-space` is therefore everything the fixed nav occupies, and it is
+     the only number anything else should clear it by. Before this, six
+     places hard-coded 6.5rem/7rem against a nav that is 4.5rem tall on a
+     phone and 6.75rem on a desktop — too much room on one, too little on
+     the other, which is what made headlines sit under the pill. */
+  --nav-offset: 0.75rem;
+  --nav-space: calc(var(--nav-offset) + var(--nav-h));
+  /* Comfortable breathing room below the pill for the first thing on a page. */
+  --nav-clear: calc(var(--nav-space) + 1.25rem);
 
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
@@ -176,16 +185,29 @@
   --thumb-accent: linear-gradient(135deg, #3F5A1E, #BBFD6A);
 }
 
-@media (max-width: 639px) {
+/* Mobile-first, composed from the four locked steps in docs/BREAKPOINTS.md. */
+:root {
+  --gutter: 1rem;
+  --section-y: 4rem;
+  --section-y-lg: 4rem;
+  --nav-h: 3.75rem;
+}
+@media (min-width: 640px) {
   :root {
-    --gutter: 1rem;
-    --section-y: 4rem;
-    --section-y-lg: 4rem;
-    --nav-h: 3.75rem;
+    --gutter: 1.5rem;
+    --section-y: 6rem;
+    --section-y-lg: 8rem;
+    --nav-h: 4.25rem;
+    --nav-offset: 1rem;
   }
 }
-@media (min-width: 640px) { :root { --gutter: 1.5rem; } }
-@media (min-width: 1024px){ :root { --gutter: 2rem; --nav-h: 5.25rem; } }
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 2rem;
+    --nav-h: 5.25rem;
+    --nav-offset: 1.5rem;
+  }
+}
 
 /* ==========================================================================
    Base
@@ -307,7 +329,14 @@ h1, h2, h3, h4 {
                   max(var(--gutter), env(safe-area-inset-right, 0px));
 }
 
-.section { padding-block: var(--section-y); position: relative; overflow: hidden; }
+/*
+  `clip`, not `hidden`. Both contain the decorative blobs identically, but
+  `hidden` makes the section a scroll container, and a sticky child is then
+  bound to a box that never scrolls — which silently disabled `.sticky-col`
+  (the FAQ rail) and `.consultant-aside`. `clip` creates no scrollport, so
+  sticky resolves against the viewport the way it was written to.
+*/
+.section { padding-block: var(--section-y); position: relative; overflow: clip; }
 @media (min-width: 640px) { .section { padding-block: var(--section-y-lg); } }
 
 .section--paper { background: var(--paper); }
@@ -764,13 +793,12 @@ h1, h2, h3, h4 {
    Nav — 9Tech's floating pill + TechStack's glass + pill items
    ========================================================================== */
 .nav-wrap {
-  position: fixed; inset-inline: 0; top: 0.75rem; z-index: 50;
+  position: fixed; inset-inline: 0; top: var(--nav-offset); z-index: 50;
   display: flex; justify-content: center;
   padding-inline: max(0.75rem, env(safe-area-inset-left, 0px))
                   max(0.75rem, env(safe-area-inset-right, 0px));
 }
-@media (min-width: 640px) { .nav-wrap { top: 1rem; padding-inline: 1rem; } }
-@media (min-width: 1024px) { .nav-wrap { top: 1.5rem; } }
+@media (min-width: 640px) { .nav-wrap { padding-inline: 1rem; } }
 .nav {
   display: flex; align-items: center; gap: 0.5rem;
   width: 100%; max-width: var(--container);
@@ -789,7 +817,13 @@ h1, h2, h3, h4 {
   }
 }
 .nav.is-scrolled { border-color: var(--nav-border-scrolled); }
-.nav__links { display: none; align-items: center; gap: 0.125rem; flex: 1; justify-content: center; }
+/* min-width:0 — without it the six labels are an unshrinkable flex item and
+   push the logo and CTA out through the ends of the pill between 1024 and
+   ~1150px, where the links have just appeared but the bar is still narrow. */
+.nav__links {
+  display: none; align-items: center; gap: 0.125rem;
+  flex: 1 1 auto; min-width: 0; justify-content: center;
+}
 @media (min-width: 1024px) { .nav__links { display: flex; } }
 .nav__link {
   position: relative;
@@ -1253,10 +1287,32 @@ body.nav-open { overflow: hidden; }
            font-family: var(--font-mono); font-size: 0.5625rem; color: var(--gold); }
 .tl__wk { font-family: var(--font-mono); font-size: 0.6875rem; color: rgba(255,255,255,0.45); }
 
-/* Visible to screen readers only — labels for inputs that show a placeholder */
+/*
+  Visible to screen readers only — labels for inputs that show a placeholder,
+  and the honeypot field every form carries.
+
+  `!important` is load-bearing here, not laziness. `.sr-only` is a single
+  class, so any element-scoped rule outranks it: `.newsletter input` (0,1,1)
+  was giving the footer honeypot `width: 100%; height: 2.75rem`, which made it
+  a 1280x44 absolutely-positioned box hanging 597px off the right edge of
+  every page on the site. Only `overflow-x: clip` on <html> was hiding the
+  scrollbar. A utility whose entire contract is "occupies no space" has to win.
+*/
 .sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0 !important;
 }
 
 /* ---- Lead gate — the blur-and-capture moment ----
@@ -1358,7 +1414,7 @@ body.nav-open { overflow: hidden; }
 }
 .bp-list li { margin-bottom: 0.35rem; }
 .bp-meta { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-@media (min-width: 720px) { .bp-meta { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 768px) { .bp-meta { grid-template-columns: repeat(3, 1fr); } }
 .feat--muted span {
   background: rgba(255,255,255,0.06);
   border-color: rgba(255,255,255,0.14);
@@ -1601,7 +1657,7 @@ body.nav-open { overflow: hidden; }
 .est__eff--down { color: rgba(134,239,172,0.9); }
 
 .est__cols { display: grid; gap: 2rem; grid-template-columns: 1fr; }
-@media (min-width: 720px) { .est__cols { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 768px) { .est__cols { grid-template-columns: 1fr 1fr; } }
 
 .est__list {
   margin: 0; padding-left: 1.1rem;
@@ -1763,7 +1819,8 @@ body.nav-open { overflow: hidden; }
 @media (min-width: 1024px) {
   .newsletter__actions { margin-top: 0; align-content: center; }
 }
-.newsletter input {
+/* `:not(.sr-only)` keeps this away from the honeypot sitting in the same form. */
+.newsletter input:not(.sr-only) {
   flex: 1 1 12rem;
   width: 100%;
   height: 2.75rem;
@@ -1814,7 +1871,7 @@ body.nav-open { overflow: hidden; }
     flex-direction: column;
     align-items: stretch;
   }
-  .newsletter input {
+  .newsletter input:not(.sr-only) {
     flex: none;
     width: 100%;
   }
@@ -1841,11 +1898,11 @@ body.nav-open { overflow: hidden; }
 
 /* ---- Page hero + closing CTA helpers ---- */
 .page-hero {
-  background: var(--ink-950); color: var(--text-on-dark); position: relative; overflow: hidden;
-  padding-block: 6.5rem 2.75rem;
+  background: var(--ink-950); color: var(--text-on-dark); position: relative; overflow: clip;
+  padding-block: calc(var(--nav-space) + 2rem) 2.75rem;
 }
-@media (min-width: 640px) { .page-hero { padding-block: 7.5rem 3.5rem; } }
-@media (min-width: 1024px) { .page-hero { padding-block: 9rem 4.5rem; } }
+@media (min-width: 640px) { .page-hero { padding-block: calc(var(--nav-space) + 2.25rem) 3.5rem; } }
+@media (min-width: 1024px) { .page-hero { padding-block: calc(var(--nav-space) + 2.25rem) 4.5rem; } }
 .page-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background:
@@ -1921,16 +1978,11 @@ body.nav-open { overflow: hidden; }
 .nav-sheet__head .logo__img { height: 2.25rem; max-width: 9rem; }
 
 .section.section--after-nav {
-  padding-block-start: 6rem;
-}
-@media (min-width: 640px) {
-  .section.section--after-nav {
-    padding-block-start: 7rem;
-  }
+  padding-block-start: calc(var(--nav-space) + 1.75rem);
 }
 @media (min-width: 1024px) {
   .section.section--after-nav {
-    padding-block-start: 8rem;
+    padding-block-start: calc(var(--nav-space) + 2.25rem);
   }
 }
 
@@ -1939,7 +1991,7 @@ body.nav-open { overflow: hidden; }
   gap: 2rem;
   grid-template-columns: 1fr;
 }
-@media (min-width: 960px) {
+@media (min-width: 1024px) {
   .book-grid {
     gap: 2.5rem;
     grid-template-columns: 0.95fr 1.15fr;
@@ -2012,7 +2064,6 @@ body.nav-open { overflow: hidden; }
     gap: 0.75rem;
   }
 
-  .consultant-page { padding-block: 6rem 3rem; }
   .consultant-page > .container > header {
     margin-bottom: 2rem !important;
     max-width: 100% !important;
@@ -2047,16 +2098,53 @@ body.nav-open { overflow: hidden; }
     letter-spacing: 0.14em;
     font-size: 0.6875rem;
   }
+
+  /*
+    Touch targets. Everything here cleared WCAG 2.5.8's 24px floor already,
+    but a 32px month arrow next to a 32px calendar cell is a mis-tap waiting
+    to happen on a thumb. These are the controls a phone visitor actually
+    has to hit.
+  */
+  .cal-nav {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .cal__d {
+    min-height: 2.5rem;
+    font-size: 0.8125rem;
+  }
+  .slot {
+    height: 2.75rem;
+  }
+  .filter-pill {
+    height: 2.5rem;
+  }
+  .socials a,
+  .nav-sheet__close {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .marquee-toggle {
+    padding: 0.5rem 1rem;
+  }
+  /* Footer link columns were an 18px line with a 10px gap — a 28px pitch,
+     which is a coin-flip for a thumb. Padding the rows widens the target
+     without changing the visual rhythm much. */
+  .footer ul {
+    gap: 0.25rem;
+  }
+  .footer ul a {
+    display: inline-block;
+    padding-block: 0.4375rem;
+  }
+  .link-arrow {
+    padding-block: 0.25rem;
+  }
 }
 
 @media (max-width: 479px) {
   .ind {
     grid-template-columns: 1fr;
-  }
-  .hero-stats,
-  .stat-band {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem 1rem;
   }
   .stat__value {
     font-size: clamp(1.5rem, 8vw, 2rem);

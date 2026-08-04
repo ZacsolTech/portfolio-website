@@ -37,26 +37,10 @@ export default async function DemoPage({ params }: Props) {
     <>
       <section className="section section--paper section--after-nav">
         <div className="container">
-          <div
-            style={{
-              display: "grid",
-              gap: "2rem",
-              gridTemplateColumns: "1fr",
-            }}
-            className="demo-layout"
-          >
-            <div
-              className={`thumb ${thumbClass(idx)}`}
-              data-label="Live demo"
-              style={{
-                minHeight: "22rem",
-                borderRadius: "var(--r-3xl)",
-                background: "var(--ink-950)",
-                border: "1px solid var(--line-on-dark)",
-              }}
-            />
+          <div className="demo-layout">
+            <div className={`thumb demo-layout__stage ${thumbClass(idx)}`} data-label="Live demo" />
 
-            <Panel style={{ padding: "1.75rem" }}>
+            <Panel className="demo-layout__panel">
               <span className="overline">Interactive demo</span>
               <h1 className="d3" style={{ marginTop: "0.75rem" }}>
                 {item.title}
@@ -96,14 +80,6 @@ export default async function DemoPage({ params }: Props) {
             </Panel>
           </div>
         </div>
-        <style>{`
-          @media (min-width: 960px) {
-            .demo-layout {
-              grid-template-columns: 1.2fr 0.9fr !important;
-              align-items: start;
-            }
-          }
-        `}</style>
       </section>
 
       <FinalCta

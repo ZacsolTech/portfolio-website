@@ -13,26 +13,11 @@ export default function ContactPage() {
   return (
     <section className="section section--paper section--after-nav">
       <div className="container">
-        <div
-          style={{
-            display: "grid",
-            gap: "3rem",
-            gridTemplateColumns: "1fr",
-          }}
-          className="contact-grid"
-        >
+        <div className="grid-a grid-a--even">
           <ContactExpectations />
           <ContactForm />
         </div>
       </div>
-      <style>{`
-        @media (min-width: 900px) {
-          .contact-grid {
-            grid-template-columns: 0.95fr 1.15fr !important;
-            align-items: start;
-          }
-        }
-      `}</style>
     </section>
   );
 }

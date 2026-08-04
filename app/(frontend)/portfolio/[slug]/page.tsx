@@ -104,15 +104,11 @@ export default async function CaseStudyPage({ params }: Props) {
                 ] as const
               ).map(([k, v]) => (
                 <PanelRow key={k}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "8rem 1fr",
-                      gap: "1rem",
-                    }}
-                  >
+                  {/* A fixed 8rem label column took half a 320px screen and
+                      left "Stack" wrapping one word per line. Stacks below sm. */}
+                  <div className="meta-row">
                     <span className="overline">{k}</span>
-                    <span style={{ fontWeight: 500 }}>{v}</span>
+                    <span className="meta-row__v">{v}</span>
                   </div>
                 </PanelRow>
               ))}

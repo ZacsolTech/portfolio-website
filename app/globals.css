@@ -52,13 +52,14 @@
   border-color: var(--gold);
 }
 
-/* Fixed pill nav clearance for in-page anchors */
+/* Fixed pill nav clearance for in-page anchors — derived from --nav-space so
+   an anchor lands below the pill at every width, not just at desktop. */
 html {
-  scroll-padding-top: 6.5rem;
+  scroll-padding-top: var(--nav-clear);
 }
 .section[id],
 .page-hero {
-  scroll-margin-top: 6.5rem;
+  scroll-margin-top: var(--nav-clear);
 }
 
 /* Block-level wrappers when a Link owns a card */
@@ -78,12 +79,17 @@ html {
   background: var(--ink-950);
   color: var(--text-on-dark);
   position: relative;
-  overflow: hidden;
-  padding-block: 9.5rem 0;
+  overflow: clip;
+  padding-block: calc(var(--nav-space) + 2.25rem) 0;
+}
+@media (min-width: 640px) {
+  .hero {
+    padding-block: calc(var(--nav-space) + 4rem) 0;
+  }
 }
 @media (min-width: 1024px) {
   .hero {
-    padding-block: 11.5rem 0;
+    padding-block: calc(var(--nav-space) + 4.75rem) 0;
   }
 }
 .hero::before {
@@ -209,6 +215,136 @@ html {
     grid-template-columns: auto 1fr auto;
     align-items: center;
   }
+}
+
+/* ---- Service index row (/services) ---- */
+.svc-row {
+  display: grid;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  align-items: center;
+  gap: 0.875rem 1rem;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "icon title arrow"
+    "body body  body";
+}
+@media (min-width: 768px) {
+  /* The icon and arrow span both rows, so the blurb sits under the title
+     inside the same column rather than beneath the whole row. */
+  .svc-row {
+    gap: 0.5rem 1.25rem;
+    grid-template-areas:
+      "icon title arrow"
+      "icon body  arrow";
+  }
+}
+.svc-row__icon { grid-area: icon; }
+.svc-row__title { grid-area: title; margin: 0; min-width: 0; }
+.svc-row__arrow { grid-area: arrow; color: var(--text-muted); flex: none; }
+.svc-row__body { grid-area: body; min-width: 0; }
+.svc-row__body p { margin: 0; max-width: 42rem; }
+.svc-row__body .chips { margin-top: 0.875rem; }
+
+/* ---- Label / value meta row (case-study facts) ---- */
+.meta-row {
+  display: grid;
+  gap: 0.3125rem;
+  min-width: 0;
+}
+.meta-row__v {
+  font-weight: 500;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 640px) {
+  .meta-row {
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: baseline;
+  }
+}
+
+/* ---- Interactive demo page (/demos/[slug]) ---- */
+.demo-layout {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 1024px) {
+  .demo-layout {
+    grid-template-columns: 1.2fr 0.9fr;
+    align-items: start;
+  }
+}
+.demo-layout > * { min-width: 0; }
+.demo-layout__stage {
+  height: auto;
+  /* Was a flat 22rem, which is more than half the screen on a short phone. */
+  min-height: min(22rem, 62vw);
+  border-radius: var(--r-3xl);
+  background: var(--ink-950);
+  border: 1px solid var(--line-on-dark);
+}
+@media (min-width: 640px) {
+  .demo-layout__stage { min-height: 22rem; }
+}
+.demo-layout__panel { padding: 1.25rem; }
+@media (min-width: 640px) {
+  .demo-layout__panel { padding: 1.75rem; }
+}
+
+/* ---- Insights index: featured card + newsletter band ---- */
+.insights-featured {
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+}
+.insights-featured > * { min-width: 0; }
+.insights-featured .card__img { height: 14rem; }
+@media (min-width: 640px) {
+  .insights-featured .card__body { padding: 2rem; }
+}
+@media (min-width: 1024px) {
+  .insights-featured { grid-template-columns: 1.1fr 1fr; }
+  .insights-featured .card__img { height: 100%; min-height: 18rem; }
+}
+
+.insights-news {
+  margin-top: 4rem;
+  border-radius: var(--r-2xl);
+  padding: 1.5rem;
+}
+@media (min-width: 640px) {
+  .insights-news { padding: 2.5rem; }
+}
+.insights-news__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  max-width: 28rem;
+}
+.insights-news__field {
+  flex: 1 1 14rem;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.insights-news__input {
+  height: 2.75rem;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-on-dark);
+  color: #fff;
+  padding-inline: 1.25rem;
+  width: 100%;
+}
+.insights-news__input::placeholder { color: rgba(255, 255, 255, 0.4); }
+@media (max-width: 639px) {
+  .insights-news__form { flex-direction: column; align-items: stretch; }
+  .insights-news__form .btn { width: 100%; }
 }
 
 .grid-2 {
@@ -557,12 +693,12 @@ a.ind__c,
 }
 
 .sticky-col {
-  position: sticky;
-  top: 7rem;
+  position: static;
 }
-@media (max-width: 1023px) {
+@media (min-width: 1024px) {
   .sticky-col {
-    position: static;
+    position: sticky;
+    top: var(--nav-clear);
   }
 }
 
@@ -727,12 +863,17 @@ a.ind__c,
   background: var(--ink-950);
   color: var(--text-on-dark);
   position: relative;
-  overflow: hidden;
-  padding-block: 7.5rem 4rem;
+  overflow: clip;
+  padding-block: calc(var(--nav-space) + 1.75rem) 3rem;
+}
+@media (min-width: 640px) {
+  .consultant-page {
+    padding-block: calc(var(--nav-space) + 2.25rem) 4rem;
+  }
 }
 @media (min-width: 1024px) {
   .consultant-page {
-    padding-block: 9rem 5rem;
+    padding-block: calc(var(--nav-space) + 2.25rem) 5rem;
   }
 }
 .consultant-page::before {
@@ -755,7 +896,7 @@ a.ind__c,
 @media (min-width: 1100px) {
   .consultant-aside {
     position: sticky;
-    top: 7rem;
+    top: var(--nav-clear);
   }
 }
 .aside-card {
@@ -865,9 +1006,6 @@ a.ind__c,
     padding-block: 0.875rem;
     text-align: center;
   }
-  .hero {
-    padding-block: 6.25rem 0;
-  }
   .hero h1 {
     font-size: clamp(2.1rem, 9vw, 2.6rem);
     line-height: 1.08;
@@ -900,12 +1038,10 @@ a.ind__c,
   }
 }
 
-/* Very small phones — keep multi-col bands readable */
+/* Very small phones — the pill needs the millimetre back. The stat bands used
+   to collapse to one column here, which turned four short figures into four
+   full-width rows; two columns reads better and costs half the height. */
 @media (max-width: 379px) {
-  .hero-stats,
-  .stat-band {
-    grid-template-columns: 1fr;
-  }
   .nav {
     padding-left: 0.75rem;
   }
@@ -1482,13 +1618,6 @@ a.ind__c,
   font-size: 1.5rem;
 }
 .book-done__when { margin: 0.5rem 0 1rem; }
-
-@media (min-width: 960px) {
-  .book-grid {
-    grid-template-columns: 0.95fr 1.15fr;
-    align-items: start;
-  }
-}
 
 /* ---- Estimator: optional capture on the result screen ---- */
 .est-capture {
