@@ -1,5 +1,7 @@
+import { ArrowRight } from "lucide-react";
 import { Reveal, RevealGroup } from "@/components/motion/reveal";
 import { Card, IconTile, LinkArrow } from "@/components/ui";
+import { ZacLink } from "@/components/zac/zac-link";
 import { zac } from "@/lib/content/zac";
 import { Icon } from "./icon";
 import { sectionClass, type Surface } from "./surface";
@@ -16,6 +18,8 @@ const tools = [
     href: "/tools/estimator",
     cta: "Estimate my project",
     meta: "≈2 min · no email",
+    /** Opens the dock in place rather than sending them to the tool page. */
+    seed: "pricing",
   },
   {
     icon: "Sparkles",
@@ -24,6 +28,7 @@ const tools = [
     href: "/portfolio",
     cta: "Open the demos",
     meta: "Interactive · no signup",
+    seed: null,
   },
 ] as const;
 
@@ -49,7 +54,14 @@ export function Toolkit({ surface = "paper" }: { surface?: Surface }) {
                 <h3 className="d4 tool-card__title">{tool.title}</h3>
                 <p className="body-sm">{tool.body}</p>
                 <div className="tool-card__foot">
-                  <LinkArrow href={tool.href}>{tool.cta}</LinkArrow>
+                  {tool.seed ? (
+                    <ZacLink seed={tool.seed} className="link-arrow">
+                      {tool.cta}
+                      <ArrowRight aria-hidden />
+                    </ZacLink>
+                  ) : (
+                    <LinkArrow href={tool.href}>{tool.cta}</LinkArrow>
+                  )}
                   <span className="tool-card__meta">{tool.meta}</span>
                 </div>
               </Card>

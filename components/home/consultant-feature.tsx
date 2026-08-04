@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Reveal } from "@/components/motion/reveal";
 import { consultantSteps } from "@/lib/content";
+import { ZacLink } from "@/components/zac/zac-link";
 import { zac } from "@/lib/content/zac";
 import { sectionClass, type Surface } from "./surface";
 
@@ -26,9 +27,9 @@ export function ConsultantFeature({ surface = "ink" }: { surface?: Surface }) {
               — whether or not you hire us.
             </p>
             <div className="btn-row" style={{ marginTop: "2.25rem" }}>
-              <Link href="/consultant" className="btn btn--gold">
+              <ZacLink seed="roadmap" className="btn btn--gold">
                 {zac.consultant.ctaTry}
-              </Link>
+              </ZacLink>
               <Link href="/book" className="btn btn--outline-dark">
                 Talk to a human instead
               </Link>

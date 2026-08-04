@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { ZacLink } from "@/components/zac/zac-link";
 import { zac } from "@/lib/content/zac";
 
 const STEPS = [
@@ -67,9 +68,9 @@ export function FinalCta({
           ) : null}
 
           <div className="btn-row final-cta__actions">
-            <Link href="/consultant" className="btn btn--gold btn--lg">
+            <ZacLink seed="roadmap" className="btn btn--gold btn--lg">
               {zac.consultant.ctaLong}
-            </Link>
+            </ZacLink>
             <Link
               href="/book"
               className={cn("btn btn--lg", onInk ? "btn--outline-dark" : "btn--ink")}

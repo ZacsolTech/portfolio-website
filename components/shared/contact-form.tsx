@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { Turnstile, useTurnstile } from "@/components/shared/turnstile";
 import { Check, Field, Input, Panel, Select, Textarea } from "@/components/ui";
 import { contactExpectations, services, site } from "@/lib/content";
+import { ZacLink } from "@/components/zac/zac-link";
 import { zac } from "@/lib/content/zac";
 import { readAttribution } from "@/lib/leads/attribution";
 
@@ -64,9 +65,9 @@ export function ContactForm() {
 			<Panel className="contact-panel" style={{ padding: "1.75rem" }}>
 				<p className="body-sm" style={{ margin: "0 0 1.25rem" }}>
 					In a hurry?{" "}
-					<Link href="/consultant" className="link-u">
+					<ZacLink seed="contact" className="link-u">
 						{zac.consultant.name} answers in three minutes
-					</Link>
+					</ZacLink>
 					.
 				</p>
 

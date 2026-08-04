@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
+import { ZacLink } from "@/components/zac/zac-link";
 import { contactExpectations } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 
@@ -50,9 +51,9 @@ export default function ThankYouPage() {
         </div>
 
         <div className="btn-row" style={{ justifyContent: "center", marginTop: "2.75rem" }}>
-          <Link href="/consultant" className="btn btn--gold btn--lg">
+          <ZacLink seed="roadmap" className="btn btn--gold btn--lg">
             While you wait: ask ZAC
-          </Link>
+          </ZacLink>
           <Link href="/" className="btn btn--outline-dark btn--lg">
             Back home
           </Link>

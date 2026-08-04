@@ -180,7 +180,7 @@ export const EstimatorChatTurnSchema = z.object({
   reply: z.string().min(1).max(1500),
   slots: EstimatorSlotsSchema.default({}),
   wantsEstimate: z.boolean().default(false),
-  suggestions: z.array(z.string().min(1).max(48)).max(4).default([]),
+  suggestions: z.array(z.string().min(1).max(48)).max(2).default([]),
 });
 
 export type EstimatorChatTurn = z.infer<typeof EstimatorChatTurnSchema>;

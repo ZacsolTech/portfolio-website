@@ -56,13 +56,25 @@ export default async function CaseStudyPage({ params }: Props) {
           </>
         }
         ctas={
+          /* A case study is a "could you build me that?" moment, so the CTA
+             goes to cost rather than to a generic greeting. */
           item.interactive
             ? [
                 { href: `/demos/${item.slug}`, label: "Try the live demo", variant: "gold" },
-                { href: "/consultant", label: "Ask ZAC", variant: "outline-dark" },
+                {
+                  href: "/tools/estimator",
+                  label: "What would this cost?",
+                  variant: "outline-dark",
+                  zac: { seed: `like.${item.slug}` },
+                },
               ]
             : [
-                { href: "/consultant", label: "Ask ZAC", variant: "gold" },
+                {
+                  href: "/tools/estimator",
+                  label: "What would this cost?",
+                  variant: "gold",
+                  zac: { seed: `like.${item.slug}` },
+                },
                 { href: "/book", label: "Book a consultation", variant: "outline-dark" },
               ]
         }

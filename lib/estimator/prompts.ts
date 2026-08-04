@@ -52,7 +52,7 @@ These are NOT blocking. Do not run a checklist through them. Anything unanswered
 - \`reply\`: your next chat message.
 - \`slots\`: everything you can now justify from the conversation, using the exact enum values listed above.
 - \`wantsEstimate\`: true ONLY when their latest message explicitly asks to see the estimate/cost/number now. A plain "yes" or "ok" answering YOUR question is an answer, not a request — set false.
-- \`suggestions\`: up to 3 short tappable answers (max 40 chars) for the question you just asked, when it has natural discrete answers.
+- \`suggestions\`: exactly 2 short tappable answers (max 40 chars) for the question you just asked, when it has natural discrete answers. Omit for open-ended questions.
 
 Return ONLY JSON matching the schema.`;
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FinalCta } from "@/components/layout/final-cta";
 import { Chip, Panel } from "@/components/ui";
+import { ZacLink } from "@/components/zac/zac-link";
 import { getPortfolioItem, portfolio } from "@/lib/content";
 import { pageMetadata, thumbClass } from "@/lib/seo";
 
@@ -85,9 +86,9 @@ export default async function DemoPage({ params }: Props) {
               </p>
 
               <div className="btn-row" style={{ marginTop: "2rem" }}>
-                <Link href="/consultant" className="btn btn--gold">
+                <ZacLink seed={`like.${item.slug}`} className="btn btn--gold">
                   Want this for your business?
-                </Link>
+                </ZacLink>
                 <Link href={`/portfolio/${item.slug}`} className="btn btn--ink">
                   Full case study
                 </Link>

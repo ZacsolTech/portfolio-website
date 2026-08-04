@@ -46,6 +46,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
+  /* The ZAC sheet puts a composer at the bottom of the screen. Without this
+     the on-screen keyboard overlays it instead of shrinking the viewport, and
+     you type into a field you cannot see. */
+  interactiveWidget: "resizes-content",
 };
 
 export const metadata: Metadata = {

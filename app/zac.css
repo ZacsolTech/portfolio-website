@@ -1,0 +1,823 @@
+/* ==========================================================================
+   ZAC dock — the assistant's primary surface
+   --------------------------------------------------------------------------
+   Right-hand slide-over on desktop, bottom sheet on mobile. The desktop panel
+   is deliberately non-modal: no scrim, no scroll lock, no focus trap. A
+   visitor scoping a project on a service page has to be able to keep reading
+   that page, which is the whole reason the dock exists instead of a
+   destination route.
+   ========================================================================== */
+
+.zac-launcher {
+  position: fixed;
+  z-index: 60;
+  right: max(1.25rem, env(safe-area-inset-right, 0px));
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  height: 3.25rem;
+  padding-inline: 1.125rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  background: var(--gold);
+  color: var(--gold-on);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 12px 32px rgba(var(--accent-rgb), 0.36);
+  /* Held back until it is wanted — see useLauncherVisible in zac-dock.tsx. */
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 0.24s var(--ease),
+    transform 0.24s var(--ease);
+}
+.zac-launcher[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.zac-launcher[data-visible="true"]:hover {
+  transform: translateY(-2px);
+}
+.zac-launcher:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.zac-launcher__label {
+  display: none;
+}
+@media (min-width: 640px) {
+  .zac-launcher__label {
+    display: inline;
+  }
+}
+@media (max-width: 639px) {
+  .zac-launcher {
+    width: 3.25rem;
+    padding-inline: 0;
+    justify-content: center;
+  }
+}
+
+/* A reply that landed while the dock was closed. */
+.zac-launcher__dot {
+  position: absolute;
+  top: -0.125rem;
+  right: -0.125rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--warn);
+  border: 2px solid var(--paper);
+}
+
+/* -------------------------------- the dock -------------------------------- */
+
+.zac-dock {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: flex;
+  justify-content: flex-end;
+  /* The container never eats clicks; only the panel and the mobile scrim do. */
+  pointer-events: none;
+}
+
+.zac-dock__scrim {
+  display: none;
+}
+
+.zac-dock__panel {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--paper);
+  color: var(--text-ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-panel);
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    transform 0.3s var(--ease),
+    opacity 0.2s var(--ease),
+    visibility 0s linear 0.3s;
+}
+.zac-dock[data-open="true"] .zac-dock__panel {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition:
+    transform 0.32s var(--ease),
+    opacity 0.2s var(--ease);
+}
+.zac-dock__panel:focus {
+  outline: none;
+}
+.zac-dock__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 84% -6%,
+    rgba(var(--accent-rgb), 0.13),
+    transparent 46%
+  );
+}
+.zac-dock__panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Desktop: a floating card, in the same language as the consoles elsewhere. */
+@media (min-width: 720px) {
+  .zac-dock {
+    padding: 1rem;
+  }
+  .zac-dock__panel {
+    width: min(27rem, calc(100vw - 2rem));
+    height: calc(100dvh - 2rem);
+    border-radius: var(--r-3xl);
+    transform: translateX(calc(100% + 1.5rem));
+  }
+}
+
+/* Mobile: a bottom sheet, and the only case where the dock is modal. */
+@media (max-width: 719px) {
+  .zac-dock {
+    align-items: flex-end;
+  }
+  .zac-dock__panel {
+    width: 100%;
+    height: 88dvh;
+    border-radius: var(--r-3xl) var(--r-3xl) 0 0;
+    border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateY(100%);
+  }
+  .zac-dock__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s var(--ease);
+  }
+  .zac-dock[data-open="true"] .zac-dock__scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Only the modal sheet locks the page behind it. */
+body.zac-locked {
+  overflow: hidden;
+}
+
+.zac-dock__grip {
+  display: none;
+}
+@media (max-width: 719px) {
+  .zac-dock__grip {
+    display: block;
+    flex: none;
+    width: 2.25rem;
+    height: 0.25rem;
+    margin: 0.625rem auto 0;
+    border-radius: var(--r-pill);
+    background: var(--line-strong);
+  }
+}
+
+/* --------------------------------- header --------------------------------- */
+
+.zac-dock__head {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex: none;
+  min-width: 0;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+.zac-dock__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-ink);
+}
+.zac-dock__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zac-dock__actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.25rem;
+  flex: none;
+}
+.zac-dock__icon {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease);
+}
+.zac-dock__icon:hover {
+  background: var(--nav-link-hover);
+  color: var(--text-ink);
+}
+.zac-dock__icon:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+/* ------------------------------ mode switcher ----------------------------- */
+
+.zac-dock__modes {
+  display: flex;
+  gap: 0.25rem;
+  flex: none;
+  margin: 0.875rem 1rem 0;
+  padding: 0.25rem;
+  border-radius: var(--r-pill);
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+}
+.zac-dock__mode {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.18s var(--ease),
+    color 0.18s var(--ease);
+}
+.zac-dock__mode:hover {
+  color: var(--text-ink);
+}
+.zac-dock__mode[data-active="true"] {
+  background: var(--gold);
+  color: var(--gold-on);
+}
+.zac-dock__mode:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.zac-dock__purpose {
+  flex: none;
+  margin: 0.625rem 1rem 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ---------------------------------- body ---------------------------------- */
+
+.zac-dock__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.875rem 1rem 1rem;
+}
+.zac-dock__pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* Beats the rule above, which would otherwise defeat the UA's `[hidden]`. */
+.zac-dock__pane[hidden] {
+  display: none;
+}
+
+.zac-dock__skeleton {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+}
+
+/*
+  The widget's own body inside the dock. In `chat` the composer stays pinned to
+  the bottom and only the transcript scrolls; a blueprint or an estimate is a
+  document, so it scrolls as one.
+*/
+.zac-pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.zac-pane[data-phase="chat"] {
+  overflow: hidden;
+}
+.zac-pane[data-phase="document"] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-ink) 35%, transparent)
+    color-mix(in srgb, var(--text-ink) 8%, transparent);
+}
+/*
+  Dock chat: the thread (intake + messages + replies + CTA) scrolls as one unit
+  so the composer stays pinned and never gets clipped out of the panel.
+*/
+.zac-pane__thread--page {
+  display: contents;
+}
+.zac-pane[data-phase="chat"] > .zac-pane__thread {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-ink) 35%, transparent)
+    color-mix(in srgb, var(--text-ink) 8%, transparent);
+}
+.zac-pane[data-phase="chat"] > .zac-pane__thread .chat--pane {
+  /* Grow to fill spare room; never shrink below the transcript (thread scrolls). */
+  flex: 1 0 auto;
+  height: auto;
+  min-height: 8rem;
+  max-height: none;
+  overflow: visible;
+  scrollbar-gutter: auto;
+}
+/* Short threads still sit at the bottom of the visible thread area. */
+.zac-pane[data-phase="chat"] > .zac-pane__thread .chat__inner {
+  min-height: 100%;
+}
+.zac-pane .chat--pane {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+.zac-pane .composer {
+  flex: none;
+  margin-top: 0;
+  padding-top: 0.875rem;
+  background: var(--paper);
+  position: relative;
+  z-index: 1;
+}
+.zac-pane .replies,
+.zac-pane .intake,
+.zac-pane .consultant-cta {
+  flex: none;
+}
+/* Four actions do not fit side by side in a 27rem panel. */
+.zac-pane .btn-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+.zac-pane .btn-row .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Answers carried across by an estimator → consultant handoff. */
+.zac-carried {
+  margin: 0 0 1rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--gold-line);
+  background: var(--gold-fill);
+  color: var(--accent-fg);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   Full-page surface — an app shell rather than a centred box
+   ========================================================================== */
+
+.container--narrow {
+  max-width: 54rem;
+}
+
+.consultant-page--app {
+  --zac-page-top: 6.5rem;
+  display: flex;
+  min-height: 100dvh;
+  padding-block: var(--zac-page-top) 2.5rem;
+}
+@media (min-width: 1024px) {
+  .consultant-page--app {
+    --zac-page-top: 7.5rem;
+  }
+}
+.consultant-page--app > .container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.consultant-page__head {
+  flex: none;
+  max-width: 46rem;
+  margin-bottom: 1.75rem;
+}
+.consultant-page__head .d3 {
+  margin-top: 0.75rem;
+  color: #fff;
+}
+.consultant-page__sub {
+  margin-top: 0.75rem;
+  max-width: 40rem;
+  color: var(--text-on-dark-body);
+}
+.consultant-page__foot {
+  flex: none;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+.consultant-page__foot .link-u {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.consultant-page--app .consultant-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+@media (min-width: 1100px) {
+  .consultant-page--app .consultant-layout {
+    align-items: stretch;
+  }
+}
+
+.console--app {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.console__body--app {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/*
+  Chat fills the shell and pins its composer; a generated document is allowed
+  to run past the fold and scroll with the page, which is where a long
+  blueprint belongs — squeezing it into a chat-sized box was the original
+  complaint.
+*/
+.console--app[data-phase="chat"] .chat--pane {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 12rem;
+}
+
+/*
+  Below the two-column breakpoint the explanatory rail stacks underneath, so a
+  viewport-height console would push it entirely off screen. Give the chat a
+  generous share instead and let the page scroll.
+*/
+@media (max-width: 1099px) {
+  .consultant-page--app {
+    min-height: 0;
+  }
+  .console--app[data-phase="chat"] .chat--pane {
+    flex: none;
+    height: min(32rem, 56dvh);
+  }
+}
+
+/*
+  Dock follows the site theme. Shared AI surface styles (chat, composer, gate,
+  estimate) assume a zinc console, so light mode needs a scoped restyle here.
+  Full-page `/consultant` and `/tools/estimator` keep their dark consoles.
+*/
+[data-theme="light"] .zac-dock__panel .chat--pane {
+  scrollbar-color: color-mix(in srgb, var(--text-ink) 28%, transparent)
+    color-mix(in srgb, var(--text-ink) 8%, transparent);
+}
+[data-theme="light"] .zac-dock__panel .chat--pane::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--text-ink) 8%, transparent);
+}
+[data-theme="light"] .zac-dock__panel .chat--pane::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-ink) 28%, transparent);
+}
+[data-theme="light"] .zac-dock__panel .chat--pane::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-ink) 42%, transparent);
+}
+
+[data-theme="light"] .zac-dock__panel .msg--user .msg__avatar {
+  background: var(--paper-alt);
+  color: var(--text-muted);
+  border-color: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .msg--bot .msg__bubble {
+  background: var(--paper-alt);
+  border-color: var(--line);
+  color: var(--text-body);
+}
+[data-theme="light"] .zac-dock__panel .typing span {
+  background: color-mix(in srgb, var(--text-ink) 45%, transparent);
+}
+
+[data-theme="light"] .zac-dock__panel .reply {
+  border-color: var(--line-strong);
+  background: var(--white);
+  color: var(--text-body);
+}
+[data-theme="light"] .zac-dock__panel .reply:hover {
+  background: var(--gold);
+  color: var(--gold-on);
+  border-color: var(--gold);
+}
+
+[data-theme="light"] .zac-dock__panel .composer {
+  border-top-color: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .composer textarea {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .composer textarea::placeholder {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .composer textarea:focus {
+  border-color: var(--gold);
+  background: var(--white);
+}
+
+[data-theme="light"] .zac-dock__panel .opt {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-body);
+}
+[data-theme="light"] .zac-dock__panel .opt:hover {
+  background: var(--paper-alt);
+  border-color: var(--line-strong);
+}
+[data-theme="light"] .zac-dock__panel .opt[aria-pressed="true"] {
+  border-color: var(--gold);
+  background: var(--gold-fill);
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .opt__key {
+  background: var(--paper-alt);
+  color: var(--text-muted);
+}
+
+[data-theme="light"] .zac-dock__panel .bp-row {
+  border-bottom-color: var(--line-soft);
+}
+[data-theme="light"] .zac-dock__panel .bp-row__k,
+[data-theme="light"] .zac-dock__panel .tl__wk,
+[data-theme="light"] .zac-dock__panel .est__h,
+[data-theme="light"] .zac-dock__panel .est__table thead th {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .bp-row__v,
+[data-theme="light"] .zac-dock__panel .est__band,
+[data-theme="light"] .zac-dock__panel .est__table td:last-child,
+[data-theme="light"] .zac-dock__panel .gate__title,
+[data-theme="light"] .zac-dock__panel .consultant-cta__recap dd {
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .feat span {
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .feat--muted span {
+  background: var(--paper-alt);
+  border-color: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .bp-why,
+[data-theme="light"] .zac-dock__panel .tl__name,
+[data-theme="light"] .zac-dock__panel .est__narrative,
+[data-theme="light"] .zac-dock__panel .est__table,
+[data-theme="light"] .zac-dock__panel .consultant-cta__note {
+  color: var(--text-body);
+}
+[data-theme="light"] .zac-dock__panel .bp-list,
+[data-theme="light"] .zac-dock__panel .est__list,
+[data-theme="light"] .zac-dock__panel .est__table td,
+[data-theme="light"] .zac-dock__panel .gate__copy {
+  color: var(--text-muted);
+}
+
+[data-theme="light"] .zac-dock__panel .gate__panel {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--paper) 0%, transparent) 0%,
+    color-mix(in srgb, var(--paper) 88%, transparent) 22%,
+    var(--paper) 52%
+  );
+}
+[data-theme="light"] .zac-dock__panel .gate__fine {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .gate__field {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .gate__field::placeholder {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .gate__field:focus {
+  border-color: var(--gold);
+  background: var(--white);
+}
+
+[data-theme="light"] .zac-dock__panel .bp-source {
+  color: var(--accent-fg);
+}
+[data-theme="light"] .zac-dock__panel .bp-source--fallback {
+  color: #a16207;
+}
+
+[data-theme="light"] .zac-dock__panel .intake__bar {
+  background: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .intake__slots {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .intake__slots li {
+  color: var(--text-muted);
+  background: var(--paper-alt);
+  border-color: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .intake__slots li.is-filled {
+  color: var(--text-ink);
+  background: var(--gold-fill);
+  border-color: var(--gold-line);
+}
+[data-theme="light"] .zac-dock__panel .intake__tick {
+  color: color-mix(in srgb, var(--text-ink) 28%, transparent);
+}
+[data-theme="light"] .zac-dock__panel .intake__slots li.is-filled .intake__tick {
+  color: var(--accent-fg);
+}
+[data-theme="light"] .zac-dock__panel .intake__value,
+[data-theme="light"] .zac-dock__panel .intake__slots li.is-filled .intake__value {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .intake__value::before {
+  color: var(--line-strong);
+}
+
+[data-theme="light"] .zac-dock__panel .consultant-cta--soft {
+  background: var(--paper-alt);
+  border-color: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .consultant-cta__note {
+  color: var(--text-body);
+}
+[data-theme="light"] .zac-dock__panel .consultant-cta__recap dt {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .consultant-cta__recap dd {
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .consultant-error {
+  color: #b91c1c;
+  background: var(--warn-fill);
+  border-color: var(--warn-line);
+}
+[data-theme="light"] .zac-dock__panel .consultant-generating__title {
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .consultant-generating__note {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .consultant-generating__bar {
+  background: var(--line);
+}
+
+[data-theme="light"] .zac-dock__panel .est__meta {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .est__meta span + span::before {
+  background: var(--line-strong);
+}
+[data-theme="light"] .zac-dock__panel .est__confidence,
+[data-theme="light"] .zac-dock__panel .est__inputs li,
+[data-theme="light"] .zac-dock__panel .est__narrative,
+[data-theme="light"] .zac-dock__panel .est__drivers li {
+  background: var(--paper-alt);
+  border-color: var(--line);
+  color: var(--text-body);
+}
+[data-theme="light"] .zac-dock__panel .est__confidence {
+  border: 1px solid var(--line);
+}
+[data-theme="light"] .zac-dock__panel .est__confidence-bar {
+  background: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .est__confidence-label {
+  color: var(--text-body);
+}
+[data-theme="light"] .zac-dock__panel .est__inputs li {
+  border: 1px solid var(--line);
+}
+[data-theme="light"] .zac-dock__panel .est__table thead th {
+  border-bottom-color: var(--line);
+}
+[data-theme="light"] .zac-dock__panel .est__table tbody tr {
+  border-bottom-color: var(--line-soft);
+}
+[data-theme="light"] .zac-dock__panel .est__eff--down {
+  color: #15803d;
+}
+[data-theme="light"] .zac-dock__panel .est__list--no li::before {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .est__list--risk li::before {
+  color: #a16207;
+}
+[data-theme="light"] .zac-dock__panel .est__basis,
+[data-theme="light"] .zac-dock__panel .est__fine {
+  color: var(--text-muted);
+}
+
+[data-theme="light"] .zac-dock__panel .levers__title {
+  color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .levers__note,
+[data-theme="light"] .zac-dock__panel .lever > label {
+  color: var(--text-muted);
+}
+[data-theme="light"] .zac-dock__panel .lever select {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-ink);
+}
+
+[data-theme="light"] .zac-dock__panel .btn--outline-dark {
+  color: var(--text-ink);
+  border-color: var(--line-strong);
+}
+[data-theme="light"] .zac-dock__panel .btn--outline-dark:hover {
+  background: var(--paper-alt);
+  border-color: var(--text-ink);
+}
+[data-theme="light"] .zac-dock__panel .link-u {
+  color: var(--text-body);
+  text-decoration-color: color-mix(in srgb, var(--text-ink) 25%, transparent);
+}
+
+[data-theme="light"] .zac-dock__panel .wiz-step {
+  background: var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zac-launcher,
+  .zac-dock__panel,
+  .zac-dock__scrim,
+  .zac-dock__mode,
+  .zac-dock__icon {
+    transition: none;
+  }
+  .zac-launcher[data-visible="true"]:hover {
+    transform: none;
+  }
+}

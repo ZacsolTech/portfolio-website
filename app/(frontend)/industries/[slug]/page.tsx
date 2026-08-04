@@ -73,6 +73,7 @@ export default async function IndustryDetailPage({ params }: Props) {
             href: "/consultant",
             label: `Describe your ${industry.name.toLowerCase()} problem`,
             variant: "gold",
+            zac: { seed: `industry.${industry.slug}` },
           },
           { href: "/book", label: "Book a consultation", variant: "outline-dark" },
         ]}

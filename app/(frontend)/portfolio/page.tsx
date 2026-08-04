@@ -33,7 +33,7 @@ export default async function PortfolioPage() {
         }
         lead="Case studies with real metrics — and interactive demos that prove the AI claims aren't marketing."
         ctas={[
-          { href: "/consultant", label: "Ask ZAC", variant: "gold" },
+          { href: "/consultant", label: "Ask ZAC", variant: "gold", zac: {} },
           { href: "/contact", label: "Start a project", variant: "outline-dark" },
         ]}
       />

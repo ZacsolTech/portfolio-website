@@ -23,6 +23,8 @@ import {
   type ConsultantSession,
 } from "@/lib/ai/session";
 import { mergeSlots, slotProgress, slotsComplete } from "@/lib/ai/slots";
+import { loadEstimatorSession } from "@/lib/estimator/session";
+import { estimatorToConsultant } from "@/lib/zac/handoff";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -80,10 +82,24 @@ const ResetBody = z.object({
   sessionId: SessionId,
 });
 
+/**
+ * Carry a finished estimate into a fresh consultation.
+ *
+ * Both ids come from the visitor's own sessionStorage and both sessions are
+ * read server-side — the client sends no slots and no prices, so a crafted
+ * request can only ever hand the visitor their own earlier answers.
+ */
+const HandoffBody = z.object({
+  action: z.literal("handoff"),
+  sessionId: SessionId,
+  fromSessionId: SessionId,
+});
+
 const BodySchema = z.discriminatedUnion("action", [
   ChatBody,
   BlueprintBody,
   GateBody,
+  HandoffBody,
   ResetBody,
 ]);
 
@@ -185,9 +201,48 @@ export async function POST(request: Request) {
       return handleBlueprint(request, body);
     case "gate":
       return handleGate(request, body);
+    case "handoff":
+      return handleHandoff(body);
     case "reset":
       return handleReset(body);
   }
+}
+
+/* --------------------------------- handoff -------------------------------- */
+
+async function handleHandoff(body: z.infer<typeof HandoffBody>) {
+  const estimator = await loadEstimatorSession(body.fromSessionId);
+  if (!estimator) {
+    return json({ error: "That estimate has expired. Start here instead." }, 404);
+  }
+
+  const session = await getOrCreateSession(body.sessionId);
+
+  // A consultation already under way is the visitor's work — never overwrite
+  // it with a replay of an older estimate.
+  if (session.messages.length > 0) {
+    return json({ ok: true, applied: false, ...publicState(session) });
+  }
+
+  const mapped = estimatorToConsultant(
+    estimator.slots,
+    estimator.estimate
+      ? { lowUsd: estimator.estimate.lowUsd, highUsd: estimator.estimate.highUsd }
+      : null,
+  );
+  if (!mapped) {
+    return json({ error: "That estimate didn't capture enough to carry over." }, 409);
+  }
+
+  await saveSession({ ...session, slots: mergeSlots(session.slots, mapped.slots) });
+
+  return json({
+    ok: true,
+    applied: true,
+    prefill: mapped.prefill,
+    carried: mapped.carried,
+    ...publicState({ ...session, slots: mapped.slots }),
+  });
 }
 
 /* ---------------------------------- chat ---------------------------------- */

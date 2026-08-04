@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   SLOT_KEYS,
   SLOT_LABELS,
@@ -11,21 +11,17 @@ import {
   type SlotKey,
   type Slots,
 } from "@/lib/ai/schema";
-import { Console, ConsoleBar, ConsoleBody } from "@/components/ui";
 import { Turnstile, useTurnstile } from "@/components/shared/turnstile";
+import { ZacFrame, type ZacSurface } from "@/components/zac/zac-frame";
 import { zac } from "@/lib/content/zac";
+import { loadSeed, readPageHandoff, readPageSeedId, type ZacSeed } from "@/lib/zac/seeds";
 import { readAttribution } from "@/lib/leads/attribution";
 
 const SESSION_KEY = "zacsol_consultant_session";
+/** The estimator writes its own id here; a handoff reads it back. */
+const ESTIMATOR_SESSION_KEY = "zacsol_estimator_session";
 
 const GREETING = zac.consultant.greeting;
-
-const STARTERS = [
-  "Orders get lost on WhatsApp",
-  "We're drowning in manual data entry",
-  "I have an app idea for field techs",
-  "We have data but no real insight",
-] as const;
 
 type Phase = "chat" | "generating" | "blueprint" | "captured";
 
@@ -97,13 +93,19 @@ function IntakeProgress({ slots, progress }: { slots: Slots; progress: number })
       </div>
       <ul className="intake__slots">
         {SLOT_KEYS.map((key: SlotKey) => {
-          const filled = Boolean(slots[key]);
+          const value = slots[key]?.trim();
+          const filled = Boolean(value);
           return (
             <li key={key} className={filled ? "is-filled" : undefined}>
               <span className="intake__tick" aria-hidden>
                 {filled ? "✓" : "○"}
               </span>
-              {SLOT_LABELS[key]}
+              <span className="intake__label">{SLOT_LABELS[key]}</span>
+              {filled ? (
+                <span className="intake__value" title={value}>
+                  {value!.length > 36 ? `${value!.slice(0, 35).trimEnd()}…` : value}
+                </span>
+              ) : null}
             </li>
           );
         })}
@@ -117,7 +119,7 @@ function GeneratingPanel() {
     <div className="consultant-generating" role="status" aria-live="polite">
       <div className="consultant-generating__orb" aria-hidden />
       <p className="overline overline--gold">Generating</p>
-      <h3 className="d4" style={{ color: "#fff", marginTop: "0.5rem" }}>
+      <h3 className="d4 consultant-generating__title">
         Building your solution roadmap…
       </h3>
       <p className="body-sm consultant-generating__note">
@@ -250,13 +252,81 @@ function BlueprintDetail({ blueprint }: { blueprint: Blueprint }) {
 
 /* ------------------------------- main widget ------------------------------ */
 
-export function ConsultantIntake() {
-  const sessionId = useMemo(() => getOrCreateSessionId(), []);
+export type ConsultantIntakeProps = {
+  /** `page` draws its own console chrome and rail; `dock` sits inside the panel. */
+  surface?: ZacSurface;
+  /** False while the dock is showing the other mode — hidden, but still mounted. */
+  active?: boolean;
+  /** Curated opening message from a contextual entry point. */
+  seed?: ZacSeed | null;
+  /** Changes whenever a new seed is delivered, even if the text repeats. */
+  seedToken?: number;
+  onSeedConsumed?: () => void;
+  /** Set when arriving from the estimator, so we carry its answers over. */
+  handoff?: { token: number } | null;
+  onHandoffConsumed?: () => void;
+  /** Fired when a reply lands, so a closed dock can flag it. */
+  onReply?: () => void;
+};
+
+export function ConsultantIntake({
+  surface = "page",
+  active = true,
+  seed: seedProp = null,
+  seedToken: seedTokenProp = 0,
+  onSeedConsumed,
+  handoff: handoffProp = null,
+  onHandoffConsumed,
+  onReply,
+}: ConsultantIntakeProps = {}) {
+  /*
+    On the full page there is no provider feeding props, so the widget reads
+    the same `?seed=` / `?from=` contract itself. Doing it here rather than in
+    the route's `searchParams` keeps `/consultant` statically rendered.
+  */
+  const [urlSeed, setUrlSeed] = useState<ZacSeed | null>(null);
+  const [urlHandoff, setUrlHandoff] = useState<{ token: number } | null>(null);
+
+  useEffect(() => {
+    if (surface !== "page") return;
+    let cancelled = false;
+
+    // A frame late so the URL read lands after hydration rather than during it.
+    const frame = window.requestAnimationFrame(() => {
+      if (readPageHandoff() === "estimator") setUrlHandoff({ token: 1 });
+
+      const id = readPageSeedId();
+      if (!id) return;
+
+      void loadSeed(id).then((resolved) => {
+        if (cancelled || !resolved || resolved.mode !== "consultant") return;
+        setUrlSeed(resolved);
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+    };
+  }, [surface]);
+
+  const seed = seedProp ?? urlSeed;
+  const seedToken = seedProp ? seedTokenProp : urlSeed ? 1 : 0;
+  const handoff = handoffProp ?? urlHandoff;
+
+  const [sessionId, setSessionId] = useState(getOrCreateSessionId);
 
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const booted = useRef(false);
+  /*
+    Read from effects that must not re-run when the transcript grows: a seed
+    arriving mid-conversation has to know whether the visitor has already
+    spoken, and `messages` in the dependency list would refire on every token.
+  */
+  const userTurnsRef = useRef(0);
+  const seedApplied = useRef(-1);
+  const handoffApplied = useRef(-1);
 
   const [phase, setPhase] = useState<Phase>("chat");
   const [messages, setMessages] = useState<UiMsg[]>([]);
@@ -283,6 +353,8 @@ export function ConsultantIntake() {
   const [doneMessage, setDoneMessage] = useState("");
   const [roadmapUrl, setRoadmapUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /** Labels for what a handoff carried over, acknowledged above the chat. */
+  const [carried, setCarried] = useState<string[]>([]);
 
   const turnstile = useTurnstile();
 
@@ -302,12 +374,23 @@ export function ConsultantIntake() {
     return () => window.cancelAnimationFrame(id);
   }, [messages, typing, suggestions, scrollChat]);
 
+  /* A hidden pane has no layout, so its scroll position is meaningless until
+     it is shown again. Re-pin to the latest message on the way back. */
+  useEffect(() => {
+    if (!active) return;
+    const id = window.requestAnimationFrame(() => scrollChat(true));
+    return () => window.cancelAnimationFrame(id);
+  }, [active, scrollChat]);
+
   /* --------------------------- session restore --------------------------- */
 
+  /*
+    Session restore is keyed on `sessionId` alone. Do not gate this with a
+    "already booted" ref — React Strict Mode runs setup → cleanup → setup, and
+    a latch that survives the cleanup leaves `restoring` stuck at true, which
+    permanently disables the composer (`disabled={busy || restoring}`).
+  */
   useEffect(() => {
-    if (booted.current) return;
-    booted.current = true;
-
     let cancelled = false;
 
     (async () => {
@@ -331,6 +414,7 @@ export function ConsultantIntake() {
 
           if (data.messages.length > 0) {
             restored = true;
+            userTurnsRef.current = data.messages.filter((m) => m.role === "user").length;
             setMessages(
               data.messages.map((m) => ({
                 id: newId(),
@@ -367,13 +451,6 @@ export function ConsultantIntake() {
         setMessages([{ id: newId(), who: "bot", text: GREETING }]);
       }
       setRestoring(false);
-
-      // Deep links like /consultant#our-orders-get-lost prefill the composer.
-      const hash = decodeURIComponent(window.location.hash.slice(1));
-      if (hash.length >= 8 && !restored) {
-        setText(hash.replace(/[-+]/g, " "));
-        window.setTimeout(() => inputRef.current?.focus(), 120);
-      }
     })();
 
     return () => {
@@ -432,6 +509,7 @@ export function ConsultantIntake() {
       setText("");
       setSuggestions([]);
       setMessages((prev) => [...prev, { id: newId(), who: "user", text: content }]);
+      userTurnsRef.current += 1;
       window.requestAnimationFrame(() => scrollChat(true));
       setTyping(true);
 
@@ -524,6 +602,7 @@ export function ConsultantIntake() {
         setProgress(done.progress);
         setComplete(done.complete);
         setSuggestions(done.suggestions ?? []);
+        onReply?.();
 
         if (done.wantsBlueprint) {
           void generateBlueprint();
@@ -539,8 +618,107 @@ export function ConsultantIntake() {
         inputRef.current?.focus();
       }
     },
-    [busy, phase, sessionId, scrollChat, generateBlueprint],
+    [busy, phase, sessionId, scrollChat, generateBlueprint, onReply],
   );
+
+  /* -------------------------- seeds and handoff -------------------------- */
+
+  /**
+   * A contextual entry point ("Ask ZAC about AI automation") delivers an
+   * opening message. Curated seeds send themselves; anything the visitor typed
+   * only ever prefills the composer — see lib/zac/seeds for why that line
+   * matters. Either way a seed is ignored once the conversation has started:
+   * a second link should bring the panel forward, not restart someone's work.
+   */
+  useEffect(() => {
+    if (!seed || restoring) return;
+    if (seedApplied.current === seedToken) return;
+    seedApplied.current = seedToken;
+
+    if (userTurnsRef.current > 0 || phase !== "chat") {
+      onSeedConsumed?.();
+      return;
+    }
+
+    /*
+      Deferred out of the effect body: sending is an action against the API,
+      not state synchronisation, and starting a stream mid-effect would cascade
+      renders through the transcript.
+    */
+    const frame = window.requestAnimationFrame(() => {
+      if (seed.autoSend) {
+        void sendMessage(seed.text);
+      } else {
+        setText(seed.text);
+        inputRef.current?.focus();
+      }
+      onSeedConsumed?.();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [seed, seedToken, restoring, phase, sendMessage, onSeedConsumed]);
+
+  /**
+   * Arriving from the estimator. The server maps that session's answers onto
+   * this one and writes the opening message, so the visitor is not asked to
+   * describe the same project twice.
+   */
+  useEffect(() => {
+    if (!handoff || restoring) return;
+    if (handoffApplied.current === handoff.token) return;
+    handoffApplied.current = handoff.token;
+
+    if (userTurnsRef.current > 0) {
+      onHandoffConsumed?.();
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      let fromSessionId: string | null = null;
+      try {
+        fromSessionId = sessionStorage.getItem(ESTIMATOR_SESSION_KEY);
+      } catch {
+        // Storage disabled — nothing to carry, so just start fresh.
+      }
+      if (!fromSessionId) {
+        onHandoffConsumed?.();
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/consultant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "handoff", sessionId, fromSessionId }),
+        });
+        const data = (await res.json()) as {
+          applied?: boolean;
+          prefill?: string;
+          carried?: string[];
+          slots?: Slots;
+          progress?: number;
+        };
+        if (cancelled) return;
+
+        if (res.ok && data.applied && data.prefill) {
+          setCarried(data.carried ?? []);
+          setSlots(data.slots ?? {});
+          setProgress(data.progress ?? 0);
+          void sendMessage(data.prefill);
+        }
+      } catch {
+        // An expired estimate is not an error worth surfacing — the greeting
+        // is already on screen and the visitor can just type.
+      } finally {
+        if (!cancelled) onHandoffConsumed?.();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [handoff, restoring, sessionId, sendMessage, onHandoffConsumed]);
 
   /* -------------------------------- gate -------------------------------- */
 
@@ -596,9 +774,44 @@ export function ConsultantIntake() {
       });
       sessionStorage.removeItem(SESSION_KEY);
     } catch {
-      // Reload still gives them a clean slate.
+      // A reload still gives them a clean slate.
     }
-    window.location.href = "/consultant";
+
+    if (surface === "page") {
+      window.location.href = "/consultant";
+      return;
+    }
+
+    /*
+      In the dock a reload would throw away the page the visitor is reading —
+      the one thing this surface exists to protect. Rebuild in place instead:
+      a fresh id re-runs the restore effect, which re-greets.
+    */
+    seedApplied.current = -1;
+    handoffApplied.current = -1;
+    userTurnsRef.current = 0;
+    setPhase("chat");
+    setMessages([]);
+    setTyping(false);
+    setText("");
+    setBusy(false);
+    setRestoring(true);
+    setSlots({});
+    setProgress(0);
+    setComplete(false);
+    setSuggestions([]);
+    setBlueprint(null);
+    setUsedFallback(false);
+    setGateOpen(false);
+    setUnlocked(false);
+    setName("");
+    setEmail("");
+    setEmailed(false);
+    setDoneMessage("");
+    setRoadmapUrl(null);
+    setError(null);
+    setCarried([]);
+    setSessionId(getOrCreateSessionId());
   }
 
   /* ------------------------------ rendering ------------------------------ */
@@ -610,22 +823,28 @@ export function ConsultantIntake() {
         ? `${zac.consultant.consoleTitle} · blueprint`
         : `${zac.consultant.consoleTitle} · chat`;
 
-  const showStarters = messages.length <= 1 && !typing && !busy && !restoring;
   const canSend = text.trim().length >= 2 && !busy;
   const userTurns = messages.filter((m) => m.who === "user").length;
 
-  return (
-    <div className="consultant-layout">
-      <Console>
-        <ConsoleBar title={barTitle} />
-        <ConsoleBody>
+  const body = (
+    <>
+          {carried.length > 0 ? (
+            <p className="zac-carried" role="status">
+              Carried over from your estimate: {carried.join(" · ")}
+            </p>
+          ) : null}
+
           {phase === "chat" ? (
             <>
-              {progress > 0 ? <IntakeProgress slots={slots} progress={progress} /> : null}
+              <div
+                className={surface === "dock" ? "zac-pane__thread" : "zac-pane__thread--page"}
+                ref={surface === "dock" ? chatRef : undefined}
+              >
+              <IntakeProgress slots={slots} progress={progress} />
 
               <div
                 className="chat chat--pane"
-                ref={chatRef}
+                ref={surface === "dock" ? undefined : chatRef}
                 role="log"
                 aria-live="polite"
                 aria-atomic="false"
@@ -648,25 +867,9 @@ export function ConsultantIntake() {
                 </div>
               </div>
 
-              {showStarters ? (
+              {suggestions.length > 0 && !busy && userTurns >= 1 ? (
                 <div className="replies" style={{ marginTop: "1rem" }}>
-                  {STARTERS.map((starter) => (
-                    <button
-                      key={starter}
-                      type="button"
-                      className="reply"
-                      onClick={() => void sendMessage(starter)}
-                      disabled={busy}
-                    >
-                      {starter}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-
-              {suggestions.length > 0 && !busy ? (
-                <div className="replies" style={{ marginTop: "1rem" }}>
-                  {suggestions.map((suggestion) => (
+                  {suggestions.slice(0, 2).map((suggestion) => (
                     <button
                       key={suggestion}
                       type="button"
@@ -723,6 +926,7 @@ export function ConsultantIntake() {
                   </button>
                 </div>
               ) : null}
+              </div>
 
               <form
                 className="composer"
@@ -915,8 +1119,22 @@ export function ConsultantIntake() {
               {error}
             </p>
           ) : null}
-        </ConsoleBody>
-      </Console>
+    </>
+  );
+
+  if (surface === "dock") {
+    return (
+      <ZacFrame surface="dock" title={barTitle} phase={phase}>
+        {body}
+      </ZacFrame>
+    );
+  }
+
+  return (
+    <div className="consultant-layout">
+      <ZacFrame surface="page" title={barTitle} phase={phase}>
+        {body}
+      </ZacFrame>
 
       <aside className="consultant-aside">
         <div className="aside-card">

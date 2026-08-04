@@ -35,7 +35,12 @@ export default async function IndustriesPage() {
         }
         lead="Eight industries where we've shipped. Each page names the leaks we see and the services that close them."
         ctas={[
-          { href: "/consultant", label: "Describe your problem", variant: "gold" },
+          {
+            href: "/consultant",
+            label: "Describe your problem",
+            variant: "gold",
+            zac: { mode: "consultant" },
+          },
           { href: "/portfolio", label: "See the work", variant: "outline-dark" },
         ]}
       />

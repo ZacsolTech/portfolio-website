@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
+import { ZacLink } from "@/components/zac/zac-link";
 import { Reveal } from "@/components/motion/reveal";
 import { ServiceIcon } from "@/components/shared/service-icon";
 import { Chip, IconTile, Panel, PanelRow } from "@/components/ui";
@@ -98,9 +99,9 @@ export default async function ServicesPage() {
             band — before you talk to anyone.
           </p>
           <div className="btn-row" style={{ justifyContent: "center", marginTop: "2rem" }}>
-            <Link href="/consultant" className="btn btn--gold btn--lg">
+            <ZacLink seed="roadmap" className="btn btn--gold btn--lg">
               Start with ZAC
-            </Link>
+            </ZacLink>
           </div>
         </div>
       </section>

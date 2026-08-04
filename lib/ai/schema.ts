@@ -103,7 +103,7 @@ export const ChatTurnSchema = z.object({
   /** Model's own read on whether the visitor just asked to see the blueprint. */
   wantsBlueprint: z.boolean().default(false),
   /** Optional tappable suggestions for the next answer. */
-  suggestions: z.array(z.string().min(1).max(48)).max(4).default([]),
+  suggestions: z.array(z.string().min(1).max(48)).max(2).default([]),
 });
 
 export type ChatTurn = z.infer<typeof ChatTurnSchema>;

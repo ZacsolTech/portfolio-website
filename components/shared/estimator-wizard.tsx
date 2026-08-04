@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Console, ConsoleBar, ConsoleBody } from "@/components/ui";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { priceProject } from "@/lib/estimator/pricing";
 import {
   DESIGN_STATES,
@@ -18,18 +17,13 @@ import {
   type RequiredSlotKey,
 } from "@/lib/estimator/schema";
 import { EstimateCapture } from "@/components/shared/estimate-capture";
+import { ZacFrame, type ZacSurface } from "@/components/zac/zac-frame";
 import { zac } from "@/lib/content/zac";
+import { loadSeed, readPageSeedId, type ZacSeed } from "@/lib/zac/seeds";
 
 const SESSION_KEY = "zacsol_estimator_session";
 
 const GREETING = zac.estimator.greeting;
-
-const STARTERS = [
-  "A booking system for my clinic",
-  "A mobile app for our field team",
-  "Rebuild our outdated web portal",
-  "An internal tool to replace spreadsheets",
-] as const;
 
 type Phase = "chat" | "pricing" | "estimate";
 
@@ -100,13 +94,20 @@ function IntakeProgress({
       </div>
       <ul className="intake__slots">
         {REQUIRED_SLOTS.map((key: RequiredSlotKey) => {
-          const filled = Boolean(slots[key]);
+          const raw = slots[key];
+          const value = typeof raw === "string" ? raw.trim() : raw != null ? String(raw) : "";
+          const filled = Boolean(value);
           return (
             <li key={key} className={filled ? "is-filled" : undefined}>
               <span className="intake__tick" aria-hidden>
                 {filled ? "✓" : "○"}
               </span>
-              {SLOT_LABELS[key]}
+              <span className="intake__label">{SLOT_LABELS[key]}</span>
+              {filled ? (
+                <span className="intake__value" title={value}>
+                  {value.length > 36 ? `${value.slice(0, 35).trimEnd()}…` : value}
+                </span>
+              ) : null}
             </li>
           );
         })}
@@ -120,7 +121,7 @@ function PricingPanel() {
     <div className="consultant-generating" role="status" aria-live="polite">
       <div className="consultant-generating__orb" aria-hidden />
       <p className="overline overline--gold">Pricing</p>
-      <h3 className="d4" style={{ color: "#fff", marginTop: "0.5rem" }}>
+      <h3 className="d4 consultant-generating__title">
         Running the numbers…
       </h3>
       <p className="body-sm consultant-generating__note">
@@ -400,13 +401,58 @@ function EstimateView({
 
 /* ------------------------------- main widget ------------------------------ */
 
-export function EstimatorWizard() {
-  const sessionId = useMemo(() => getOrCreateSessionId(), []);
+export type EstimatorWizardProps = {
+  /** `page` draws its own console chrome; `dock` sits inside the panel. */
+  surface?: ZacSurface;
+  /** False while the dock is showing the other mode — hidden, but still mounted. */
+  active?: boolean;
+  seed?: ZacSeed | null;
+  seedToken?: number;
+  onSeedConsumed?: () => void;
+  onReply?: () => void;
+  /** Estimator → consultant, carrying the priced inputs across. */
+  onRequestRoadmap?: () => void;
+};
+
+export function EstimatorWizard({
+  surface = "page",
+  active = true,
+  seed: seedProp = null,
+  seedToken: seedTokenProp = 0,
+  onSeedConsumed,
+  onReply,
+  onRequestRoadmap,
+}: EstimatorWizardProps = {}) {
+  /* See consultant-intake: read `?seed=` here so the route stays static. */
+  const [urlSeed, setUrlSeed] = useState<ZacSeed | null>(null);
+
+  useEffect(() => {
+    if (surface !== "page") return;
+    const id = readPageSeedId();
+    if (!id) return;
+
+    let cancelled = false;
+    void loadSeed(id).then((resolved) => {
+      if (cancelled || !resolved || resolved.mode !== "estimator") return;
+      setUrlSeed(resolved);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [surface]);
+
+  const seed = seedProp ?? urlSeed;
+  const seedToken = seedProp ? seedTokenProp : urlSeed ? 1 : 0;
+
+  const [sessionId, setSessionId] = useState(getOrCreateSessionId);
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const persistRef = useRef<number | null>(null);
-  const booted = useRef(false);
+  /* See the note in consultant-intake: effects that must not re-run per token. */
+  const userTurnsRef = useRef(0);
+  const seedApplied = useRef(-1);
 
   const [phase, setPhase] = useState<Phase>("chat");
   const [messages, setMessages] = useState<UiMsg[]>([]);
@@ -438,9 +484,20 @@ export function EstimatorWizard() {
     return () => window.cancelAnimationFrame(id);
   }, [messages, typing, suggestions, scrollChat]);
 
+  /* A hidden pane has no layout — re-pin to the latest message when shown. */
   useEffect(() => {
-    if (booted.current) return;
-    booted.current = true;
+    if (!active) return;
+    const id = window.requestAnimationFrame(() => scrollChat(true));
+    return () => window.cancelAnimationFrame(id);
+  }, [active, scrollChat]);
+
+  /*
+    Session restore is keyed on `sessionId` alone. Do not gate this with a
+    "already booted" ref — React Strict Mode runs setup → cleanup → setup, and
+    a latch that survives the cleanup leaves `restoring` stuck at true, which
+    permanently disables the composer (`disabled={busy || restoring}`).
+  */
+  useEffect(() => {
     let cancelled = false;
 
     (async () => {
@@ -456,6 +513,9 @@ export function EstimatorWizard() {
 
           if (Array.isArray(data.messages) && data.messages.length > 0) {
             restored = true;
+            userTurnsRef.current = data.messages.filter(
+              (m: { role: string }) => m.role === "user",
+            ).length;
             setMessages(
               data.messages.map((m: { role: string; content: string }) => ({
                 id: newId(),
@@ -583,6 +643,7 @@ export function EstimatorWizard() {
       setText("");
       setSuggestions([]);
       setMessages((prev) => [...prev, { id: newId(), who: "user", text: content }]);
+      userTurnsRef.current += 1;
       window.requestAnimationFrame(() => scrollChat(true));
       setTyping(true);
 
@@ -672,6 +733,7 @@ export function EstimatorWizard() {
         setProgress(Number(done.progress ?? 0));
         setComplete(Boolean(done.complete));
         setSuggestions((done.suggestions ?? []) as string[]);
+        onReply?.();
 
         if (done.wantsEstimate) void runEstimate();
       } catch (err) {
@@ -685,8 +747,37 @@ export function EstimatorWizard() {
         inputRef.current?.focus();
       }
     },
-    [busy, sessionId, scrollChat, runEstimate],
+    [busy, sessionId, scrollChat, runEstimate, onReply],
   );
+
+  /* Curated seeds send themselves; visitor text only prefills. A seed arriving
+     mid-conversation is ignored — see lib/zac/seeds. */
+  useEffect(() => {
+    if (!seed || restoring) return;
+    if (seedApplied.current === seedToken) return;
+    seedApplied.current = seedToken;
+
+    if (userTurnsRef.current > 0 || phase !== "chat") {
+      onSeedConsumed?.();
+      return;
+    }
+
+    /*
+      Deferred out of the effect body: sending is an action against the API,
+      not state synchronisation, and starting a stream mid-effect would cascade
+      renders through the transcript.
+    */
+    const frame = window.requestAnimationFrame(() => {
+      if (seed.autoSend) {
+        void sendMessage(seed.text);
+      } else {
+        setText(seed.text);
+        inputRef.current?.focus();
+      }
+      onSeedConsumed?.();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [seed, seedToken, restoring, phase, sendMessage, onSeedConsumed]);
 
   async function restart() {
     abortRef.current?.abort();
@@ -698,12 +789,34 @@ export function EstimatorWizard() {
       });
       sessionStorage.removeItem(SESSION_KEY);
     } catch {
-      // Reload still gives a clean slate.
+      // A reload still gives a clean slate.
     }
-    window.location.href = "/tools/estimator";
+
+    if (surface === "page") {
+      window.location.href = "/tools/estimator";
+      return;
+    }
+
+    /* In the dock, rebuild in place rather than reloading the page behind it. */
+    seedApplied.current = -1;
+    userTurnsRef.current = 0;
+    setPhase("chat");
+    setMessages([]);
+    setTyping(false);
+    setText("");
+    setBusy(false);
+    setRestoring(true);
+    setSlots({});
+    setProgress(0);
+    setComplete(false);
+    setSuggestions([]);
+    setEstimate(null);
+    setResolved(null);
+    setOverrides({});
+    setError(null);
+    setSessionId(getOrCreateSessionId());
   }
 
-  const showStarters = messages.length <= 1 && !typing && !busy && !restoring;
   const canSend = text.trim().length >= 2 && !busy;
   const userTurns = messages.filter((m) => m.who === "user").length;
 
@@ -714,17 +827,19 @@ export function EstimatorWizard() {
         ? zac.estimator.consoleTitleResult
         : zac.estimator.consoleTitleChat;
 
-  return (
-    <Console>
-      <ConsoleBar title={barTitle} />
-      <ConsoleBody>
+  const body = (
+    <>
         {phase === "chat" ? (
           <>
-            {progress > 0 ? <IntakeProgress slots={slots} progress={progress} /> : null}
+            <div
+              className={surface === "dock" ? "zac-pane__thread" : "zac-pane__thread--page"}
+              ref={surface === "dock" ? chatRef : undefined}
+            >
+            <IntakeProgress slots={slots} progress={progress} />
 
             <div
               className="chat chat--pane"
-              ref={chatRef}
+              ref={surface === "dock" ? undefined : chatRef}
               role="log"
               aria-live="polite"
               aria-label={zac.estimator.ariaChat}
@@ -746,25 +861,9 @@ export function EstimatorWizard() {
               </div>
             </div>
 
-            {showStarters ? (
+            {suggestions.length > 0 && !busy && userTurns >= 1 ? (
               <div className="replies" style={{ marginTop: "1rem" }}>
-                {STARTERS.map((starter) => (
-                  <button
-                    key={starter}
-                    type="button"
-                    className="reply"
-                    onClick={() => void sendMessage(starter)}
-                    disabled={busy}
-                  >
-                    {starter}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-
-            {suggestions.length > 0 && !busy ? (
-              <div className="replies" style={{ marginTop: "1rem" }}>
-                {suggestions.map((suggestion) => (
+                {suggestions.slice(0, 2).map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
@@ -809,6 +908,7 @@ export function EstimatorWizard() {
                 </button>
               </div>
             ) : null}
+            </div>
 
             <form
               className="composer"
@@ -868,9 +968,24 @@ export function EstimatorWizard() {
             <EstimateCapture sessionId={sessionId} />
 
             <div className="btn-row est__actions">
-              <Link href="/consultant" className="btn btn--gold">
-                Get a full solution roadmap
-              </Link>
+              {/*
+                A handoff, not a link: the consultant picks up the answers this
+                estimate was built from, so nobody describes the same project
+                twice. Falls back to a plain navigation on the full page.
+              */}
+              {onRequestRoadmap ? (
+                <button
+                  type="button"
+                  className="btn btn--gold"
+                  onClick={onRequestRoadmap}
+                >
+                  Turn this into a full roadmap
+                </button>
+              ) : (
+                <Link href="/consultant?from=estimator" className="btn btn--gold">
+                  Turn this into a full roadmap
+                </Link>
+              )}
               <Link href="/book" className="btn btn--outline-dark">
                 Talk it through with an engineer
               </Link>
@@ -896,7 +1011,12 @@ export function EstimatorWizard() {
             {error}
           </p>
         ) : null}
-      </ConsoleBody>
-    </Console>
+    </>
+  );
+
+  return (
+    <ZacFrame surface={surface} title={barTitle} phase={phase}>
+      {body}
+    </ZacFrame>
   );
 }

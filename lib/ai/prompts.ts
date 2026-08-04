@@ -56,7 +56,7 @@ Re-send every slot you have evidence for on every turn, not just newly learned o
 - \`slots\`: everything you now know. scale must be exactly one of: ${SCALE_OPTIONS.join(" | ")}. timeline must be exactly one of: ${TIMELINE_OPTIONS.join(" | ")}. Leave a slot out rather than guessing wildly.
 - \`evidence\`: when you newly fill \`scale\` or \`timeline\`, quote the visitor's own words that told you so — copied exactly from their message, e.g. "about 25 staff use it" or "we need it live as soon as possible". If you cannot copy a real quote, you are guessing: leave BOTH that slot and its evidence out and ask instead. These two fields set the price we quote, and a quote you cannot cite is discarded.
 - \`wantsBlueprint\`: true ONLY when the visitor's latest message is explicitly asking to see, build, or receive the blueprint/roadmap now. A plain "yes", "ok", or "sure" answering YOUR question is NOT a blueprint request — it is an answer, so set false.
-- \`suggestions\`: up to 3 short tappable example answers (max 40 chars) for the question you just asked, when the question has natural discrete answers. Omit for open-ended questions.
+- \`suggestions\`: exactly 2 short tappable example answers (max 40 chars) for the question you just asked, when the question has natural discrete answers. Omit for open-ended questions.
 
 Return ONLY JSON matching the schema.`;
 

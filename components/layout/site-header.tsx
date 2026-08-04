@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo } from "@/components/layout/logo";
+import { ZacLink } from "@/components/zac/zac-link";
 import { isNavActive, mainNav } from "@/lib/nav";
 
 export function SiteHeader() {
@@ -197,9 +198,9 @@ export function SiteHeader() {
             })}
           </nav>
           <div className="nav-sheet__foot">
-            <Link href="/consultant" className="btn btn--gold" onClick={close}>
+            <ZacLink className="btn btn--gold" onClick={close}>
               Ask ZAC
-            </Link>
+            </ZacLink>
             <Link href="/book" className="btn btn--outline-dark" onClick={close}>
               Book a consultation
             </Link>

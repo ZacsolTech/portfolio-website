@@ -208,7 +208,7 @@ function coerceTurn(
       .filter((s): s is string => typeof s === "string")
       .map((s) => s.trim().slice(0, 48))
       .filter(Boolean)
-      .slice(0, 3),
+      .slice(0, 2),
   });
 }
 
@@ -224,19 +224,19 @@ const FALLBACK_QUESTIONS: Record<
   },
   projectType: {
     reply: "What kind of project is it closest to?",
-    suggestions: ["Web app or platform", "Mobile app", "Internal tool"],
+    suggestions: ["Web app or platform", "Mobile app"],
   },
   platform: {
     reply: "Where does it need to run?",
-    suggestions: ["Web", "Mobile", "Web + mobile"],
+    suggestions: ["Web", "Mobile"],
   },
   scope: {
     reply: "Are we talking about a first version, or the full product?",
-    suggestions: ["MVP — smallest thing that works", "Full product", "Add to an existing system"],
+    suggestions: ["MVP — smallest thing that works", "Full product"],
   },
   timeline: {
     reply: "And how soon do you need it live?",
-    suggestions: ["As soon as possible", "This quarter", "Next 6 months"],
+    suggestions: ["As soon as possible", "This quarter"],
   },
 };
 

@@ -286,6 +286,12 @@ h1, h2, h3, h4 {
   --gold-fill: rgba(187, 253, 106, 0.16);
   --gold-line: rgba(187, 253, 106, 0.30);
 }
+/* Dock follows the site theme; only force lime accents when the panel is dark. */
+[data-theme="dark"] .zac-dock__panel {
+  --accent-fg: #BBFD6A;
+  --gold-fill: rgba(187, 253, 106, 0.16);
+  --gold-line: rgba(187, 253, 106, 0.30);
+}
 
 /* Prose measure */
 .measure { max-width: 62ch; }
@@ -603,7 +609,8 @@ h1, h2, h3, h4 {
 .badge--dark { background: rgba(255,255,255,0.06); border-color: var(--line-on-dark); color: rgba(255,255,255,0.8); }
 /* Lime pill on zinc/console */
 .on-dark .badge--gold,
-.console .badge--gold {
+.console .badge--gold,
+[data-theme="dark"] .zac-dock__panel .badge--gold {
   background: rgba(var(--accent-rgb), 0.16);
   border-color: rgba(var(--accent-rgb), 0.4);
   color: var(--accent);
@@ -1369,16 +1376,36 @@ body.nav-open { overflow: hidden; }
   background: var(--gold); transition: width 0.5s var(--ease);
 }
 .intake__slots {
-  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+  display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem;
   margin: 0.75rem 0 0; padding: 0; list-style: none;
-  font-family: var(--font-mono); font-size: 0.625rem;
-  text-transform: uppercase; letter-spacing: 0.12em;
-  color: rgba(255,255,255,0.35);
+  font-family: var(--font-body); font-size: 0.75rem; line-height: 1.35;
+  color: rgba(255,255,255,0.42);
 }
-.intake__slots li { display: flex; align-items: center; gap: 0.375rem; }
-.intake__slots li.is-filled { color: rgba(255,255,255,0.72); }
-.intake__tick { color: rgba(255,255,255,0.25); }
+.intake__slots li {
+  display: inline-flex; align-items: baseline; gap: 0.35rem;
+  max-width: 100%; min-width: 0;
+  padding: 0.25rem 0.5rem 0.25rem 0.375rem;
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.intake__slots li.is-filled {
+  color: rgba(255,255,255,0.88);
+  background: rgba(var(--accent-rgb), 0.10);
+  border-color: rgba(var(--accent-rgb), 0.28);
+}
+.intake__tick {
+  flex: none; color: rgba(255,255,255,0.28);
+  font-size: 0.6875rem; line-height: 1;
+}
 .intake__slots li.is-filled .intake__tick { color: var(--gold); }
+.intake__label { flex: none; font-weight: 500; }
+.intake__value {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: rgba(255,255,255,0.55); font-weight: 400;
+}
+.intake__value::before { content: "·"; margin-right: 0.35rem; color: rgba(255,255,255,0.28); }
+.intake__slots li.is-filled .intake__value { color: rgba(255,255,255,0.72); }
 
 /* Streaming caret on the bubble currently being written */
 .caret {
@@ -1427,6 +1454,10 @@ body.nav-open { overflow: hidden; }
 
 /* Generating panel */
 .consultant-generating { text-align: center; padding: 2.5rem 1rem; }
+.consultant-generating__title {
+  color: #fff;
+  margin-top: 0.5rem;
+}
 .consultant-generating__note { color: rgba(255,255,255,0.62); margin-top: 0.5rem; }
 .consultant-generating__orb {
   width: 3rem; height: 3rem; margin: 0 auto 1.25rem; border-radius: 50%;
@@ -1659,23 +1690,8 @@ body.nav-open { overflow: hidden; }
   .est--stale { transition: none; }
 }
 
-/* ---- AI consultant float ---- */
-.ai-float {
-  position: fixed; z-index: 60;
-  display: flex; align-items: center; gap: 0.625rem;
-  height: 3.25rem; padding-inline: 1.125rem; border-radius: var(--r-pill);
-  background: var(--gold); color: var(--gold-on); font-weight: 600; font-size: 0.875rem;
-  box-shadow: 0 12px 32px rgba(var(--accent-rgb), 0.36);
-  transition: transform 0.2s var(--ease);
-  right: max(1.25rem, env(safe-area-inset-right, 0px));
-  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
-}
-.ai-float:hover { transform: translateY(-2px); }
-.ai-float span { display: none; }
-@media (min-width: 640px) { .ai-float span { display: inline; } }
-@media (max-width: 639px) {
-  .ai-float { width: 3.25rem; height: 3.25rem; padding-inline: 0; justify-content: center; }
-}
+/* The floating link that used to live here became a launcher for the ZAC
+   dock — see the "ZAC dock" block near the end of this file. */
 
 /* ---- Booking calendar (Book a Consultation) ---- */
 .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.25rem; }

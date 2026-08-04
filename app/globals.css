@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./tokens.css";
+@import "./zac.css";
 
 /* Map design tokens into Tailwind v4 @theme */
 @theme inline {
@@ -1342,7 +1343,8 @@ a.ind__c,
   .nav-wrap,
   .nav-sheet,
   .footer,
-  .ai-float,
+  .zac-launcher,
+  .zac-dock,
   .preview-banner,
   .doc__actions,
   .doc-cta__actions {

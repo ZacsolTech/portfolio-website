@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Panel } from "@/components/ui";
+import { ZacLink } from "@/components/zac/zac-link";
 
 /**
  * Reschedule or cancel from the link in the confirmation email.
@@ -70,9 +71,7 @@ export function BookingManage({ token, booking }: { token: string; booking: Book
 					<Link href="/book" className="btn btn--gold">
 						Book another time
 					</Link>
-					<Link href="/consultant" className="btn btn--ghost">
-						Try ZAC Consultant instead
-					</Link>
+					<ZacLink className="btn btn--ghost">Try ZAC Consultant instead</ZacLink>
 				</div>
 			</Panel>
 		);

@@ -1,10 +1,18 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { ZacLink } from "@/components/zac/zac-link";
+import type { ZacMode } from "@/lib/zac/modes";
 
 export type PageHeroCta = {
   href: string;
   label: string;
   variant?: "gold" | "outline-dark" | "ink" | "ghost";
+  /**
+   * Turns the CTA into a ZAC entry point: same anchor, same href, but the
+   * click opens the dock in place instead of leaving the page. `seed` is a
+   * registry id from lib/zac/seeds.
+   */
+  zac?: { mode?: ZacMode; seed?: string };
 };
 
 export type PageHeroCrumb = {
@@ -80,15 +88,26 @@ export function PageHero({
 
         {ctas && ctas.length > 0 ? (
           <div className="btn-row">
-            {ctas.map((cta) => (
-              <Link
-                key={`${cta.href}-${cta.label}`}
-                href={cta.href}
-                className={ctaClassName(cta.variant)}
-              >
-                {cta.label}
-              </Link>
-            ))}
+            {ctas.map((cta) =>
+              cta.zac ? (
+                <ZacLink
+                  key={`${cta.href}-${cta.label}`}
+                  mode={cta.zac.mode}
+                  seed={cta.zac.seed}
+                  className={ctaClassName(cta.variant)}
+                >
+                  {cta.label}
+                </ZacLink>
+              ) : (
+                <Link
+                  key={`${cta.href}-${cta.label}`}
+                  href={cta.href}
+                  className={ctaClassName(cta.variant)}
+                >
+                  {cta.label}
+                </Link>
+              ),
+            )}
           </div>
         ) : null}
 

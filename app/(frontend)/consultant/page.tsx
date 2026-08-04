@@ -9,10 +9,9 @@ const ConsultantIntake = dynamic(
   {
     loading: () => (
       <div
-        className="console"
+        className="console console--app"
         aria-busy="true"
         aria-label={zac.consultant.ariaLoading}
-        style={{ minHeight: "28rem" }}
       />
     ),
   },
@@ -32,26 +31,35 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
+/**
+ * The focus-mode surface for ZAC Consultant.
+ *
+ * Most conversations happen in the dock, on whatever page prompted them. This
+ * route is the search landing page, the "open full view" target, and the
+ * no-JS fallback every ZacLink points at — so it reads the same `seed` and
+ * `from` contract the dock does.
+ */
 export default function ConsultantPage() {
   return (
-    <div className="consultant-page on-dark">
+    <div className="consultant-page consultant-page--app on-dark">
       <div className="container">
-        <header style={{ textAlign: "center", maxWidth: "44rem", margin: "0 auto 3rem" }}>
+        <header className="consultant-page__head">
           <span className="overline overline--gold">{zac.consultant.name}</span>
-          <h1 className="d2" style={{ marginTop: "1rem", color: "#fff" }}>
+          <h1 className="d3">
             Most agencies ask for your budget.{" "}
             <span className="em-serif">We ask what&apos;s broken.</span>
           </h1>
-          <p
-            className="lead"
-            style={{ margin: "1.25rem auto 0", color: "var(--text-on-dark-body)", maxWidth: "36rem" }}
-          >
-            Describe the bottleneck in a conversation. Get a solution roadmap on screen — then
-            decide whether you want the PDF or a human conversation.
+          <p className="body-sm consultant-page__sub">
+            Describe the bottleneck in a conversation. Get a solution roadmap on screen —
+            then decide whether you want the PDF or a human conversation.
           </p>
         </header>
 
-        <ConsultantIntake />
+        {/* `seed` and `from` are read from the URL inside the widget, in the
+            browser. Touching `searchParams` here would opt this keyword
+            landing page out of static rendering for a query string that most
+            visits never carry. */}
+        <ConsultantIntake surface="page" />
       </div>
     </div>
   );

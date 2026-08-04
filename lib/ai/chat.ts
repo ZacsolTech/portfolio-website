@@ -169,7 +169,7 @@ function coerceTurn(
     .filter((s): s is string => typeof s === "string")
     .map((s) => s.trim().slice(0, 48))
     .filter(Boolean)
-    .slice(0, 3);
+    .slice(0, 2);
 
   const evidenceRaw = (raw.evidence ?? {}) as Record<string, unknown>;
   const verified = context.allowInference
@@ -236,19 +236,19 @@ const FALLBACK_QUESTIONS: Record<SlotKey, { reply: string; suggestions: string[]
   },
   industry: {
     reply: "Got it. What kind of business is this for?",
-    suggestions: ["Retail", "Logistics", "Healthcare"],
+    suggestions: ["Retail", "Logistics"],
   },
   current: {
     reply: "How does that work today — manually, spreadsheets, or some tool you've outgrown?",
-    suggestions: ["Manual / paper", "Spreadsheets", "An off-the-shelf tool"],
+    suggestions: ["Manual / paper", "Spreadsheets"],
   },
   scale: {
     reply: "Roughly how many people would end up using this?",
-    suggestions: [...SCALE_OPTIONS.slice(0, 3)],
+    suggestions: [...SCALE_OPTIONS.slice(0, 2)],
   },
   timeline: {
     reply: "And how soon do you need it live?",
-    suggestions: [...TIMELINE_OPTIONS.slice(0, 3)],
+    suggestions: [...TIMELINE_OPTIONS.slice(0, 2)],
   },
 };
 

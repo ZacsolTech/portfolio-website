@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
+import { ZacLink } from "@/components/zac/zac-link";
 import { Reveal } from "@/components/motion/reveal";
 import { FaqList } from "@/components/shared/faq-list";
 import { ServiceIcon } from "@/components/shared/service-icon";
@@ -265,9 +266,20 @@ export default async function ServiceDetailPage({ params }: Props) {
               <p className="body-sm" style={{ marginTop: "1rem", maxWidth: "22rem" }}>
                 Not sure this is the right service? Ask ZAC.
               </p>
-              <Link href="/consultant" className="link-u" style={{ display: "inline-block", marginTop: "1rem" }}>
-                Ask ZAC →
-              </Link>
+              <ZacLink
+                seed={`service.${service.slug}`}
+                className="link-u"
+                style={{ display: "inline-block", marginTop: "1rem" }}
+              >
+                Ask ZAC about {service.shortTitle.toLowerCase()} →
+              </ZacLink>
+              <ZacLink
+                seed={`cost.${service.slug}`}
+                className="link-u"
+                style={{ display: "block", marginTop: "0.5rem" }}
+              >
+                Or get a cost range →
+              </ZacLink>
             </div>
             <FaqList items={service.faqs} />
           </div>

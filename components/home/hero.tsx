@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Badge, Console, ConsoleBar, ConsoleBody, LiveDot } from "@/components/ui";
+import { ZacLink } from "@/components/zac/zac-link";
+import { useZac } from "@/components/zac/zac-provider";
 import { heroStats } from "@/lib/content";
 import { zac } from "@/lib/content/zac";
 
@@ -27,15 +28,6 @@ const QUICK_REPLIES = [
   },
 ] as const;
 
-function goToConsultant(router: ReturnType<typeof useRouter>, seed: string) {
-  const trimmed = seed.trim();
-  if (!trimmed) {
-    router.push("/consultant");
-    return;
-  }
-  router.push(`/consultant#${encodeURIComponent(trimmed)}`);
-}
-
 /**
  * Deliberately not wrapped in <Reveal>. The h1 is the LCP element; gating it
  * behind hydration + IntersectionObserver meant the fold stayed blank until
@@ -43,16 +35,31 @@ function goToConsultant(router: ReturnType<typeof useRouter>, seed: string) {
  * so the text is paintable from the server HTML.
  */
 export function Hero() {
-  const router = useRouter();
+  const { openZac } = useZac();
   const [seed, setSeed] = useState("");
+
+  /**
+   * The hero console is a mock-up; submitting it opens the real ZAC and sends
+   * what they typed (or the chip they picked). That Send is their gesture —
+   * unlike a URL-carried free-text seed, which only ever prefills.
+   */
+  function start(text: string) {
+    const trimmed = text.trim();
+    if (trimmed.length < 2) {
+      openZac({ mode: "consultant", source: "hero" });
+      return;
+    }
+    openZac({ mode: "consultant", text: trimmed, autoSend: true, source: "hero" });
+    setSeed("");
+  }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    goToConsultant(router, seed);
+    start(seed);
   }
 
   return (
-    <section className="hero on-dark" aria-labelledby="hero-title">
+    <section className="hero on-dark" aria-labelledby="hero-title" data-zac-hero>
       <div className="hero__grain" aria-hidden />
       <div
         className="blob blob--gold"
@@ -81,10 +88,10 @@ export function Hero() {
               features it needs, a timeline and a cost range. Free, and in about three minutes.
             </p>
             <div className="btn-row">
-              <Link href="/consultant" className="btn btn--gold">
+              <ZacLink seed="roadmap" className="btn btn--gold">
                 {zac.consultant.ctaLong}
                 <ArrowRight aria-hidden />
-              </Link>
+              </ZacLink>
               <Link href="/book" className="btn btn--outline-dark">
                 Book a consultation
               </Link>
@@ -118,7 +125,7 @@ export function Hero() {
                         key={reply.label}
                         type="button"
                         className="reply"
-                        onClick={() => goToConsultant(router, reply.seed)}
+                        onClick={() => start(reply.seed)}
                       >
                         {reply.label}
                       </button>

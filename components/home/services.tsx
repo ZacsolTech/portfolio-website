@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Reveal, RevealGroup } from "@/components/motion/reveal";
 import { Card, CardNum, CardTop, Chip, IconTile } from "@/components/ui";
 import { services } from "@/lib/content";
+import { ZacLink } from "@/components/zac/zac-link";
 import { zac } from "@/lib/content/zac";
 import { Icon } from "./icon";
 import { sectionClass, type Surface } from "./surface";
@@ -65,9 +66,9 @@ export function Services({ surface = "paper-alt" }: { surface?: Surface }) {
                 Describe the problem instead of the solution. {zac.consultant.name} maps it to the
                 right line.
               </p>
-              <Link href="/consultant" className="btn btn--gold btn--sm card--invert__cta">
+              <ZacLink className="btn btn--gold btn--sm card--invert__cta">
                 {zac.consultant.cta}
-              </Link>
+              </ZacLink>
             </Card>
           </Reveal>
         </RevealGroup>
