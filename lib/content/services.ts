@@ -24,48 +24,52 @@ export const services: Service[] = [
     title: "Web development",
     shortTitle: "Web development",
     blurb:
-      "Dashboards, portals, marketplaces and platforms that stay fast as data and team size grow.",
+      "Full-stack web apps, CMS sites and admin portals — MERN, Django, PHP or WordPress, chosen for your product and your team.",
     icon: "Monitor",
-    tech: ["Next.js", "React", "TypeScript"],
+    tech: ["MERN", "DJANGO", "PHP", "WORDPRESS"],
     included: [
-      "Product architecture and information architecture",
-      "Responsive UI on a shared design system",
-      "API design, auth and role-based access",
-      "Performance budgets and Core Web Vitals targets",
-      "CI, staging environments and one-command rollback",
-      "Handover docs, decision records and a recorded walkthrough",
+      "Stack recommendation with clear tradeoffs (MERN, Django, PHP or WordPress)",
+      "Responsive UI built for conversion, clarity and mobile-first use",
+      "Secure auth, roles, APIs and integrations with tools you already run",
+      "Performance tuning, SEO foundations and Core Web Vitals targets",
+      "Staging, CI and a deployment path your team can repeat safely",
+      "Handover docs, admin training and a recorded walkthrough",
     ],
     stackGroups: [
-      { label: "Frontend", items: ["Next.js", "React", "TypeScript", "Tailwind"] },
-      { label: "Backend", items: ["Node.js", "PostgreSQL", "Redis"] },
-      { label: "Delivery", items: ["Vercel", "GitHub Actions", "Playwright"] },
+      { label: "JavaScript", items: ["MongoDB", "Express", "React", "Node.js"] },
+      { label: "Python & PHP", items: ["Django", "PHP", "Laravel-ready patterns"] },
+      { label: "CMS", items: ["WordPress", "custom themes", "headless options"] },
     ],
     process: [
       {
-        title: "Map the product",
-        body: "Users, workflows and the bottleneck — not a feature wishlist.",
+        title: "Choose the right stack",
+        body: "MERN for rich apps, Django for structured backends, PHP or WordPress when content and speed-to-market win — written before build.",
       },
       {
         title: "Ship a thin vertical",
-        body: "One real path end to end on staging within the first two weeks.",
+        body: "One real user path live on staging within the first two weeks.",
       },
       {
         title: "Harden and grow",
-        body: "Auth, performance, accessibility and the next surface areas in priority order.",
+        body: "Security, SEO, performance and the next surfaces in priority order.",
       },
       {
         title: "Hand over clean",
-        body: "Runbook, observability and a team that can extend it without us.",
+        body: "Runbook, hosting access and a team that can extend it without us.",
       },
     ],
     faqs: [
       {
-        q: "Do you rebuild existing sites or only greenfield?",
-        a: "Both. A large share of our work is stabilising and extending products already in production — after a one-week audit that tells you what's salvageable.",
+        q: "MERN, Django, PHP or WordPress — how do you decide?",
+        a: "By product shape, not preference. Rich dashboards and SPAs lean MERN; data-heavy backends lean Django; marketing and content sites often win on WordPress or PHP. We recommend in writing during discovery.",
       },
       {
-        q: "How do you keep dashboards fast as data grows?",
-        a: "Server-side data access, indexed queries, caching where it earns its keep, and performance budgets checked in CI — not a late optimisation pass.",
+        q: "Can you rebuild or extend an existing site?",
+        a: "Yes. Much of our work is stabilising production products — after a short audit that tells you what to keep, rewrite or retire.",
+      },
+      {
+        q: "Will the site be SEO-ready?",
+        a: "Yes. Clean URLs, metadata, sitemap/robots, performance budgets and structured content are part of delivery — not a bolt-on later.",
       },
     ],
     engagement: [
@@ -75,7 +79,7 @@ export const services: Service[] = [
     ],
     seo: {
       description:
-        "Web applications, portals and platforms built with Next.js and TypeScript — senior engineers, weekly deployables, clean handover.",
+        "Web development with MERN, Django, PHP and WordPress — fast apps, CMS sites and portals with SEO foundations and clean handover.",
     },
   },
   {
@@ -83,30 +87,30 @@ export const services: Service[] = [
     title: "Mobile app development",
     shortTitle: "Mobile apps",
     blurb:
-      "Native-feel iOS and Android from one codebase — and we ship it through both stores for you.",
+      "iOS and Android apps that feel native — React Native, Flutter, PWA, Swift or Kotlin, shipped through both stores.",
     icon: "Smartphone",
-    tech: ["React Native", "Flutter", "PWA"],
+    tech: ["React Native", "Flutter", "PWA", "SWIFT", "KOTLIN"],
     included: [
-      "Platform choice with honest tradeoffs (RN, Flutter or PWA)",
-      "Native-feel navigation, offline and push where needed",
-      "Shared design system across web and mobile when both exist",
-      "Store listing, review and release pipeline for iOS and Android",
+      "Platform choice with honest tradeoffs (React Native, Flutter, PWA, Swift or Kotlin)",
+      "Native-feel navigation, offline support and push notifications where needed",
+      "Shared design language across web and mobile when both exist",
+      "App Store and Google Play listing, review handling and release pipeline",
       "Crash reporting, analytics and staged rollouts",
       "Handover docs and a release runbook your team can own",
     ],
     stackGroups: [
-      { label: "Apps", items: ["React Native", "Flutter", "Expo", "PWA"] },
-      { label: "Native", items: ["Swift", "Kotlin bridges when required"] },
-      { label: "Backend", items: ["Node.js", "PostgreSQL", "Push services"] },
+      { label: "Cross-platform", items: ["React Native", "Flutter", "Expo", "PWA"] },
+      { label: "Native", items: ["Swift", "Kotlin"] },
+      { label: "Backend", items: ["Node.js", "PostgreSQL", "push services"] },
     ],
     process: [
       {
         title: "Pick the right shell",
-        body: "Native feel vs reach vs cost — written down before a line of UI ships.",
+        body: "Cross-platform reach vs native depth vs PWA speed — documented before UI work starts.",
       },
       {
         title: "Core loops first",
-        body: "The three screens users live in, wired to real data on TestFlight / internal tracks.",
+        body: "The screens users live in, wired to real data on TestFlight and internal Android tracks.",
       },
       {
         title: "Store-ready polish",
@@ -119,12 +123,16 @@ export const services: Service[] = [
     ],
     faqs: [
       {
-        q: "React Native or Flutter?",
-        a: "Whichever matches your team and existing stack. We recommend in writing during discovery — not by default.",
+        q: "React Native, Flutter, PWA or fully native?",
+        a: "Whichever matches your timeline, team and product. We recommend in writing during discovery — not by default. Swift and Kotlin when native APIs or performance demand it.",
       },
       {
         q: "Do you handle App Store and Play review?",
         a: "Yes. Listings, compliance screenshots, review responses and the first production release are part of the build.",
+      },
+      {
+        q: "Can one codebase serve both stores?",
+        a: "Usually yes with React Native or Flutter. When a feature needs deep native work, we bridge with Swift or Kotlin without rewriting the whole app.",
       },
     ],
     engagement: [
@@ -134,7 +142,7 @@ export const services: Service[] = [
     ],
     seo: {
       description:
-        "iOS and Android apps with React Native or Flutter — store shipping, staged rollouts and a handover your team can run.",
+        "Mobile app development with React Native, Flutter, PWA, Swift and Kotlin — store shipping, staged rollouts and team handover.",
     },
   },
   {
@@ -142,21 +150,21 @@ export const services: Service[] = [
     title: "AI automation",
     shortTitle: "AI automation",
     blurb:
-      "Assistants, document processing and retrieval — each scoped to a measurable hour or rupee saved.",
+      "Chatbots, RAG assistants and agent workflows — wired through n8n or Zapier and scoped to hours or cost you can measure.",
     icon: "Sparkles",
-    tech: ["LLM pipelines", "RAG", "Agents"],
+    tech: ["LLM pipelines", "RAG", "Agents", "N8N", "ZAPIER", "CHATBOT"],
     included: [
-      "Use-case scoping against a measurable saving before build",
-      "Retrieval, tools and guardrails — not a chat widget bolted on",
-      "Evaluation set and regression checks for answer quality",
-      "Human escalation paths with context attached",
-      "Observability: cost, latency, deflection and failure modes",
-      "Runbook so your team can update knowledge without us",
+      "Use-case scoping against a measurable saving before any model work",
+      "RAG over your docs, tools and guardrails — not a generic chat widget",
+      "Custom chatbots and agents with human escalation paths",
+      "n8n or Zapier orchestration into the apps your team already uses",
+      "Evaluation sets, cost/latency monitoring and failure alerts",
+      "Runbook so your team can update knowledge and flows without us",
     ],
     stackGroups: [
-      { label: "Models", items: ["Gemini", "Claude", "OpenAI"] },
-      { label: "Orchestration", items: ["LangChain", "structured outputs", "agents"] },
-      { label: "Data", items: ["pgvector", "embeddings", "document stores"] },
+      { label: "Intelligence", items: ["LLM pipelines", "RAG", "agents", "chatbots"] },
+      { label: "Orchestration", items: ["n8n", "Zapier", "webhooks", "APIs"] },
+      { label: "Data", items: ["embeddings", "vector stores", "document stores"] },
     ],
     process: [
       {
@@ -168,8 +176,8 @@ export const services: Service[] = [
         body: "Retrieval over your real docs, with evaluation cases from day one.",
       },
       {
-        title: "Ship with guardrails",
-        body: "Escalation, audit logs and cost caps before anyone trusts it with customers.",
+        title: "Wire into operations",
+        body: "n8n or Zapier connects the assistant to CRM, email, tickets and the tools people already open.",
       },
       {
         title: "Measure and tighten",
@@ -179,7 +187,11 @@ export const services: Service[] = [
     faqs: [
       {
         q: "Will you just wrap ChatGPT for us?",
-        a: "No. The consultant on this site is our own work — retrieval, evaluation and guardrails. We scope every feature to a measurable saving first.",
+        a: "No. We build retrieval, agents, evaluation and guardrails — then connect them with n8n or Zapier so the answer reaches the right system, not only a chat box.",
+      },
+      {
+        q: "n8n or Zapier?",
+        a: "Zapier when you want speed and SaaS connectors. n8n when you need self-hosted control, complex branching or lower volume cost. We pick for fit during discovery.",
       },
       {
         q: "What if our data isn't ready?",
@@ -193,7 +205,70 @@ export const services: Service[] = [
     ],
     seo: {
       description:
-        "AI assistants, RAG and document automation scoped to measurable savings — with evaluation, guardrails and clean handover.",
+        "AI automation with LLM pipelines, RAG, agents and chatbots — orchestrated via n8n or Zapier, scoped to measurable savings.",
+    },
+  },
+  {
+    slug: "content-automation",
+    title: "Content automation",
+    shortTitle: "Content automation",
+    blurb:
+      "From brief to published video — n8n workflows with HeyGen, Higgsfield and Veo-3 so your team ships more without the grind.",
+    icon: "Clapperboard",
+    tech: ["N8N", "HEYGEN", "HIGGSFIELD", "VEO-3", "CUSTOM WORKFLOWS"],
+    included: [
+      "Editorial workflow from brief to approved script inside n8n",
+      "AI video generation with HeyGen, Higgsfield and Veo-3 where each fits",
+      "Brand voice rules, forbidden-claim checks and human review gates",
+      "Custom workflows for assembly, subtitles, thumbnails and variants",
+      "Publish pipelines to the channels and CMS you already use",
+      "Analytics loop so the next brief starts smarter",
+    ],
+    stackGroups: [
+      { label: "Orchestration", items: ["n8n", "custom workflows", "approval gates"] },
+      { label: "Video AI", items: ["HeyGen", "Higgsfield", "Veo-3"] },
+      { label: "Publish", items: ["schedulers", "CMS APIs", "social connectors"] },
+    ],
+    process: [
+      {
+        title: "Define the pipeline",
+        body: "Formats, channels, approval roles and which AI tool owns each step.",
+      },
+      {
+        title: "Automate drafts",
+        body: "Scripts and assets generated against brand rules — review before anything public.",
+      },
+      {
+        title: "Produce with AI video",
+        body: "HeyGen for presenters, Higgsfield and Veo-3 for scenes — assembled and QA'd in the same flow.",
+      },
+      {
+        title: "Ship and learn",
+        body: "Scheduled publish with rollback, performance fed back into the next brief.",
+      },
+    ],
+    faqs: [
+      {
+        q: "Does AI publish without review?",
+        a: "Not by default. Review gates sit where brand and legal risk live. Full auto-publish is opt-in after trust is earned.",
+      },
+      {
+        q: "Why HeyGen, Higgsfield and Veo-3 together?",
+        a: "Different jobs. HeyGen excels at avatar presenters; Higgsfield and Veo-3 handle cinematic and generative scenes. We route each asset to the right tool inside one n8n pipeline.",
+      },
+      {
+        q: "Can this plug into our existing CMS?",
+        a: "Yes — CMS APIs and schedulers are the usual path. We don't force a new editorial stack unless yours is the bottleneck.",
+      },
+    ],
+    engagement: [
+      engagementDefaults.discovery,
+      engagementDefaults.fixed,
+      engagementDefaults.embedded,
+    ],
+    seo: {
+      description:
+        "Content automation with n8n, HeyGen, Higgsfield and Veo-3 — brand-safe script-to-video pipelines with human review gates.",
     },
   },
   {
@@ -201,21 +276,21 @@ export const services: Service[] = [
     title: "Data science",
     shortTitle: "Data science",
     blurb:
-      "Forecasting, segmentation and dashboards that answer the question you actually asked.",
+      "ML models, computer vision, NLP and analysis that answer the business question — not a model for its own sake.",
     icon: "TrendingUp",
-    tech: ["Python", "ML models", "BI"],
+    tech: ["ML MODELS", "COMPUTER VISION", "NLP", "DATA ANALYSIS"],
     included: [
       "Question framing before model work — what decision this answers",
-      "Pipelines from source systems into a trustworthy warehouse layer",
-      "Models you can explain to operators, not only to data teams",
-      "Dashboards and alerts wired to the decisions they support",
-      "Monitoring for drift, freshness and silent failures",
-      "Documentation so the next hire can extend the work",
+      "ML models you can explain to operators, not only to data teams",
+      "Computer vision for images, documents and quality inspection",
+      "NLP for classification, extraction, search and support triage",
+      "Analysis, dashboards and alerts wired to the decisions they support",
+      "Monitoring for drift, freshness and silent failures — plus docs for the next hire",
     ],
     stackGroups: [
-      { label: "Languages", items: ["Python", "SQL"] },
-      { label: "ML & BI", items: ["pandas", "scikit-learn", "dbt", "Metabase"] },
-      { label: "Stores", items: ["PostgreSQL", "ClickHouse", "object storage"] },
+      { label: "ML", items: ["supervised models", "forecasting", "scoring"] },
+      { label: "Vision & language", items: ["computer vision", "NLP", "embeddings"] },
+      { label: "Analysis", items: ["Python", "SQL", "dashboards", "pipelines"] },
     ],
     process: [
       {
@@ -224,21 +299,25 @@ export const services: Service[] = [
       },
       {
         title: "Fix the pipes",
-        body: "Sources, freshness and definitions. Models on dirty inputs are theatre.",
+        body: "Sources, labels and definitions. Models on dirty inputs are theatre.",
       },
       {
         title: "Model and validate",
-        body: "Baselines before cleverness. Operators review outputs against reality.",
+        body: "Baselines before cleverness — whether it's tabular ML, vision or NLP.",
       },
       {
         title: "Put it in the loop",
-        body: "Dashboards, alerts or APIs where the decision actually happens.",
+        body: "APIs, dashboards or alerts where the decision actually happens.",
       },
     ],
     faqs: [
       {
         q: "Do you build models or just dashboards?",
-        a: "Both — but only when the decision is clear. Many briefs need trustworthy reporting first; we say which.",
+        a: "Both — but only when the decision is clear. Many briefs need trustworthy analysis first; we say which before any ML work.",
+      },
+      {
+        q: "When do you use computer vision or NLP?",
+        a: "When the signal lives in images, PDFs or unstructured text — quality checks, document extraction, ticket triage, search. We prove lift against a simple baseline first.",
       },
       {
         q: "Can you work with our existing warehouse?",
@@ -252,7 +331,7 @@ export const services: Service[] = [
     ],
     seo: {
       description:
-        "Forecasting, segmentation and decision-ready dashboards — Python, SQL and pipelines your team can operate.",
+        "Data science with ML models, computer vision, NLP and decision-ready analysis — pipelines and dashboards your team can operate.",
     },
   },
   {
@@ -260,19 +339,19 @@ export const services: Service[] = [
     title: "Custom software",
     shortTitle: "Custom software",
     blurb:
-      "ERP, CRM and internal tools built around how your business actually runs — not a template.",
+      "ERP, CRM and internal tools on Node.js, .NET and PostgreSQL — shaped around how your business actually runs.",
     icon: "Code2",
     tech: ["Node.js", ".NET", "PostgreSQL"],
     included: [
       "Process mapping with the people who do the work today",
       "Domain model and permissions that match real roles",
+      "Node.js or .NET backends on PostgreSQL — chosen for your team and constraints",
       "Integrations with the systems you already pay for",
-      "Migration plan from spreadsheets or legacy tools",
-      "Audit trails and reporting operators actually use",
+      "Migration plan from spreadsheets or legacy tools, with audit trails",
       "Ownership transfer: code, infra access and runbooks",
     ],
     stackGroups: [
-      { label: "Backend", items: ["Node.js", "NestJS", ".NET", "PostgreSQL"] },
+      { label: "Backend", items: ["Node.js", ".NET", "PostgreSQL"] },
       { label: "Frontend", items: ["React", "Next.js", "TypeScript"] },
       { label: "Integration", items: ["REST", "webhooks", "queues", "SSO"] },
     ],
@@ -283,7 +362,7 @@ export const services: Service[] = [
       },
       {
         title: "Replace the painful slice",
-        body: "One workflow live end to end before boiling the ocean.",
+        body: "One workflow live end to end on Node.js or .NET before boiling the ocean.",
       },
       {
         title: "Integrate and migrate",
@@ -300,6 +379,10 @@ export const services: Service[] = [
         a: "Often you should. We say so when a product fits. Custom wins when your process is the product — and templates fight you every quarter.",
       },
       {
+        q: "Node.js or .NET?",
+        a: "Node.js when JavaScript teams and API-heavy products dominate; .NET when Windows estates, enterprise integrations or existing C# skills do. PostgreSQL is our default data layer either way.",
+      },
+      {
         q: "Will we be locked into ZACSOL?",
         a: "No. Code, infra and docs are yours. Handover is a phase, not a surprise.",
       },
@@ -311,66 +394,7 @@ export const services: Service[] = [
     ],
     seo: {
       description:
-        "Custom ERP, CRM and internal tools shaped to your process — integrations, migration and a clean handover.",
-    },
-  },
-  {
-    slug: "ui-ux-design",
-    title: "UI/UX design",
-    shortTitle: "UI/UX design",
-    blurb:
-      "Research, flows, interface and a design system your own team can extend after we leave.",
-    icon: "Palette",
-    tech: ["Figma", "Design systems"],
-    included: [
-      "Research and journey maps tied to a real bottleneck",
-      "Flows and wireframes validated before visual polish",
-      "Interface design with production-ready component specs",
-      "A Figma system your engineers can implement without guesswork",
-      "Accessibility review against WCAG targets you set",
-      "Handover session so your team can extend the system",
-    ],
-    stackGroups: [
-      { label: "Design", items: ["Figma", "prototyping", "design tokens"] },
-      { label: "Systems", items: ["components", "variants", "documentation"] },
-      { label: "Handoff", items: ["specs", "redlines", "dev pairing"] },
-    ],
-    process: [
-      {
-        title: "Find the friction",
-        body: "Interviews and task observation — the screen that costs you the most.",
-      },
-      {
-        title: "Structure before style",
-        body: "Flows and information architecture signed off before colour and type.",
-      },
-      {
-        title: "System and UI",
-        body: "Components, states and the pages that ship in the first release.",
-      },
-      {
-        title: "Pair into build",
-        body: "Design stays in the loop through implementation — no throw-over-the-wall.",
-      },
-    ],
-    faqs: [
-      {
-        q: "Do you design only, or design and build?",
-        a: "Either. Many clients take design-plus-build as one team so the system and the code stay aligned.",
-      },
-      {
-        q: "Can you work inside our existing brand?",
-        a: "Yes. We extend what you have unless the brand itself is the constraint — and then we say so early.",
-      },
-    ],
-    engagement: [
-      engagementDefaults.discovery,
-      engagementDefaults.fixed,
-      engagementDefaults.embedded,
-    ],
-    seo: {
-      description:
-        "Product UX, interface design and Figma systems your engineers can ship — research-led, handover-ready.",
+        "Custom ERP, CRM and internal tools with Node.js, .NET and PostgreSQL — integrations, migration and a clean handover.",
     },
   },
   {
@@ -378,20 +402,20 @@ export const services: Service[] = [
     title: "Business process automation",
     shortTitle: "Process automation",
     blurb:
-      "The quiet win: approvals, handoffs and reporting that stop needing a person to chase them.",
+      "Approvals, handoffs and reporting on autopilot — n8n, Zapier, RPA and custom workflows that stop needing someone to chase them.",
     icon: "Workflow",
-    tech: ["Workflow", "Integrations", "RPA"],
+    tech: ["WORKFLOW", "INTEGRATIONS", "RPA", "N8N", "ZAPIER", "CUSTOM WORKFLOWS"],
     included: [
       "Process map with owners, SLAs and failure modes",
-      "Workflow engine or lightweight automation — chosen for fit, not fashion",
-      "Integrations between the tools your team already uses",
+      "n8n, Zapier or custom workflows — chosen for fit, not fashion",
+      "API integrations between the tools your team already uses",
+      "RPA only where systems won't talk — with the risk documented",
       "Exception queues humans can clear without a spreadsheet",
-      "Auditability for finance, ops and compliance",
-      "Playbooks so ops can change rules without a deploy every time",
+      "Auditability and playbooks so ops can change rules without a deploy every time",
     ],
     stackGroups: [
-      { label: "Automation", items: ["workflow engines", "queues", "schedulers"] },
-      { label: "Integration", items: ["APIs", "webhooks", "iPaaS", "RPA where needed"] },
+      { label: "Automation", items: ["n8n", "Zapier", "custom workflows", "schedulers"] },
+      { label: "Integration", items: ["APIs", "webhooks", "RPA where needed"] },
       { label: "Ops", items: ["dashboards", "alerts", "audit logs"] },
     ],
     process: [
@@ -401,11 +425,11 @@ export const services: Service[] = [
       },
       {
         title: "Automate the spine",
-        body: "Happy path first, with clear ownership when something breaks.",
+        body: "Happy path first in n8n or Zapier, with clear ownership when something breaks.",
       },
       {
         title: "Handle exceptions",
-        body: "Queues, retries and human takeover — not silent failure.",
+        body: "Queues, retries and human takeover — not silent failure. RPA only as a last resort.",
       },
       {
         title: "Measure the gain",
@@ -413,6 +437,10 @@ export const services: Service[] = [
       },
     ],
     faqs: [
+      {
+        q: "n8n, Zapier or custom?",
+        a: "Zapier for fast SaaS glue. n8n for self-hosted control and complex branching. Custom workflows when volume, latency or compliance outgrow no-code. We recommend in discovery.",
+      },
       {
         q: "Is this RPA or proper integration?",
         a: "Integration when APIs exist. RPA only when the system won't talk — and we document the risk either way.",
@@ -429,56 +457,60 @@ export const services: Service[] = [
     ],
     seo: {
       description:
-        "Approvals, handoffs and reporting automated with integrations and workflows — measurable cycle-time gains.",
+        "Business process automation with n8n, Zapier, RPA and custom workflows — measurable cycle-time gains and audit-ready ops.",
     },
   },
   {
-    slug: "content-automation",
-    title: "Content automation",
-    shortTitle: "Content automation",
+    slug: "ui-ux-design",
+    title: "UI/UX design",
+    shortTitle: "UI/UX design",
     blurb:
-      "Script to video to publish — an automated pipeline that drafts, produces and ships content without the manual grind.",
-    icon: "Clapperboard",
-    tech: ["Script", "Video", "Auto-publish"],
+      "Research, flows, prototypes and design systems in Figma — plus Adobe XD and Canva when your team already lives there.",
+    icon: "Palette",
+    tech: ["Figma", "Design systems", "ADOBE XD", "CANVA", "FIGMA PLUGINS", "PROTOTYPING"],
     included: [
-      "Editorial workflow from brief to approved script",
-      "Generation and assembly steps with human review gates",
-      "Brand voice constraints and forbidden-claim checks",
-      "Publish pipelines to the channels you already use",
-      "Asset library, versioning and reuse across formats",
-      "Analytics loop so the next brief starts smarter",
+      "Research and journey maps tied to a real product bottleneck",
+      "Flows, wireframes and interactive prototypes validated before visual polish",
+      "Interface design with production-ready component specs",
+      "Figma design systems, plugins and tokens engineers can implement cleanly",
+      "Adobe XD or Canva deliverables when stakeholders need lighter tools",
+      "Accessibility review and a handover session so your team can extend the system",
     ],
     stackGroups: [
-      { label: "Generation", items: ["LLM drafting", "templates", "brand rules"] },
-      { label: "Media", items: ["video assembly", "subtitles", "thumbnails"] },
-      { label: "Publish", items: ["schedulers", "CMS APIs", "social connectors"] },
+      { label: "Design", items: ["Figma", "Adobe XD", "prototyping", "Figma plugins"] },
+      { label: "Systems", items: ["components", "variants", "design tokens", "docs"] },
+      { label: "Lightweight", items: ["Canva", "stakeholder kits", "marketing assets"] },
     ],
     process: [
       {
-        title: "Define the pipeline",
-        body: "Formats, channels, approval roles and where humans must stay in the loop.",
+        title: "Find the friction",
+        body: "Interviews and task observation — the screen that costs you the most.",
       },
       {
-        title: "Automate drafts",
-        body: "Script and asset generation against brand rules — review before anything public.",
+        title: "Structure before style",
+        body: "Flows and information architecture signed off before colour and type.",
       },
       {
-        title: "Produce and ship",
-        body: "Assembly, QA checks and scheduled publish with rollback.",
+        title: "Prototype and system",
+        body: "Clickable prototypes, then components, states and the pages that ship first.",
       },
       {
-        title: "Learn from output",
-        body: "Performance fed back into the next brief — not a dead-end calendar.",
+        title: "Pair into build",
+        body: "Design stays in the loop through implementation — Figma specs, not throw-over-the-wall PDFs.",
       },
     ],
     faqs: [
       {
-        q: "Does AI publish without review?",
-        a: "Not by default. We put review gates where brand and legal risk live. Full auto-publish is opt-in after trust is earned.",
+        q: "Do you design only, or design and build?",
+        a: "Either. Many clients take design-plus-build as one team so the system and the code stay aligned.",
       },
       {
-        q: "Can this plug into our existing CMS?",
-        a: "Yes — CMS APIs and schedulers are the usual path. We don't force a new editorial stack unless yours is the bottleneck.",
+        q: "Figma only, or Adobe XD and Canva too?",
+        a: "Figma is our system of record. Adobe XD when you already have files there; Canva when marketing needs editable social and deck assets without touching the product file.",
+      },
+      {
+        q: "Can you work inside our existing brand?",
+        a: "Yes. We extend what you have unless the brand itself is the constraint — and then we say so early.",
       },
     ],
     engagement: [
@@ -488,7 +520,7 @@ export const services: Service[] = [
     ],
     seo: {
       description:
-        "Content automation from script to publish — brand-safe pipelines with human review gates and channel delivery.",
+        "UI/UX design with Figma, design systems, Adobe XD, Canva and prototyping — research-led interfaces your engineers can ship.",
     },
   },
 ];

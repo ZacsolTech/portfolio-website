@@ -37,9 +37,7 @@ export { generateBlueprint } from "./gemini";
 export { extractSlots, rulesChatTurn, streamConsultantTurn, type ChatEvent } from "./chat";
 export { buildRulesBlueprint, classifySeed } from "./rules-engine";
 export { sanitizeSeed, sanitizeChatMessage } from "./sanitize";
-export { limitConsultant, getClientIp, type LimitKind } from "./rate-limit";
-export { sendBlueprintEmail, type EmailResult } from "./email";
-export { saveLead, type LeadRecord } from "./leads";
+export { limitConsultant, limitForm, getClientIp, type LimitKind } from "./rate-limit";
 export {
   getOrCreateSession,
   loadSession,

@@ -2,6 +2,7 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
+import { Turnstile, useTurnstile } from "@/components/shared/turnstile";
 
 type State = "idle" | "sending" | "done" | "error";
 
@@ -9,6 +10,7 @@ export function NewsletterForm() {
   const emailId = useId();
   const [state, setState] = useState<State>("idle");
   const [error, setError] = useState("");
+  const turnstile = useTurnstile();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,6 +29,7 @@ export function NewsletterForm() {
         body: JSON.stringify({
           email: String(data.get("email") ?? ""),
           company: String(data.get("company") ?? ""),
+          turnstileToken: turnstile.token ?? undefined,
         }),
       });
 
@@ -34,6 +37,8 @@ export function NewsletterForm() {
         const body = (await res.json().catch(() => null)) as { error?: string } | null;
         setError(body?.error ?? "Something went wrong. Please try again.");
         setState("error");
+        // Turnstile tokens are single-use; a retry needs a fresh one.
+        turnstile.reset();
         return;
       }
 
@@ -42,6 +47,7 @@ export function NewsletterForm() {
     } catch {
       setError("Network error. Please try again.");
       setState("error");
+      turnstile.reset();
     }
   }
 
@@ -84,6 +90,12 @@ export function NewsletterForm() {
       <button type="submit" className="btn btn--gold" disabled={state === "sending"}>
         {state === "sending" ? "Subscribing…" : "Subscribe"}
       </button>
+      <Turnstile
+        key={turnstile.nonce}
+        action="newsletter"
+        className="newsletter__turnstile"
+        onToken={turnstile.setToken}
+      />
 
       {state === "error" ? (
         <p className="newsletter__error" id={`${emailId}-error`} role="alert">

@@ -36,7 +36,13 @@ export const ConsultantSessionSchema = z.object({
   blueprint: BlueprintSchema.nullable().default(null),
   /** Set once the visitor passes the gate, so we never double-email. */
   lead: z
-    .object({ name: z.string(), email: z.string(), at: z.number() })
+    .object({
+      name: z.string(),
+      email: z.string(),
+      at: z.number(),
+      /** Shareable document minted at the gate; restored on reload. */
+      roadmapUrl: z.string().nullable().optional(),
+    })
     .nullable()
     .default(null),
   createdAt: z.number(),

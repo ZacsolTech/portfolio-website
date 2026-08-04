@@ -16,6 +16,8 @@ import {
   Testimonials,
   Faqs,
   Leads,
+  Roadmaps,
+  Bookings,
   Subscribers,
 } from './collections'
 import { normalizeDatabaseUrl } from './lib/db'
@@ -46,6 +48,8 @@ export default buildConfig({
     Testimonials,
     Faqs,
     Leads,
+    Roadmaps,
+    Bookings,
     Subscribers,
   ],
   editor: lexicalEditor(),

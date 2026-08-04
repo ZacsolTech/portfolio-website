@@ -171,6 +171,49 @@ export async function limitSubscribe(ip: string): Promise<boolean> {
 }
 
 /**
+ * Generic per-IP cap for the ordinary public forms — contact, booking.
+ *
+ * These are cheap compared with a Gemini call, so the cap only has to stop
+ * scripted flooding of the inbox and the CRM, not protect a budget. Kept
+ * separate per `kind` so someone who has filled in the contact form twice can
+ * still book a call.
+ */
+const FORM_BUDGET = { max: 8, windowMs: 60 * 60 * 1000 };
+
+const formLimiters = new Map<string, Ratelimit>();
+
+export async function limitForm(input: {
+	ip: string;
+	kind: string;
+	max?: number;
+}): Promise<boolean> {
+	const { ip, kind } = input;
+	const max = input.max ?? FORM_BUDGET.max;
+
+	if (!hasUpstash()) {
+		return memoryLimit(`form:${kind}:${ip}`, max, FORM_BUDGET.windowMs).success;
+	}
+
+	try {
+		let limiter = formLimiters.get(kind);
+		if (!limiter) {
+			limiter = new Ratelimit({
+				redis: Redis.fromEnv(),
+				limiter: Ratelimit.slidingWindow(max, "1 h"),
+				prefix: `zacsol:form:${kind}`,
+				analytics: true,
+			});
+			formLimiters.set(kind, limiter);
+		}
+		const res = await limiter.limit(ip || "unknown");
+		return res.success;
+	} catch (err) {
+		console.error(`[${kind}] rate limit backend failed, using memory:`, err);
+		return memoryLimit(`form:${kind}:${ip}`, max, FORM_BUDGET.windowMs).success;
+	}
+}
+
+/**
  * Client IP from proxy headers.
  *
  * `x-forwarded-for` is caller-controlled unless a trusted proxy overwrote it,

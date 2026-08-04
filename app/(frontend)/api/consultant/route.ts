@@ -1,12 +1,21 @@
 import { after } from "next/server";
 import { z } from "zod";
 import { extractSlots, streamConsultantTurn } from "@/lib/ai/chat";
-import { sendBlueprintEmail } from "@/lib/ai/email";
 import { generateBlueprint } from "@/lib/ai/gemini";
-import { saveLead, updateLeadDelivery } from "@/lib/ai/leads";
 import { getClientIp, limitConsultant, type LimitKind } from "@/lib/ai/rate-limit";
 import { sanitizeChatMessage } from "@/lib/ai/sanitize";
 import { slotsToAnswers, type Slots } from "@/lib/ai/schema";
+import { captureLead, updateLead } from "@/lib/leads/capture";
+import {
+	AttributionSchema,
+	consentRecord,
+	EmailSchema,
+	PersonNameSchema,
+} from "@/lib/leads/schema";
+import { internalRecipient, notify, summarize } from "@/lib/notifications";
+import { createRoadmap } from "@/lib/roadmaps/store";
+import { verifyTurnstile } from "@/lib/security/turnstile";
+import { absoluteUrl } from "@/lib/seo";
 import {
   appendMessage,
   getOrCreateSession,
@@ -46,17 +55,24 @@ const BlueprintBody = z.object({
   sessionId: SessionId,
 });
 
+/**
+ * The wording next to the gate's submit button. Stored verbatim with the
+ * consent record — what someone agreed to is the part that matters if it is
+ * ever challenged, and it changes when the copy does.
+ */
+const GATE_CONSENT_TEXT =
+  "Email me the complete blueprint. One email with your blueprint, plus a short follow-up sequence you can stop at any time.";
+
 const GateBody = z.object({
   action: z.literal("gate"),
   sessionId: SessionId,
-  name: z
-    .string()
-    .trim()
-    .min(2)
-    .max(80)
-    .regex(/^[\p{L}\p{M}'’.\- ]+$/u, "Use a real name"),
-  email: z.string().trim().email().max(160).toLowerCase(),
+  name: PersonNameSchema,
+  email: EmailSchema,
   consent: z.boolean().optional(),
+  utm: AttributionSchema.optional(),
+  turnstileToken: z.string().max(4000).optional(),
+  /** Honeypot — accepted so a bot gets no signal, checked in the handler. */
+  company: z.string().max(200).optional(),
 });
 
 const ResetBody = z.object({
@@ -145,6 +161,7 @@ export async function GET(request: Request) {
     messages: session.messages,
     blueprint: session.blueprint,
     captured: Boolean(session.lead),
+    roadmapUrl: session.lead?.roadmapUrl ?? null,
     ...publicState(session),
   });
 }
@@ -355,6 +372,18 @@ async function handleBlueprint(request: Request, body: z.infer<typeof BlueprintB
 /* ----------------------------------- gate ---------------------------------- */
 
 async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
+  // Silent success: a bot that filled the honeypot gets no signal to tune against.
+  if (body.company) {
+    return json({ ok: true, queued: true, email: body.email, message: "On its way." });
+  }
+
+  const human = await verifyTurnstile({
+    token: body.turnstileToken,
+    ip: getClientIp(request),
+    action: "consultant-gate",
+  });
+  if (!human.ok) return json({ error: human.error }, 403);
+
   const limit = await guard(request, body.sessionId, "gate");
   if (!limit.ok) return limit.response;
 
@@ -376,6 +405,7 @@ async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
         ok: true,
         alreadySent: true,
         email: session.lead.email,
+        roadmapUrl: session.lead.roadmapUrl ?? null,
         message: "That roadmap is already on its way.",
         ...publicState(session),
       },
@@ -389,40 +419,119 @@ async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
   // Capture the lead before anything that can be slow. A cold Resend
   // connection takes ~11s; the visitor must not wait on it to see the unlock,
   // and we must not lose the lead if delivery fails.
-  const saved = await saveLead({
-    name: body.name,
-    email: body.email,
+  const saved = await captureLead({
+    source: "consultant",
+    seed: session.slots.problem,
+    answers: {
+      industry: session.slots.industry ?? null,
+      current: session.slots.current ?? null,
+      scale: session.slots.scale ?? null,
+      timeline: session.slots.timeline ?? null,
+    },
+    solution: {
+      title: blueprint.title,
+      serviceSlug: blueprint.serviceSlug,
+      costLowUsd: blueprint.costBandUsd[0],
+      costHighUsd: blueprint.costBandUsd[1],
+      durationLowWeeks: blueprint.durationWeeks[0],
+      durationHighWeeks: blueprint.durationWeeks[1],
+      document: blueprint,
+    },
+    contact: { name: body.name, email: body.email },
+    consent: {
+      email: consentRecord(true, GATE_CONSENT_TEXT),
+      marketing: consentRecord(true, GATE_CONSENT_TEXT),
+    },
+    utm: body.utm ?? {},
     sessionId: session.id,
-    slots: session.slots,
-    blueprint,
     transcript: session.messages,
-    email_result: { status: "skipped", reason: "queued" },
+    engine: blueprint.source,
   });
 
   if (!saved.stored) {
     console.error("[consultant] lead not persisted:", saved.error);
   }
 
+  // Minted before the response so the visitor can open their document
+  // immediately, without waiting on the email that also carries the link.
+  const roadmap = await createRoadmap({
+    name: body.name,
+    email: body.email,
+    blueprint,
+    slots: session.slots,
+    leadId: saved.stored ? saved.id : undefined,
+  });
+
   await saveSession({
     ...session,
     stage: "captured",
-    lead: { name: body.name, email: body.email, at: Date.now() },
+    lead: {
+      name: body.name,
+      email: body.email,
+      at: Date.now(),
+      roadmapUrl: roadmap?.url ?? null,
+    },
   });
 
   // Delivery continues after the response is flushed.
   after(async () => {
-    const result = await sendBlueprintEmail({
-      to: body.email,
-      name: body.name,
-      blueprint,
-      slots: session.slots,
-    });
-
-    if (result.status === "failed") {
-      console.error("[consultant] blueprint email failed:", result.error);
+    if (saved.stored && saved.id !== undefined && roadmap) {
+      await updateLead(saved.id, { roadmap: roadmap.id });
     }
+
+    const results = await notify(
+      {
+        type: "roadmap.delivered",
+        category: "transactional",
+        name: body.name,
+        blueprint,
+        slots: session.slots,
+        roadmapUrl: roadmap?.url ?? null,
+      },
+      { name: body.name, email: body.email },
+    );
+
     if (saved.stored && saved.id !== undefined) {
-      await updateLeadDelivery(saved.id, result);
+      const outcome = summarize(results);
+      await updateLead(saved.id, {
+        emailStatus: outcome.status,
+        emailError: outcome.detail,
+      });
+    }
+
+    const internal = internalRecipient();
+    if (internal) {
+      await notify(
+        {
+          type: "contact.internal",
+          category: "internal",
+          lead: {
+            name: body.name,
+            email: body.email,
+            message: [
+              session.slots.problem ?? "(no problem statement captured)",
+              "",
+              `Recommended: ${blueprint.title}`,
+              `Band: $${Math.round(blueprint.costBandUsd[0])}–$${Math.round(blueprint.costBandUsd[1])} over ${blueprint.durationWeeks[0]}–${blueprint.durationWeeks[1]} weeks`,
+              roadmap ? `Roadmap: ${roadmap.url}` : "",
+            ].join("\n"),
+            service: blueprint.serviceTitle,
+            source: "consultant",
+            utm: {
+              source: body.utm?.source,
+              medium: body.utm?.medium,
+              campaign: body.utm?.campaign,
+              referrer: body.utm?.referrer,
+              landingPath: body.utm?.landingPath,
+            },
+          },
+          adminUrl:
+            saved.stored && saved.id !== undefined
+              ? absoluteUrl(`/admin/collections/leads/${saved.id}`)
+              : null,
+        },
+        internal,
+      );
     }
   });
 
@@ -432,6 +541,7 @@ async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
       email: body.email,
       name: body.name,
       queued: true,
+      roadmapUrl: roadmap?.url ?? null,
       message: "On its way — check your inbox in the next minute or two.",
       ...publicState({ ...session, stage: "captured" }),
     },

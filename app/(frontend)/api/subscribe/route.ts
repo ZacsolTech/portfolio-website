@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getClientIp, limitSubscribe } from "@/lib/ai/rate-limit";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 
 export const runtime = "nodejs";
 
@@ -20,6 +21,7 @@ const Body = z.object({
    * exactly which field to stop filling. It is checked below instead.
    */
   company: z.string().max(200).optional(),
+  turnstileToken: z.string().max(4000).optional(),
 });
 
 async function payloadClient() {
@@ -39,7 +41,16 @@ export async function POST(request: Request) {
   // Silent success: a bot that filled the honeypot gets no signal to tune against.
   if (parsed.company) return Response.json({ ok: true });
 
-  const allowed = await limitSubscribe(getClientIp(request));
+  const ip = getClientIp(request);
+
+  const human = await verifyTurnstile({
+    token: parsed.turnstileToken,
+    ip,
+    action: "newsletter",
+  });
+  if (!human.ok) return Response.json({ error: human.error }, { status: 403 });
+
+  const allowed = await limitSubscribe(ip);
   if (!allowed) {
     return Response.json(
       { error: "Too many sign-ups from this network. Try again later." },

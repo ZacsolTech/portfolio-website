@@ -17,6 +17,7 @@ import {
   type LeverOverrides,
   type RequiredSlotKey,
 } from "@/lib/estimator/schema";
+import { EstimateCapture } from "@/components/shared/estimate-capture";
 import { zac } from "@/lib/content/zac";
 
 const SESSION_KEY = "zacsol_estimator_session";
@@ -863,6 +864,8 @@ export function EstimatorWizard() {
               onChange={onLeverChange}
               disabled={busy}
             />
+
+            <EstimateCapture sessionId={sessionId} />
 
             <div className="btn-row est__actions">
               <Link href="/consultant" className="btn btn--gold">

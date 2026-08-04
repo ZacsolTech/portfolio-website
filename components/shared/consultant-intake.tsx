@@ -12,7 +12,9 @@ import {
   type Slots,
 } from "@/lib/ai/schema";
 import { Console, ConsoleBar, ConsoleBody } from "@/components/ui";
+import { Turnstile, useTurnstile } from "@/components/shared/turnstile";
 import { zac } from "@/lib/content/zac";
+import { readAttribution } from "@/lib/leads/attribution";
 
 const SESSION_KEY = "zacsol_consultant_session";
 
@@ -275,9 +277,14 @@ export function ConsultantIntake() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  /** Honeypot — real users never fill a field they cannot see. */
+  const [honeypot, setHoneypot] = useState("");
   const [emailed, setEmailed] = useState(false);
   const [doneMessage, setDoneMessage] = useState("");
+  const [roadmapUrl, setRoadmapUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const turnstile = useTurnstile();
 
   /* ------------------------------ scrolling ------------------------------ */
 
@@ -315,6 +322,7 @@ export function ConsultantIntake() {
             messages: ChatMessage[];
             blueprint: Blueprint | null;
             captured: boolean;
+            roadmapUrl: string | null;
             slots: Slots;
             progress: number;
             complete: boolean;
@@ -341,6 +349,7 @@ export function ConsultantIntake() {
                 setPhase("captured");
                 setUnlocked(true);
                 setEmailed(true);
+                setRoadmapUrl(data.roadmapUrl);
                 setDoneMessage("Your roadmap is on its way.");
               } else {
                 setPhase("blueprint");
@@ -549,22 +558,29 @@ export function ConsultantIntake() {
           sessionId,
           name: name.trim(),
           email: email.trim(),
+          company: honeypot,
+          utm: readAttribution(),
+          turnstileToken: turnstile.token ?? undefined,
         }),
       });
       const data = (await res.json()) as {
         queued?: boolean;
         alreadySent?: boolean;
+        roadmapUrl?: string | null;
         message?: string;
         error?: string;
       };
       if (!res.ok) throw new Error(data.error || "Could not send your roadmap.");
 
       setEmailed(Boolean(data.queued || data.alreadySent));
+      setRoadmapUrl(data.roadmapUrl ?? null);
       setDoneMessage(data.message ?? "");
       setUnlocked(true);
       setPhase("captured");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send your roadmap.");
+      // Turnstile tokens are single-use; a retry needs a fresh one.
+      turnstile.reset();
     } finally {
       setBusy(false);
     }
@@ -806,6 +822,22 @@ export function ConsultantIntake() {
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                       />
+                      {/* Off-screen, not display:none, so bots still fill it. */}
+                      <input
+                        type="text"
+                        name="company"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden
+                        className="sr-only"
+                        value={honeypot}
+                        onChange={(event) => setHoneypot(event.target.value)}
+                      />
+                      <Turnstile
+                        key={turnstile.nonce}
+                        action="consultant-gate"
+                        onToken={turnstile.setToken}
+                      />
                       <button
                         type="submit"
                         className="btn btn--gold gate__submit"
@@ -814,7 +846,8 @@ export function ConsultantIntake() {
                         {busy ? "Sending…" : "Reveal my roadmap"}
                       </button>
                       <p className="gate__fine">
-                        One email with your blueprint. No newsletter, no reselling.
+                        One email with your blueprint, plus a short follow-up sequence you
+                        can stop at any time. No reselling.
                       </p>
                     </form>
                   </div>
@@ -845,11 +878,25 @@ export function ConsultantIntake() {
                       {doneMessage ||
                         "A senior engineer will follow up within one business day."}
                     </p>
+                    {roadmapUrl ? (
+                      <p className="body-sm gate__copy" style={{ marginTop: "0.5rem" }}>
+                        Your document also lives at{" "}
+                        <a href={roadmapUrl} className="link-u">
+                          a shareable link
+                        </a>{" "}
+                        — forward it, or print it to PDF.
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               ) : null}
 
               <div className="btn-row gate__actions">
+                {roadmapUrl ? (
+                  <a href={roadmapUrl} className="btn btn--gold">
+                    Open your roadmap
+                  </a>
+                ) : null}
                 <Link href="/book" className="btn btn--gold">
                   Book a consultation
                 </Link>

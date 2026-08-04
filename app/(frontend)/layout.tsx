@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { SiteShell } from "@/components/layout/site-shell";
+import { AttributionTracker } from "@/components/shared/attribution-tracker";
 import { SiteJsonLd } from "@/components/seo/json-ld";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeScript } from "@/components/theme-script";
@@ -126,6 +127,9 @@ export default function FrontendLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
+          {/* Records first-touch campaign data before the visitor navigates
+              away from the URL that carried it. */}
+          <AttributionTracker />
           <SiteShell>{children}</SiteShell>
         </ThemeProvider>
       </body>

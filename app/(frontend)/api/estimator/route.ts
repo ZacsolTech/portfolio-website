@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { getClientIp, limitConsultant } from "@/lib/ai/rate-limit";
+import { getClientIp, limitConsultant, limitForm } from "@/lib/ai/rate-limit";
+import { captureLead } from "@/lib/leads/capture";
+import {
+  AttributionSchema,
+  consentRecord,
+  EmailSchema,
+  PersonNameSchema,
+} from "@/lib/leads/schema";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 import { sanitizeChatMessage } from "@/lib/ai/sanitize";
 import {
   estimatorProgress,
@@ -37,7 +45,11 @@ export const maxDuration = 60;
  * message. Prices come from the deterministic engine in lib/estimator/pricing,
  * never from the model, so no request payload can move the number.
  *
- * Actions: chat (SSE) · estimate · adjust (levers) · reset
+ * Actions: chat (SSE) · estimate · adjust (levers) · capture · reset
+ *
+ * `capture` is the one exception to "ungated", and it runs after the estimate
+ * exists: it attaches a name and address to a number the visitor has already
+ * been shown in full.
  */
 
 const SessionId = z.string().uuid();
@@ -61,10 +73,29 @@ const AdjustBody = z.object({
 
 const ResetBody = z.object({ action: z.literal("reset"), sessionId: SessionId });
 
+/**
+ * Optional capture on the result screen.
+ *
+ * Deliberately *after* the estimate, never before it: the tool's whole promise
+ * is that nothing is withheld, and a visitor who never leaves an address still
+ * gets the complete number.
+ */
+const CaptureBody = z.object({
+  action: z.literal("capture"),
+  sessionId: SessionId,
+  name: PersonNameSchema,
+  email: EmailSchema,
+  utm: AttributionSchema.optional(),
+  turnstileToken: z.string().max(4000).optional(),
+  /** Honeypot — accepted so a bot gets no signal, checked in the handler. */
+  company: z.string().max(200).optional(),
+});
+
 const BodySchema = z.discriminatedUnion("action", [
   ChatBody,
   EstimateBody,
   AdjustBody,
+  CaptureBody,
   ResetBody,
 ]);
 
@@ -176,6 +207,8 @@ export async function POST(request: Request) {
       return handleEstimate(request, body);
     case "adjust":
       return handleAdjust(request, body);
+    case "capture":
+      return handleCapture(request, body);
     case "reset":
       await clearEstimatorSession(body.sessionId);
       return json({ ok: true });
@@ -348,6 +381,84 @@ async function handleEstimate(request: Request, body: z.infer<typeof EstimateBod
     200,
     limit.headers,
   );
+}
+
+/* --------------------------------- capture -------------------------------- */
+
+const CAPTURE_CONSENT_TEXT =
+  "Send me this estimate by email. We'll follow up once or twice — you can stop it at any time.";
+
+/**
+ * Attach a name and address to an estimate that already exists.
+ *
+ * The figures come from the stored session, never from the request, so this
+ * cannot be used to file a fabricated quote against someone else's address.
+ */
+async function handleCapture(request: Request, body: z.infer<typeof CaptureBody>) {
+  // Silent success: a bot that filled the honeypot gets nothing to tune against.
+  if (body.company) return json({ ok: true });
+
+  const ip = getClientIp(request);
+
+  const human = await verifyTurnstile({
+    token: body.turnstileToken,
+    ip,
+    action: "estimator-capture",
+  });
+  if (!human.ok) return json({ error: human.error }, 403);
+
+  const allowed = await limitForm({ ip, kind: "estimator-capture", max: 5 });
+  if (!allowed) {
+    return json({ error: "Too many requests from this network. Try again later." }, 429);
+  }
+
+  const session = await getOrCreateEstimatorSession(body.sessionId);
+  if (!session.estimate) {
+    return json({ error: "No estimate on this session yet." }, 409);
+  }
+
+  const resolved = resolveInputs(session.slots, session.overrides);
+
+  const saved = await captureLead({
+    source: "estimator",
+    seed: session.slots.summary,
+    answers: {
+      projectType: resolved.projectType,
+      platform: resolved.platform,
+      scope: resolved.scope,
+      timeline: resolved.timeline,
+      scale: resolved.scale,
+      designState: resolved.designState,
+      integrations: resolved.integrations,
+      regulated: resolved.regulated,
+      assumed: resolved.assumed,
+    },
+    solution: {
+      title: `Estimate — ${resolved.projectType}`,
+      costLowUsd: session.estimate.lowUsd,
+      costHighUsd: session.estimate.highUsd,
+      durationLowWeeks: session.estimate.durationWeeks[0],
+      durationHighWeeks: session.estimate.durationWeeks[1],
+      document: session.estimate,
+    },
+    contact: { name: body.name, email: body.email },
+    consent: {
+      email: consentRecord(true, CAPTURE_CONSENT_TEXT),
+      marketing: consentRecord(true, CAPTURE_CONSENT_TEXT),
+    },
+    utm: body.utm ?? {},
+    sessionId: session.id,
+    transcript: session.messages,
+  });
+
+  if (!saved.stored) {
+    console.error("[estimator] lead not persisted:", saved.error);
+  }
+
+  return json({
+    ok: true,
+    message: "Saved. A senior engineer will look at it and follow up.",
+  });
 }
 
 /* --------------------------------- adjust --------------------------------- */
