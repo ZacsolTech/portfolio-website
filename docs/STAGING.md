@@ -55,20 +55,17 @@ way for a UAT click to reach a real customer.
 ## Crons on staging
 
 `vercel.json` crons run on **production deployments only**. Staging therefore
-never sends a nurture email or a reminder on its own, which is the behaviour you
+never sends a nurture email on its own, which is the behaviour you
 want — a UAT lead should not start receiving a sequence.
 
-To exercise them deliberately:
+To exercise it deliberately:
 
 ```bash
 curl -H "Authorization: Bearer $STAGING_CRON_SECRET" \
   https://staging.zacsol.com/api/cron/nurture
-
-curl -H "Authorization: Bearer $STAGING_CRON_SECRET" \
-  https://staging.zacsol.com/api/cron/reminders
 ```
 
-Both return a JSON summary (`due`, `sent`, `failed`) rather than an empty 200, so
+It returns a JSON summary (`due`, `sent`, `failed`) rather than an empty 200, so
 a run that did nothing is distinguishable from a run that failed.
 
 ## Standing it up

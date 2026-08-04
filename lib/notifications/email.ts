@@ -7,7 +7,6 @@ import type {
 import {
 	renderBookingConfirmation,
 	renderBookingInternal,
-	renderBookingReminder,
 } from "./templates/booking";
 import { renderContactAck, renderContactInternal } from "./templates/contact";
 import { renderNurtureEmail } from "./templates/nurture";
@@ -69,8 +68,6 @@ function render(event: NotificationEvent): EmailContent | null {
 				icsBase64: event.icsBase64,
 				rescheduled: event.rescheduled,
 			});
-		case "booking.reminder":
-			return renderBookingReminder({ name: event.name, booking: event.booking });
 		case "booking.internal":
 			return renderBookingInternal({
 				booking: event.booking,

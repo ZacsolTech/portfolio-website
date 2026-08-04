@@ -73,12 +73,6 @@ export type NotificationEvent =
 			rescheduled?: boolean;
 	  }
 	| {
-			type: "booking.reminder";
-			category: "transactional";
-			name: string;
-			booking: BookingSummary;
-	  }
-	| {
 			type: "booking.internal";
 			category: "internal";
 			booking: BookingSummary;

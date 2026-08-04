@@ -29,7 +29,7 @@ import { team } from "@/lib/content";
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] as const;
 
 const EMAIL_CONSENT_TEXT =
-	"Email me a calendar invite and reminder for this consultation.";
+	"Email me a calendar invite for this consultation.";
 
 type Slot = { startsAt: string; endsAt: string };
 

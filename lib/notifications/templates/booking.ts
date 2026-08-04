@@ -1,7 +1,6 @@
 import type { BookingSummary } from "../types";
 import type { EmailContent } from "../email";
 import {
-	absolute,
 	button,
 	definitionRows,
 	esc,
@@ -16,7 +15,7 @@ import {
 } from "./kit";
 
 /**
- * Booking confirmation and reminder.
+ * Booking confirmation.
  *
  * The confirmation carries a real `.ics` attachment (built in lib/booking/ics)
  * so the meeting lands in the recipient's calendar with one click, in every
@@ -99,47 +98,6 @@ export function renderBookingConfirmation(input: {
 					},
 				]
 			: undefined,
-	};
-}
-
-export function renderBookingReminder(input: {
-	name: string;
-	booking: BookingSummary;
-}): EmailContent {
-	const { name, booking } = input;
-	const when = formatDateTime(booking.startsAt, booking.timezone);
-
-	const body = [
-		masthead({
-			overline: "ZACSOL · Tomorrow",
-			title: when,
-			lede: `Thirty minutes with ${booking.hostName}.`,
-		}),
-		paragraph(`Hi ${name}, a quick reminder — we're speaking ${when}.`),
-		`<div style="margin:24px 0 0;padding:20px;background:${palette.paper};border:1px solid ${palette.line};border-radius:12px;">
-      ${definitionRows(details(booking))}
-    </div>`,
-		booking.meetingUrl
-			? button({ href: booking.meetingUrl, label: "Join the call" })
-			: button({ href: absolute("/book"), label: "View booking details" }),
-		secondaryLink({ href: booking.manageUrl, label: "Reschedule or cancel →" }),
-		footer(),
-	].join("\n");
-
-	return {
-		subject: `Reminder: ${when}`,
-		html: shell({ preheader: `Your ZACSOL consultation — ${when}`, body }),
-		text: textBlock([
-			`Hi ${name},`,
-			"",
-			`A reminder that we're speaking ${when}.`,
-			"",
-			...details(booking).map((row) => `${row.term}: ${row.value}`),
-			"",
-			`Reschedule or cancel: ${booking.manageUrl}`,
-			"",
-			"ZACSOL",
-		]),
 	};
 }
 

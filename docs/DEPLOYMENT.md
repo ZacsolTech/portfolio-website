@@ -20,7 +20,7 @@ See also [LEADS.md](./LEADS.md) for how the lead pipeline fits together, and
 | `PAYLOAD_SECRET` | Admin auth breaks |
 | `ESTIMATOR_WEEKLY_RATE_USD` | Optional. Defaults to 4000 — every estimator figure scales off it |
 | `TURNSTILE_SECRET_KEY` / `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | **Bot protection is OFF.** Verification is skipped and a warning is logged once per process. Both keys are required together |
-| `CRON_SECRET` | The nurture and reminder crons **refuse to run** (503). No follow-ups, no booking reminders |
+| `CRON_SECRET` | The nurture cron **refuses to run** (503). No lead follow-ups |
 | `LEADS_NOTIFY_EMAIL` | New-lead and new-booking alerts fall back to `RESEND_REPLY_TO`; with neither, nobody is told a lead arrived |
 | `BOOKING_TIMEZONE` and friends | Optional. Defaults are Mon–Fri, 09:30–16:30 Asia/Karachi, 30 min, 12h notice, 28-day horizon |
 | `NEXT_PUBLIC_CAL_LINK` | Optional. Set it to hand scheduling to Cal.com; unset uses the built-in calendar |
@@ -96,11 +96,10 @@ Every one of these degrades silently, so check them rather than assuming.
 1. Submit. The sender gets an acknowledgement, `LEADS_NOTIFY_EMAIL` gets an alert.
 2. The lead lands in `/admin` with its consent wording and UTM attribution stored.
 
-**Crons** — after deploy, trigger both by hand and read the JSON summary:
+**Crons** — after deploy, trigger the nurture job by hand and read the JSON summary:
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" https://zacsol.com/api/cron/nurture
-curl -H "Authorization: Bearer $CRON_SECRET" https://zacsol.com/api/cron/reminders
 ```
 
 ## 4. Model quota

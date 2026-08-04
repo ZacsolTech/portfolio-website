@@ -35,7 +35,7 @@ export const maxDuration = 30;
  */
 
 const EMAIL_CONSENT_TEXT =
-	"Email me a calendar invite and reminder for this consultation.";
+	"Email me a calendar invite for this consultation.";
 
 const Body = z.object({
 	startsAt: z.string().datetime(),

@@ -70,7 +70,6 @@ await notify(
 |---|---|---|
 | `roadmap.delivered` | Lead | transactional |
 | `booking.confirmed` | Lead (+ `.ics` attachment) | transactional |
-| `booking.reminder` | Lead, 24h before | transactional |
 | `booking.internal` | `LEADS_NOTIFY_EMAIL` | internal |
 | `contact.received` | Lead | transactional |
 | `contact.internal` | `LEADS_NOTIFY_EMAIL` | internal |

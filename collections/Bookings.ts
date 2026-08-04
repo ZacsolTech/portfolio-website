@@ -158,12 +158,6 @@ export const Bookings: CollectionConfig = {
           ],
         },
         { name: 'confirmationError', type: 'text' },
-        {
-          name: 'reminderSentAt',
-          type: 'date',
-          index: true,
-          admin: { readOnly: true, description: 'Set by the reminder cron. Blank means not yet sent.' },
-        },
       ],
     },
   ],
