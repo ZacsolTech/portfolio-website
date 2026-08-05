@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FinalCta } from "@/components/layout/final-cta";
-import { getInsight, getTeam } from "@/lib/cms";
-import { insights } from "@/lib/content";
+import { getInsight } from "@/lib/cms";
+import { insights, team } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
@@ -50,10 +50,10 @@ function renderBody(paragraphs: string[]) {
 
 export default async function InsightArticlePage({ params }: Props) {
   const { slug } = await params;
-  const [article, teamMembers] = await Promise.all([getInsight(slug), getTeam()]);
+  const article = await getInsight(slug);
   if (!article) notFound();
 
-  const author = teamMembers.find((t) => t.name === article.author);
+  const author = team.find((t) => t.name === article.author);
   const related = (
     await Promise.all(article.related.map((s) => getInsight(s)))
   ).filter((a): a is NonNullable<typeof a> => Boolean(a));

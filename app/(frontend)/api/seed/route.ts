@@ -6,7 +6,6 @@ import { services } from '@/lib/content/services'
 import { industries } from '@/lib/content/industries'
 import { portfolio } from '@/lib/content/portfolio'
 import { insights } from '@/lib/content/insights'
-import { team } from '@/lib/content/team'
 import { testimonials } from '@/lib/content/testimonials'
 import { faqs } from '@/lib/content/faqs'
 
@@ -170,26 +169,6 @@ export async function POST(request: Request) {
     }
   }
   summary.insights = insights.length
-
-  for (const t of team) {
-    const existing = await payload.find({
-      collection: 'team',
-      where: { name: { equals: t.name } },
-      limit: 1,
-      overrideAccess: true,
-    })
-    if (existing.docs[0]) {
-      await payload.update({
-        collection: 'team',
-        id: existing.docs[0].id,
-        data: t,
-        overrideAccess: true,
-      })
-    } else {
-      await payload.create({ collection: 'team', data: t, overrideAccess: true })
-    }
-  }
-  summary.team = team.length
 
   for (const t of testimonials) {
     const existing = await payload.find({

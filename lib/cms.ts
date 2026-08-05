@@ -3,7 +3,6 @@ import type {
   Industry,
   PortfolioItem,
   Insight,
-  TeamMember,
   Testimonial,
   FaqItem,
 } from './content/types'
@@ -24,7 +23,6 @@ import {
   insights as staticInsights,
   getInsight as staticGetInsight,
 } from './content/insights'
-import { team as staticTeam } from './content/team'
 import { testimonials as staticTestimonials } from './content/testimonials'
 import { faqs as staticFaqs } from './content/faqs'
 
@@ -271,30 +269,6 @@ function mapInsight(doc: Record<string, unknown>): Insight {
     readingTime: (doc.readingTime as string) ?? '',
     body: bodyRows.map((r) => r.paragraph),
     related: fromValueArray(doc.related as { value: string }[]),
-  }
-}
-
-// ── Team ──────────────────────────────────────────────────
-
-export async function getTeam(): Promise<TeamMember[]> {
-  try {
-    const payload = await getPayloadClient()
-    if (!payload) return staticTeam
-
-    const { docs } = await payload.find({
-      collection: 'team',
-      limit: 100,
-      sort: 'name',
-    })
-
-    return docs.map((doc) => ({
-      name: doc.name as string,
-      role: doc.role as string,
-      bio: doc.bio as string,
-      initials: doc.initials as string,
-    }))
-  } catch {
-    return staticTeam
   }
 }
 

@@ -1,4 +1,4 @@
-/** Shared shapes for typed content modules (CMS-collection mirrors). */
+/** Shared shapes for typed content modules. */
 
 export type FaqItem = {
   q: string;

@@ -8,7 +8,6 @@ import { services } from '../lib/content/services'
 import { industries } from '../lib/content/industries'
 import { portfolio } from '../lib/content/portfolio'
 import { insights } from '../lib/content/insights'
-import { team } from '../lib/content/team'
 import { testimonials } from '../lib/content/testimonials'
 import { faqs } from '../lib/content/faqs'
 const toValueArray = (arr: string[]) => arr.map((value) => ({ value }))
@@ -128,20 +127,6 @@ async function seed() {
       await payload.update({ collection: 'insights', id: existing.docs[0].id, data })
     } else {
       await payload.create({ collection: 'insights', data })
-    }
-  }
-
-  console.log('Seeding team…')
-  for (const t of team) {
-    const existing = await payload.find({
-      collection: 'team',
-      where: { name: { equals: t.name } },
-      limit: 1,
-    })
-    if (existing.docs.length > 0) {
-      await payload.update({ collection: 'team', id: existing.docs[0].id, data: t })
-    } else {
-      await payload.create({ collection: 'team', data: t })
     }
   }
 

@@ -7,7 +7,7 @@ Payload CMS 3 is live against Neon Postgres. Static TypeScript modules in `lib/c
 1. Start the app: `pnpm dev`
 2. Open [http://localhost:3000/admin](http://localhost:3000/admin)
 3. Create the first admin user (email + password) on first visit
-4. Edit Services, Industries, Portfolio, Insights, Team, Testimonials, FAQs, Media
+4. Edit Services, Industries, Portfolio, Insights, Testimonials, FAQs, Media
 
 ## Seed
 
@@ -28,11 +28,12 @@ In production, set `SEED_SECRET` and send header `x-seed-secret: <value>`.
 | Industries   | `lib/content/industries.ts`   | yes    |
 | Portfolio    | `lib/content/portfolio.ts`    | yes    |
 | Insights     | `lib/content/insights.ts`     | yes    |
-| Team         | `lib/content/team.ts`         | no     |
 | Testimonials | `lib/content/testimonials.ts` | no     |
 | Faqs         | `lib/content/faqs.ts`         | no     |
 | Media        | uploads → `public/media`      | —      |
 | Users        | admin auth                    | —      |
+
+Code-only (not in CMS): `lib/content/team.ts`, `lib/content/site.ts`, `lib/content/zac.ts`.
 
 ## Frontend data
 

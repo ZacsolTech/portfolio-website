@@ -10,8 +10,7 @@ import {
   Check,
   Stat,
 } from "@/components/ui";
-import { getTeam } from "@/lib/cms";
-import { aboutPrinciples, faqs, resultsStats, site } from "@/lib/content";
+import { aboutPrinciples, faqs, resultsStats, site, team } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 import { FaqJsonLd } from "@/components/seo/json-ld";
 
@@ -29,7 +28,6 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function AboutPage() {
-  const team = await getTeam();
   return (
     <>
       <FaqJsonLd items={faqs} />
