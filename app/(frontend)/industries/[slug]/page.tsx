@@ -6,8 +6,8 @@ import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { ServiceIcon } from "@/components/shared/service-icon";
 import { Badge, Card, CardBody, CardMedia, IconTile } from "@/components/ui";
-import { getIndustry, getService, getPortfolio } from "@/lib/cms";
-import { industries } from "@/lib/content";
+import { getIndustry, getPortfolio } from "@/lib/cms";
+import { getService, industries } from "@/lib/content";
 import { pageMetadata, thumbClass } from "@/lib/seo";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
@@ -39,9 +39,9 @@ export default async function IndustryDetailPage({ params }: Props) {
   const [industry, portfolio] = await Promise.all([getIndustry(slug), getPortfolio()]);
   if (!industry) notFound();
 
-  const relatedServices = (
-    await Promise.all(industry.services.map((s) => getService(s)))
-  ).filter((s): s is NonNullable<typeof s> => Boolean(s));
+  const relatedServices = industry.services
+    .map((s) => getService(s))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   const relatedWork = portfolio
     .filter((p) =>

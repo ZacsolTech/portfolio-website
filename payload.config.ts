@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url'
 import {
   Users,
   Media,
-  Services,
   Industries,
   Portfolio,
   Insights,
@@ -39,7 +38,6 @@ export default buildConfig({
   collections: [
     Users,
     Media,
-    Services,
     Industries,
     Portfolio,
     Insights,

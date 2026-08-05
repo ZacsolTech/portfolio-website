@@ -4,7 +4,6 @@ loadDotenv({ path: '.env' })
 import { getPayload } from 'payload'
 import config from '../payload.config'
 
-import { services } from '../lib/content/services'
 import { industries } from '../lib/content/industries'
 import { portfolio } from '../lib/content/portfolio'
 import { insights } from '../lib/content/insights'
@@ -14,38 +13,6 @@ const toValueArray = (arr: string[]) => arr.map((value) => ({ value }))
 
 async function seed() {
   const payload = await getPayload({ config })
-
-  console.log('Seeding services…')
-  for (const s of services) {
-    const existing = await payload.find({
-      collection: 'services',
-      where: { slug: { equals: s.slug } },
-      limit: 1,
-    })
-    const data = {
-      slug: s.slug,
-      title: s.title,
-      shortTitle: s.shortTitle,
-      blurb: s.blurb,
-      icon: s.icon,
-      tech: toValueArray(s.tech),
-      included: toValueArray([...s.included]),
-      stackGroups: s.stackGroups.map((g) => ({
-        label: g.label,
-        items: toValueArray(g.items),
-      })),
-      process: s.process,
-      faqs: s.faqs,
-      engagement: [...s.engagement],
-      seoDescription: s.seo.description,
-      _status: 'published' as const,
-    }
-    if (existing.docs.length > 0) {
-      await payload.update({ collection: 'services', id: existing.docs[0].id, data })
-    } else {
-      await payload.create({ collection: 'services', data })
-    }
-  }
 
   console.log('Seeding industries…')
   for (const ind of industries) {

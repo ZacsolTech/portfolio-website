@@ -2,10 +2,10 @@ import type { TeamMember } from "./types";
 
 export const team: TeamMember[] = [
   {
-    name: "S. Zahid",
-    role: "Founder · Product & AI",
+    name: "Shehryar Afzal",
+    role: "Founder & CEO",
     bio: "Owns the consultant, the blueprint contract and which AI features earn a build. Senior engineer first — pitch decks second.",
-    initials: "SZ",
+    initials: "SA",
   },
   {
     name: "A. Rahman",

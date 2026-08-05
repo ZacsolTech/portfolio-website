@@ -7,7 +7,7 @@ import { ZacLink } from "@/components/zac/zac-link";
 import { Reveal } from "@/components/motion/reveal";
 import { ServiceIcon } from "@/components/shared/service-icon";
 import { Chip, IconTile, Panel, PanelRow } from "@/components/ui";
-import { getServices } from "@/lib/cms";
+import { services } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -24,8 +24,7 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
-export default async function ServicesPage() {
-  const services = await getServices();
+export default function ServicesPage() {
   return (
     <>
       <PageHero

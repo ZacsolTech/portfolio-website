@@ -17,8 +17,8 @@ import {
   Panel,
   PanelRow,
 } from "@/components/ui";
-import { getService, getPortfolio } from "@/lib/cms";
-import { services } from "@/lib/content";
+import { getPortfolio } from "@/lib/cms";
+import { getService, services } from "@/lib/content";
 import { pageMetadata, thumbClass } from "@/lib/seo";
 import { BreadcrumbJsonLd, FaqJsonLd, ServiceJsonLd } from "@/components/seo/json-ld";
 
@@ -30,7 +30,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const service = await getService(slug);
+  const service = getService(slug);
   if (!service) return {};
   return pageMetadata({
     title: service.title,
@@ -47,7 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
-  const [service, portfolio] = await Promise.all([getService(slug), getPortfolio()]);
+  const service = getService(slug);
+  const portfolio = await getPortfolio();
   if (!service) notFound();
 
   const related = portfolio

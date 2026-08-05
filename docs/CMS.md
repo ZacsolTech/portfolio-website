@@ -7,7 +7,7 @@ Payload CMS 3 is live against Neon Postgres. Static TypeScript modules in `lib/c
 1. Start the app: `pnpm dev`
 2. Open [http://localhost:3000/admin](http://localhost:3000/admin)
 3. Create the first admin user (email + password) on first visit
-4. Edit Services, Industries, Portfolio, Insights, Testimonials, FAQs, Media
+4. Edit Industries, Portfolio, Insights, Testimonials, FAQs, Media
 
 ## Seed
 
@@ -24,7 +24,6 @@ In production, set `SEED_SECRET` and send header `x-seed-secret: <value>`.
 
 | Collection   | Source module                 | Drafts |
 |--------------|-------------------------------|--------|
-| Services     | `lib/content/services.ts`     | yes    |
 | Industries   | `lib/content/industries.ts`   | yes    |
 | Portfolio    | `lib/content/portfolio.ts`    | yes    |
 | Insights     | `lib/content/insights.ts`     | yes    |
@@ -33,18 +32,20 @@ In production, set `SEED_SECRET` and send header `x-seed-secret: <value>`.
 | Media        | uploads → `public/media`      | —      |
 | Users        | admin auth                    | —      |
 
-Code-only (not in CMS): `lib/content/team.ts`, `lib/content/site.ts`, `lib/content/zac.ts`.
+Code-only (not in CMS): `lib/content/services.ts`, `lib/content/team.ts`, `lib/content/site.ts`, `lib/content/zac.ts`.
 
 ## Frontend data
 
-Pages call `lib/cms.ts` helpers (`getServices`, `getPortfolioItem`, …). Flow:
+CMS-backed pages call `lib/cms.ts` helpers (`getPortfolioItem`, `getIndustry`, …). Flow:
 
 1. Try Payload Local API
 2. On failure / empty DB → fall back to `lib/content/*`
 
+Services and team are imported directly from `lib/content/*`.
+
 ## Draft preview
 
-Services, Industries, Portfolio and Insights support **drafts** + **autosave**.
+Industries, Portfolio and Insights support **drafts** + **autosave**.
 
 1. Set `PREVIEW_SECRET` in `.env` (see `.env.example`)
 2. In `/admin`, open a document → click **Preview** (or open Live Preview)

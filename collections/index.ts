@@ -1,6 +1,5 @@
 export { Users } from './Users'
 export { Media } from './Media'
-export { Services } from './Services'
 export { Industries } from './Industries'
 export { Portfolio } from './Portfolio'
 export { Insights } from './Insights'

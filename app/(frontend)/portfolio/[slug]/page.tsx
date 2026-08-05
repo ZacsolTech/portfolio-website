@@ -5,8 +5,8 @@ import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Chip, Panel, PanelRow, Stat } from "@/components/ui";
-import { getPortfolioItem, getService, getPortfolio } from "@/lib/cms";
-import { portfolio } from "@/lib/content";
+import { getPortfolioItem, getPortfolio } from "@/lib/cms";
+import { getService, portfolio } from "@/lib/content";
 import { pageMetadata, thumbClass } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -34,9 +34,9 @@ export default async function CaseStudyPage({ params }: Props) {
   const idx = allPortfolio.findIndex((p) => p.slug === slug);
   const next = allPortfolio[(idx + 1) % allPortfolio.length];
 
-  const relatedServicesList = (
-    await Promise.all(item.relatedServices.map((s) => getService(s)))
-  ).filter((s): s is NonNullable<typeof s> => Boolean(s));
+  const relatedServicesList = item.relatedServices
+    .map((s) => getService(s))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   return (
     <>

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
-import { services } from '@/lib/content/services'
 import { industries } from '@/lib/content/industries'
 import { portfolio } from '@/lib/content/portfolio'
 import { insights } from '@/lib/content/insights'
@@ -30,44 +29,6 @@ export async function POST(request: Request) {
 
   const payload = await getPayload({ config })
   const summary: Record<string, number> = {}
-
-  for (const s of services) {
-    const existing = await payload.find({
-      collection: 'services',
-      where: { slug: { equals: s.slug } },
-      limit: 1,
-      overrideAccess: true,
-    })
-    const data = {
-      slug: s.slug,
-      title: s.title,
-      shortTitle: s.shortTitle,
-      blurb: s.blurb,
-      icon: s.icon,
-      tech: toValueArray(s.tech),
-      included: toValueArray([...s.included]),
-      stackGroups: s.stackGroups.map((g) => ({
-        label: g.label,
-        items: toValueArray(g.items),
-      })),
-      process: s.process,
-      faqs: s.faqs,
-      engagement: [...s.engagement],
-      seoDescription: s.seo.description,
-      _status: 'published' as const,
-    }
-    if (existing.docs[0]) {
-      await payload.update({
-        collection: 'services',
-        id: existing.docs[0].id,
-        data,
-        overrideAccess: true,
-      })
-    } else {
-      await payload.create({ collection: 'services', data, overrideAccess: true })
-    }
-  }
-  summary.services = services.length
 
   for (const ind of industries) {
     const existing = await payload.find({

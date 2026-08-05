@@ -1,5 +1,4 @@
 import type {
-  Service,
   Industry,
   PortfolioItem,
   Insight,
@@ -7,10 +6,6 @@ import type {
   FaqItem,
 } from './content/types'
 
-import {
-  services as staticServices,
-  getService as staticGetService,
-} from './content/services'
 import {
   industries as staticIndustries,
   getIndustry as staticGetIndustry,
@@ -48,65 +43,6 @@ async function draftQuery() {
     return { draft: true as const, overrideAccess: true as const }
   } catch {
     return { draft: false as const }
-  }
-}
-
-// ── Services ──────────────────────────────────────────────
-
-export async function getServices(): Promise<Service[]> {
-  try {
-    const payload = await getPayloadClient()
-    if (!payload) return staticServices
-
-    const { docs } = await payload.find({
-      collection: 'services',
-      limit: 100,
-      sort: 'title',
-      ...(await draftQuery()),
-    })
-
-    return docs.map(mapService)
-  } catch {
-    return staticServices
-  }
-}
-
-export async function getService(slug: string): Promise<Service | undefined> {
-  try {
-    const payload = await getPayloadClient()
-    if (!payload) return staticGetService(slug)
-
-    const { docs } = await payload.find({
-      collection: 'services',
-      where: { slug: { equals: slug } },
-      limit: 1,
-      ...(await draftQuery()),
-    })
-
-    return docs[0] ? mapService(docs[0]) : staticGetService(slug)
-  } catch {
-    return staticGetService(slug)
-  }
-}
-
-function mapService(doc: Record<string, unknown>): Service {
-  const stackGroups = (doc.stackGroups as Array<{ label: string; items?: { value: string }[] }>) ?? []
-  return {
-    slug: doc.slug as string,
-    title: doc.title as string,
-    shortTitle: doc.shortTitle as string,
-    blurb: doc.blurb as string,
-    icon: doc.icon as string,
-    tech: fromValueArray(doc.tech as { value: string }[]),
-    included: fromValueArray(doc.included as { value: string }[]) as Service['included'],
-    stackGroups: stackGroups.map((g) => ({
-      label: g.label,
-      items: fromValueArray(g.items),
-    })),
-    process: (doc.process as Service['process']) ?? [],
-    faqs: (doc.faqs as Service['faqs']) ?? [],
-    engagement: (doc.engagement as Service['engagement']) ?? ([] as unknown as Service['engagement']),
-    seo: { description: (doc.seoDescription as string) ?? '' },
   }
 }
 
