@@ -11,7 +11,7 @@ export const metadata: Metadata = pageMetadata({
 export default function NotFound() {
   return (
     <section
-      className="section section--ink section--persist on-dark"
+      className="section section--ink on-dark"
       style={{ minHeight: "70vh", display: "flex", alignItems: "center" }}
     >
       <div className="container" style={{ textAlign: "center", paddingBlock: "4rem" }}>
@@ -20,13 +20,14 @@ export default function NotFound() {
           style={{
             fontSize: "clamp(4rem, 12vw, 7rem)",
             lineHeight: 1,
-            color: "var(--gold)",
+            /* --accent-fg, not --gold: lime is illegible on the light band. */
+            color: "var(--accent-fg)",
             margin: 0,
           }}
         >
           404
         </p>
-        <h1 className="d2" style={{ marginTop: "1rem", color: "#fff" }}>
+        <h1 className="d2" style={{ marginTop: "1rem" }}>
           That page shipped elsewhere.
         </h1>
         <p className="lead" style={{ margin: "1.25rem auto 0", color: "var(--text-on-dark-body)", maxWidth: "28rem" }}>

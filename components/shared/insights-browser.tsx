@@ -88,9 +88,9 @@ export function InsightsBrowser({ items }: Props) {
         ))}
       </div>
 
-      <div className="section section--ink section--persist on-dark insights-news">
+      <div className="section section--ink on-dark insights-news">
         <span className="overline overline--gold">Newsletter</span>
-        <h2 className="d3" style={{ marginTop: "0.75rem", color: "#fff" }}>
+        <h2 className="d3" style={{ marginTop: "0.75rem" }}>
           {site.newsletterBlurb}
         </h2>
         {/*

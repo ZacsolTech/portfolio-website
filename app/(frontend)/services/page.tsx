@@ -73,10 +73,10 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="section section--ink section--persist on-dark">
+      <section className="section section--ink on-dark">
         <div className="container" style={{ textAlign: "center", maxWidth: "40rem", marginInline: "auto" }}>
           <span className="overline overline--gold">Not sure which you need?</span>
-          <h2 className="d2" style={{ marginTop: "0.75rem", color: "#fff" }}>
+          <h2 className="d2" style={{ marginTop: "0.75rem" }}>
             Send the problem, <span className="em-serif">not the spec</span>.
           </h2>
           <p className="lead" style={{ margin: "1.25rem auto 0", color: "var(--text-on-dark-body)" }}>

@@ -103,37 +103,71 @@
   --ink-700:  var(--z-700);
   --ink-black:var(--z-950);
 
-  /* paper-alt is a real step down from paper (was #F4F4F5 — a 2% delta
-     that read as one continuous surface across every band). */
-  --paper:      var(--z-50);
-  --paper-alt:  #EEEEF1;
-  --white:      #FFFFFF;
+  /*
+    Four surface steps, not two.
+
+    Light mode used to own only `paper` and `paper-alt`, ~4% of luminance
+    apart, which is why a page of alternating bands read as one continuous
+    sheet — and why mid-page chapter breaks were forced to go dark instead.
+    `paper-deep` is the missing step: the chapter break, dark enough to
+    separate but still paper. `white` stays the raised-card surface, so a
+    card on `paper-deep` now has real elevation to sit above.
+  */
+  --paper:      var(--z-50);   /* base band          #FAFAFA */
+  --paper-alt:  #F1F1F4;       /* recessed band              */
+  --paper-deep: #E7E7EE;       /* feature band / chapter break */
+  --white:      #FFFFFF;       /* raised card                */
 
   --text-ink:   var(--z-950);
   --text-body:  #27272A;
-  /* #71717A fell to 4.32:1 on paper-alt at 11–14px; #63636D is 5.07:1 */
-  --text-muted: #63636D;
+  /* Has to clear AA on `paper-deep`, the darkest paper: #5C5C66 is 5.4:1
+     there and 6.3:1 on `paper` (the old #63636D was 4.5:1 on deep). */
+  --text-muted: #5C5C66;
 
-  --line:        rgba(var(--z-rgb), 0.10);
-  --line-soft:   rgba(var(--z-rgb), 0.08);
-  --line-strong: rgba(var(--z-rgb), 0.14);
+  --line:        rgba(var(--z-rgb), 0.11);
+  --line-soft:   rgba(var(--z-rgb), 0.07);
+  --line-strong: rgba(var(--z-rgb), 0.18);
 
-  --nav-bg: rgba(250, 250, 250, 0.86);
+  --nav-bg: rgba(255, 255, 255, 0.82);
   --nav-border: rgba(var(--z-rgb), 0.10);
-  --nav-border-scrolled: rgba(var(--z-rgb), 0.14);
+  --nav-border-scrolled: rgba(var(--z-rgb), 0.16);
   --nav-link-hover: rgba(var(--z-rgb), 0.05);
 
-  --sh-card:       0 14px 40px rgba(var(--z-rgb), 0.05);
-  --sh-card-hover: 0 20px 50px rgba(var(--z-rgb), 0.09);
-  --sh-panel:      0 24px 80px rgba(var(--z-rgb), 0.07);
-  --sh-hero:       0 32px 90px rgba(var(--z-rgb), 0.12);
-  --sh-ink-btn:    0 12px 30px rgba(var(--z-rgb), 0.20);
-  --sh-gold-btn:   0 12px 30px rgba(var(--accent-rgb), 0.28);
+  /*
+    Layered, not single-blur. One 40px shadow at 5% is a grey smudge; a
+    tight contact shadow plus a wide ambient one is what makes a light
+    surface read as lifted rather than tinted. Negative spread keeps the
+    ambient layer under the card instead of haloing around it.
+  */
+  --sh-card:       0 1px 2px rgba(var(--z-rgb), 0.05),
+                   0 6px 14px -6px rgba(var(--z-rgb), 0.08),
+                   0 18px 36px -18px rgba(var(--z-rgb), 0.12);
+  --sh-card-hover: 0 1px 2px rgba(var(--z-rgb), 0.06),
+                   0 10px 22px -8px rgba(var(--z-rgb), 0.12),
+                   0 28px 54px -22px rgba(var(--z-rgb), 0.18);
+  --sh-panel:      0 1px 2px rgba(var(--z-rgb), 0.05),
+                   0 12px 28px -10px rgba(var(--z-rgb), 0.10),
+                   0 36px 72px -28px rgba(var(--z-rgb), 0.16);
+  --sh-hero:       0 2px 4px rgba(var(--z-rgb), 0.06),
+                   0 24px 60px -20px rgba(var(--z-rgb), 0.20),
+                   0 48px 100px -40px rgba(var(--z-rgb), 0.24);
+  --sh-ink-btn:    0 1px 2px rgba(var(--z-rgb), 0.16),
+                   0 10px 24px -8px rgba(var(--z-rgb), 0.28);
+  /* Grounded on a contact shadow so the lime button sits on the page
+     rather than glowing above it. */
+  --sh-gold-btn:   0 1px 2px rgba(var(--z-rgb), 0.10),
+                   0 12px 26px -8px rgba(120, 176, 40, 0.45);
 
-  /* Deep lime for text/labels on paper — readable, still on-brand */
-  --accent-fg:    #3A6B0F;
-  --gold-fill:    rgba(58, 107, 15, 0.10);
-  --gold-line:    rgba(58, 107, 15, 0.22);
+  /*
+    Accent on paper. Lime is unreadable as text on white, so light mode
+    substitutes a deep moss for ink (5.8:1 on paper, 4.9:1 on paper-deep)
+    — but fills and hairlines stay derived from the *lime* hue. Tinting
+    them from the moss instead is what made accented chips look muddy.
+  */
+  --accent-fg:    #35700F;
+  --gold-fill:    rgba(163, 224, 74, 0.26);
+  --gold-line:    rgba(120, 176, 40, 0.45);
+  --gold-glow:    rgba(var(--accent-rgb), 0.18);
 
   --sheet-backdrop: rgba(9, 9, 11, 0.55);
   --thumb-light: linear-gradient(135deg, #E4E4E7, #F4F4F5);
@@ -153,6 +187,7 @@
 
   --paper:      var(--z-950);
   --paper-alt:  #101014;
+  --paper-deep: #16161B;
   --white:      var(--z-900);
 
   --text-ink:   #FAFAFA;
@@ -298,12 +333,18 @@ h1, h2, h3, h4 {
 .on-dark .overline, .overline--gold { color: var(--accent-fg); }
 .text-accent { color: var(--accent-fg); }
 
-/* Bright lime text accents on dark surfaces — even in light theme */
+/* Bright lime text accents on dark surfaces — even in light theme.
+   `.card--invert` and `.doc-cta` are dark boxes that sit *inside* light
+   sections, so they have to carry their own reading: without this the ZAC
+   tile in the services grid rendered a moss badge on near-black (1.5:1). */
 .hero,
 .page-hero,
 .footer,
 .console,
-.section--persist {
+.section--persist,
+.nav-sheet__panel,
+.card--invert,
+.doc-cta {
   --accent-fg: #BBFD6A;
   --gold-fill: rgba(187, 253, 106, 0.16);
   --gold-line: rgba(187, 253, 106, 0.30);
@@ -341,6 +382,17 @@ h1, h2, h3, h4 {
 
 .section--paper { background: var(--paper); }
 .section--paper-alt { background: var(--paper-alt); }
+/*
+  Two adjacent paper bands differ by about 9% of luminance. That is the right
+  amount of difference — but at that distance a full-width edge reads as a
+  rendering artefact rather than a seam, so the transition gets a hairline
+  the way the dark bands do.
+*/
+[data-theme="light"] .section--paper + .section--paper-alt,
+[data-theme="light"] .section--paper-alt + .section--paper,
+[data-theme="light"] .section--paper-alt + .section--paper-alt {
+  box-shadow: inset 0 1px 0 var(--line-soft);
+}
 .section--wash {
   background: linear-gradient(180deg, var(--paper) 0%, var(--paper-alt) 100%);
 }
@@ -358,8 +410,11 @@ h1, h2, h3, h4 {
 .section--ink > .container { position: relative; z-index: 1; }
 
 /* Hairline where a dark band meets the band above it — the seam reads as
-   deliberate joinery instead of two blocks resting on each other. */
+   deliberate joinery instead of two blocks resting on each other.
+   In dark theme every ink band is a dark band, so every one gets the seam;
+   in light theme only the ones that stay dark do. */
 .section--persist::after,
+[data-theme="dark"] .section--ink::after,
 .hero::after {
   content: ''; position: absolute; inset-inline: 0; top: 0; height: 1px; z-index: 2;
   pointer-events: none;
@@ -383,19 +438,53 @@ h1, h2, h3, h4 {
 .on-dark .tone-strong,
 .page.on-dark .tone-strong { color: #fff; }
 
-/*
-  Light mode: only hero / persist / footer stay dark.
-  Other .section--ink bands become paper so the page reads light-first.
-*/
+/* ==========================================================================
+   Light mode: the feature band
+   --------------------------------------------------------------------------
+   `.section--ink` means "chapter break", not "black". Dark theme spells that
+   as a zinc slab; light theme spells it as the deepest paper step, lit from
+   the top-left by the same lime wash, with white cards floating on it. Both
+   readings do the same job, so light mode no longer has to go dark to get a
+   break — which is what left half the page black in the light theme.
+
+   Only the bookends keep dark chrome in light mode: the hero, the page hero,
+   the closing CTA (`.section--persist`) and the footer.
+   ========================================================================== */
 [data-theme="light"] .section--wash {
   background: linear-gradient(180deg, var(--paper) 0%, var(--paper-alt) 100%);
 }
 [data-theme="light"] .section--ink:not(.section--persist) {
-  background: var(--paper);
+  background: var(--paper-deep);
   color: var(--text-body);
+  /*
+    Inset rather than a real border: the band is already `overflow: clip`
+    with absolutely-positioned children measured against its box, and two
+    added pixels of height would shift them.
+  */
+  box-shadow:
+    inset 0 1px 0 var(--line-soft),
+    inset 0 -1px 0 var(--line-soft);
+
+  /*
+    The whole on-dark vocabulary, re-pointed at paper ink in one place.
+    Everything written as `var(--text-on-dark-body)` or `var(--line-on-dark)`
+    — tone utilities, stat bands, rules, quote attributions, aside cards —
+    follows automatically instead of needing a rule each.
+  */
+  --text-on-dark:        var(--text-ink);
+  --text-on-dark-body:   var(--text-body);
+  --text-on-dark-muted:  var(--text-muted);
+  --line-on-dark:        var(--line);
+  --line-on-dark-strong: var(--line-strong);
 }
+/* Same two lights as the dark band: a lime wash top-left, and a soft white
+   lift bottom-right, so the band is a lit surface rather than a flat
+   rectangle of grey. Kept faint and wide on purpose — on paper the same
+   stops that read as "light in the room" on zinc read as a stain. */
 [data-theme="light"] .section--ink:not(.section--persist)::before {
-  background: radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.08), transparent 28%);
+  background:
+    radial-gradient(90% 70% at 6% -10%, rgba(var(--accent-rgb), 0.13), transparent 76%),
+    radial-gradient(75% 75% at 98% 108%, rgba(255, 255, 255, 0.55), transparent 74%);
 }
 [data-theme="light"] .section--ink:not(.section--persist) h1,
 [data-theme="light"] .section--ink:not(.section--persist) h2,
@@ -464,61 +553,288 @@ h1, h2, h3, h4 {
   border-color: var(--line-soft);
 }
 
-/* Tool pages (consultant / estimator): light chrome, dark console only */
-[data-theme="light"] body:has(.page.on-dark) {
-  background: var(--paper);
-}
-[data-theme="light"] .page.on-dark {
-  color: var(--text-body);
-}
-[data-theme="light"] .page.on-dark::before {
-  background: radial-gradient(circle at 80% 0%, rgba(var(--accent-rgb), 0.10), transparent 44%);
-}
-[data-theme="light"] .page.on-dark .head h1 {
-  color: var(--text-ink);
-}
-[data-theme="light"] .page.on-dark .head p {
+/*
+  The rest of the on-dark vocabulary that is written as literal white rather
+  than as a token, so the block above cannot reach it. These are the pieces
+  that used to disappear the moment a band stopped being black: a lime badge
+  on paper, a translucent-white chip on paper, white card numerals.
+*/
+[data-theme="light"] .section--ink:not(.section--persist) .chip {
+  background: var(--white);
+  border-color: var(--line);
   color: var(--text-muted);
 }
-[data-theme="light"] .page.on-dark .aside-card {
+[data-theme="light"] .section--ink:not(.section--persist) .card__num,
+[data-theme="light"] .section--ink:not(.section--persist) .page-hero__crumbs ol {
+  color: var(--text-muted);
+}
+[data-theme="light"] .section--ink:not(.section--persist) .badge {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-ink);
+}
+[data-theme="light"] .section--ink:not(.section--persist) .badge--gold {
+  background: var(--gold-fill);
+  border-color: var(--gold-line);
+  color: var(--accent-fg);
+}
+[data-theme="light"] .section--ink:not(.section--persist) .step__t,
+[data-theme="light"] .section--ink:not(.section--persist) .ind__t,
+[data-theme="light"] .section--ink:not(.section--persist) .flow__t,
+[data-theme="light"] .section--ink:not(.section--persist) .bp-row__v {
+  color: var(--text-ink);
+}
+[data-theme="light"] .section--ink:not(.section--persist) .divider-dark {
+  background: var(--line);
+}
+/* A white card on `paper-deep` needs the elevation, or the band swallows it. */
+[data-theme="light"] .section--ink:not(.section--persist) .card:not(.card--dark):not(.card--invert) {
+  box-shadow: var(--sh-card);
+}
+
+/* ==========================================================================
+   Dark-chrome components on a paper surface
+   --------------------------------------------------------------------------
+   `.card--dark`, `.panel--dark`, `.badge--dark` and the wizard `.opt` tile
+   are written in white-on-black literals, on the assumption that something
+   dark is always behind them. Put one on a paper section — which /styleguide
+   does, and which every un-persisted feature band now does — and it renders
+   white text on a white card.
+
+   So in light theme they take the paper reading by default, and the dark
+   chrome is restored only inside a container that is genuinely dark. The
+   `:is()` list below is the complete set of those containers.
+   ========================================================================== */
+[data-theme="light"] .card--dark {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-body);
+  box-shadow: var(--sh-card);
+}
+[data-theme="light"] .card--dark:hover {
+  background: var(--white);
+  border-color: var(--line-strong);
+  box-shadow: var(--sh-card-hover);
+}
+[data-theme="light"] .card--dark .d4 {
+  color: var(--text-ink);
+}
+[data-theme="light"] .panel--dark {
+  background: var(--white);
+  border-color: var(--line);
+  box-shadow: var(--sh-panel);
+}
+[data-theme="light"] .panel--dark .panel__row {
+  border-color: var(--line-soft);
+}
+[data-theme="light"] .badge--dark {
+  background: var(--paper-alt);
+  border-color: var(--line);
+  color: var(--text-ink);
+}
+[data-theme="light"] .opt {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-body);
+}
+[data-theme="light"] .opt:hover {
+  background: var(--paper-alt);
+  border-color: var(--line-strong);
+}
+[data-theme="light"] .opt[aria-pressed="true"] {
+  border-color: var(--gold-line);
+  background: var(--gold-fill);
+  color: var(--text-ink);
+}
+[data-theme="light"] .opt__key {
+  background: var(--paper-alt);
+  color: var(--text-muted);
+}
+/*
+  Same idea for the pieces that used to depend on an opt-in modifier
+  (`.steps--on-paper`, `.ind--on-paper`) or on the band happening to be dark.
+  Forgetting the modifier produced white-on-white; defaulting to paper and
+  restoring dark inside a dark container cannot.
+*/
+[data-theme="light"] :is(.flow__t, .step__t, .ind__t, .aside-card h3) {
+  color: var(--text-ink);
+}
+[data-theme="light"] :is(.ind__s, .aside-card p, .aside-card li) {
+  color: var(--text-muted);
+}
+[data-theme="light"] :is(.aside-card, .reply, .scale-btn) {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--text-body);
+}
+[data-theme="light"] .aside-card--accent {
+  background: var(--gold-fill);
+  border-color: var(--gold-line);
+}
+[data-theme="light"] .reply:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-on);
+}
+[data-theme="light"] .scale-btn:hover {
+  background: var(--paper-alt);
+  border-color: var(--line-strong);
+}
+[data-theme="light"] .scale-btn--on {
+  border-color: var(--gold-line);
+  background: var(--gold-fill);
+  color: var(--text-ink);
+}
+
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  :is(.card--dark, .panel--dark, .badge--dark, .opt, .opt__key) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--line-on-dark);
+  color: var(--text-on-dark-body);
+  box-shadow: none;
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  :is(.card--dark, .opt):hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--line-on-dark-strong);
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  :is(.card--dark .d4, .panel--dark .d4, .badge--dark) {
+  color: #fff;
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  .opt[aria-pressed="true"] {
+  border-color: var(--gold);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: #fff;
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  .opt[aria-pressed="true"] .opt__key {
+  background: var(--gold);
+  color: var(--gold-on);
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  :is(.flow__t, .step__t, .ind__t, .aside-card h3) {
+  color: #fff;
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  :is(.ind__s, .aside-card p, .aside-card li) {
+  color: rgba(255, 255, 255, 0.62);
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  :is(.aside-card, .reply, .scale-btn) {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--line-on-dark);
+  color: rgba(255, 255, 255, 0.82);
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  .aside-card--accent {
+  background: rgba(var(--accent-rgb), 0.07);
+  border-color: rgba(var(--accent-rgb), 0.28);
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  .reply:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-on);
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  .scale-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+[data-theme="light"]
+  :is(.hero, .page-hero, .footer, .console, .nav-sheet__panel, .doc-cta,
+      .section--persist)
+  .scale-btn--on {
+  border-color: var(--gold);
+  background: rgba(var(--accent-rgb), 0.14);
+  color: #fff;
+}
+
+/* ==========================================================================
+   Tool pages (/consultant, /tools/estimator): light chrome, dark console
+   --------------------------------------------------------------------------
+   This was always the intent, but the rules were written against `.page`
+   and the shell renders `.consultant-page`, so none of them ever matched
+   and light theme served a fully black page. The console keeps its zinc —
+   it is the product surface, and every AI style inside it assumes dark.
+   ========================================================================== */
+[data-theme="light"] .consultant-page.on-dark {
+  background: var(--paper);
+  color: var(--text-body);
+}
+[data-theme="light"] .consultant-page.on-dark::before {
+  background:
+    radial-gradient(circle at 88% -8%, rgba(var(--accent-rgb), 0.13), transparent 52%),
+    radial-gradient(circle at 2% 104%, rgba(var(--z-rgb), 0.045), transparent 46%);
+}
+[data-theme="light"] .consultant-page.on-dark h1,
+[data-theme="light"] .consultant-page.on-dark h2,
+[data-theme="light"] .consultant-page.on-dark .consultant-page__head .d3 {
+  color: var(--text-ink);
+}
+[data-theme="light"] .consultant-page.on-dark .consultant-page__sub,
+[data-theme="light"] .consultant-page.on-dark .tone-soft {
+  color: var(--text-body);
+}
+[data-theme="light"] .consultant-page.on-dark .tone-faint {
+  color: var(--text-muted);
+}
+[data-theme="light"] .consultant-page.on-dark .tone-strong {
+  color: var(--text-ink);
+}
+[data-theme="light"] .consultant-page.on-dark .consultant-page__foot .link-u {
+  color: var(--text-muted);
+}
+[data-theme="light"] .consultant-page.on-dark .blob--gold {
+  opacity: 0.45;
+}
+/* The aside rail sits on paper next to the console, not inside it. */
+[data-theme="light"] .consultant-page.on-dark .aside-card {
   background: var(--white);
   border-color: var(--line);
   box-shadow: var(--sh-card);
 }
-[data-theme="light"] .page.on-dark .aside-card h3 {
+[data-theme="light"] .consultant-page.on-dark .aside-card h3 {
   color: var(--text-ink);
 }
-[data-theme="light"] .page.on-dark .aside-card p,
-[data-theme="light"] .page.on-dark .aside-card li {
+[data-theme="light"] .consultant-page.on-dark .aside-card p,
+[data-theme="light"] .consultant-page.on-dark .aside-card li {
   color: var(--text-muted);
 }
-[data-theme="light"] .page.on-dark .tone-soft {
-  color: var(--text-muted);
-}
-[data-theme="light"] .page.on-dark .tone-faint {
-  color: var(--text-muted);
-}
-[data-theme="light"] .page.on-dark .tone-strong {
+[data-theme="light"] .consultant-page.on-dark .aside-card a {
   color: var(--text-ink);
 }
-[data-theme="light"] .page.on-dark .aside-card--accent {
-  border-color: rgba(var(--accent-rgb), 0.35);
-  background: rgba(var(--accent-rgb), 0.12);
+[data-theme="light"] .consultant-page.on-dark .aside-card--accent {
+  border-color: var(--gold-line);
+  background: var(--gold-fill);
 }
-[data-theme="light"] .page.on-dark .aside-card a {
-  color: var(--text-ink);
-}
-[data-theme="light"] .page.on-dark .aside-card--accent h3 {
+[data-theme="light"] .consultant-page.on-dark .aside-card--accent h3,
+[data-theme="light"] .consultant-page.on-dark .aside-card a.text-accent {
   color: var(--accent-fg);
-}
-[data-theme="light"] .page.on-dark .aside-card a.text-accent {
-  color: var(--accent-fg);
-}
-[data-theme="light"] .page.on-dark .stepline__t {
-  color: var(--text-muted);
-}
-[data-theme="light"] .page.on-dark .blob--gold {
-  opacity: 0.45;
 }
 
 /* Light-mode surface callout (replaces white glass on dark) */
@@ -529,9 +845,13 @@ h1, h2, h3, h4 {
   border: 1px solid var(--line-on-dark);
   padding: 1.5rem;
 }
+/* A recessed note has to go lighter than the band it sits in, not darker —
+   `--paper-alt` is only a few percent off `--paper-deep` and the note
+   vanished into it. */
 [data-theme="light"] .section--ink:not(.section--persist) .surface-note {
-  background: var(--paper-alt);
+  background: var(--white);
   border-color: var(--line);
+  box-shadow: var(--sh-card);
 }
 
 /* Section header block */
@@ -654,6 +974,16 @@ h1, h2, h3, h4 {
   font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-muted);
 }
 .on-dark .chip { background: rgba(255,255,255,0.05); border-color: var(--line-on-dark); color: rgba(255,255,255,0.6); }
+/* A chip whose fill is `--paper-alt` disappears on a `--paper-alt` band. */
+.section--paper-alt > .container .chip { background: var(--white); }
+/* …and a paper chip on the inverted tile is a light rectangle on black.
+   Same weight as the rule above, declared after it, so the tile wins when
+   it sits inside a paper-alt band — which is where it actually lives. */
+.card.card--invert .chip {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--line-on-dark);
+  color: rgba(255, 255, 255, 0.62);
+}
 
 /* ==========================================================================
    Cards
@@ -1435,7 +1765,8 @@ body.nav-open { overflow: hidden; }
   display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem;
   margin: 0.75rem 0 0; padding: 0; list-style: none;
   font-family: var(--font-body); font-size: 0.75rem; line-height: 1.35;
-  color: rgba(255,255,255,0.42);
+  /* 0.42 was 4.1:1 on the panel — under AA for a 12px label. */
+  color: rgba(255,255,255,0.52);
 }
 .intake__slots li {
   display: inline-flex; align-items: baseline; gap: 0.35rem;

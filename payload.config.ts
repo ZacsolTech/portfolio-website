@@ -56,6 +56,15 @@ export default buildConfig({
     pool: {
       connectionString: normalizeDatabaseUrl(process.env.DATABASE_URL || ''),
     },
+    /*
+      DATABASE_URL points at the hosted Neon instance, not a local database.
+      With push left on, starting `next dev` was enough to prompt for an
+      ALTER TABLE against it — the drop of `bookings.reminder_sent_at` was
+      offered that way, from a laptop, with no record of the change. Schema
+      changes go through `migrations/` and `payload migrate` instead.
+    */
+    push: false,
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
   // sharp image processing for uploads
   sharp,

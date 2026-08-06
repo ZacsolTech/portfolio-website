@@ -8,10 +8,10 @@ export const team: TeamMember[] = [
     initials: "SA",
   },
   {
-    name: "A. Rahman",
-    role: "Engineering lead",
+    name: "Syed Shayan Arshad",
+    role: "CTO & Co-Founder",
     bio: "Delivery, architecture and the Friday deploy habit. Fixed-scope phases with a change protocol you can actually hold.",
-    initials: "AR",
+    initials: "SA",
   },
   {
     name: "N. Farooq",

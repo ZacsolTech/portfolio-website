@@ -44,7 +44,7 @@ export default async function PortfolioPage() {
         </div>
       </section>
 
-      <section className="section section--ink section--persist on-dark">
+      <section className="section section--ink on-dark">
         <div className="container">
           <div className="grid-4">
             {heroStats.map((stat) => (

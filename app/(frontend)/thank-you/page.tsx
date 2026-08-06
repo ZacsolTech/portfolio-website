@@ -14,7 +14,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default function ThankYouPage() {
   return (
-    <section className="section section--ink section--persist on-dark" style={{ minHeight: "70vh" }}>
+    <section className="section section--ink on-dark" style={{ minHeight: "70vh" }}>
       <div
         className="container"
         style={{ textAlign: "center", maxWidth: "36rem", marginInline: "auto", paddingBlock: "4rem" }}
@@ -23,7 +23,7 @@ export default function ThankYouPage() {
           <Check size={28} strokeWidth={2.5} />
         </div>
         <span className="overline overline--gold">Received</span>
-        <h1 className="d2" style={{ marginTop: "0.75rem", color: "#fff" }}>
+        <h1 className="d2" style={{ marginTop: "0.75rem" }}>
           Brief received.
         </h1>
         <p className="lead" style={{ margin: "1.25rem auto 0", color: "var(--text-on-dark-body)" }}>

@@ -99,11 +99,11 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="section section--ink section--persist on-dark">
+      <section className="section section--ink on-dark">
         <div className="container">
           <div className="sec-head">
             <span className="overline overline--gold">Numbers</span>
-            <h2 className="d3" style={{ marginTop: "0.75rem", color: "#fff" }}>
+            <h2 className="d3" style={{ marginTop: "0.75rem" }}>
               Proof in the ledger
             </h2>
           </div>
