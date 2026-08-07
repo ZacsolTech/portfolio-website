@@ -15,15 +15,10 @@ const BLOCK_PATTERNS: RegExp[] = [
 ];
 
 const MAX_SEED_CHARS = 4000;
-const MIN_SEED_CHARS = 8;
 
 export type SanitizeResult =
   | { ok: true; text: string }
   | { ok: false; error: string };
-
-export function sanitizeSeed(raw: unknown): SanitizeResult {
-  return sanitizeText(raw, { min: MIN_SEED_CHARS, max: MAX_SEED_CHARS });
-}
 
 /** Chat follow-ups can be short ("retail", "ASAP", "about 20 people"). */
 export function sanitizeChatMessage(raw: unknown): SanitizeResult {
@@ -62,8 +57,4 @@ function sanitizeText(
     .replace(/\s+/g, " ");
 
   return { ok: true, text: cleaned };
-}
-
-export function assertSafeAnswer(option: string, allowed: readonly string[]): boolean {
-  return allowed.includes(option);
 }

@@ -24,19 +24,12 @@ export const metadata = pageMetadata({
 });
 
 /**
- * 2026 agency homepage — tease + convert, don't duplicate depth.
- * Full process / stack / contact live on /about, /services, /contact, /book.
+ * Homepage — tease + convert, don't duplicate depth.
  *
- * Two decisions this file owns:
+ * Narrative: Problem (Leaks) → fix (Fixes) → capability (Services) →
+ * differentiator (ZAC) → proof (Portfolio, Results).
  *
- * 1. Narrative. Problem (Leaks) → fix (Fixes) → capability (Services) →
- *    differentiator (ZAC) → proof (Portfolio, Results). The page used to open
- *    with the solution and reach the problem in position six, and buried both
- *    proof sections below the fold everyone stops at.
- *
- * 2. Rhythm. Every third band is `ink`, and `ink` persists in both themes.
- *    Previously every mid-page section resolved to paper in light theme —
- *    seven consecutive bands within 2% luminance of each other.
+ * Rhythm: every third band is `ink`, and `ink` persists in both themes.
  */
 export default function HomePage() {
   return (

@@ -31,11 +31,6 @@ when the CLI `require()`s `payload.config.ts`). Use the direct SQL runner instea
 pnpm run migrate -- --list
 pnpm run migrate -- <migration-name> --check
 pnpm run migrate -- <migration-name> --apply
-# one-shot drops:
-pnpm migrate:testimonials
-pnpm migrate:industries
-pnpm migrate:faqs
-pnpm migrate:portfolio
 ```
 
 That writes the same SQL as `migrations/*.ts` and records a row in

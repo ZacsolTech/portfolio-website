@@ -166,9 +166,3 @@ export class GeminiLadderError extends Error {
     this.failures = failures;
   }
 }
-
-/** @deprecated Use CHAT_MODELS / BLUEPRINT_MODELS — kept for older imports. */
-export const models = {
-  flash: CHAT_MODELS[0]!,
-  pro: BLUEPRINT_MODELS[0]!,
-} as const;

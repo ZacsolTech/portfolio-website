@@ -9,6 +9,7 @@ import {
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -28,11 +29,13 @@ function categoryLabel(category: string) {
   return category.charAt(0).toUpperCase() + category.slice(1);
 }
 
+const emptySubscribe = () => () => {};
+
 export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -66,15 +69,6 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
     },
     [onClose, goPrev, goNext, lightboxOpen],
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    setActiveImage(0);
-    setLightboxOpen(false);
-  }, [item.slug]);
 
   useEffect(() => {
     if (!mounted) return;

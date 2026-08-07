@@ -61,11 +61,6 @@ export type PortfolioCategory =
   | "data"
   | "automation";
 
-export type ResultMetric = {
-  value: string;
-  label: string;
-};
-
 /** Visual for a project — real asset path or CSS frame fallback. */
 export type PortfolioImage = {
   alt: string;
@@ -127,18 +122,6 @@ export type Testimonial = {
 };
 
 export type SiteFaq = FaqItem;
-
-export type ProcessPhase = {
-  number: string;
-  title: string;
-  body: string;
-  deliverable: string;
-};
-
-export type TechStackCategory = {
-  label: string;
-  items: string[];
-};
 
 export type LeakItem = {
   number: string;

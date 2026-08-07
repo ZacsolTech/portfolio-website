@@ -60,11 +60,6 @@ export function SiteJsonLd() {
   return <JsonLd data={data} />;
 }
 
-/** @deprecated Prefer SiteJsonLd — kept for any leftover imports. */
-export function OrganizationJsonLd() {
-  return <SiteJsonLd />;
-}
-
 export function BreadcrumbJsonLd({ items }: { items: Crumb[] }) {
   const data = {
     "@context": "https://schema.org",

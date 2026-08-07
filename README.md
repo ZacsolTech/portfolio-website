@@ -5,7 +5,7 @@ Next.js 16 (App Router) production site for ZACSOL — AI-powered software agenc
 ## Stack
 
 - Next.js 16 · TypeScript · Tailwind CSS v4
-- Design tokens from `design/tokens.css` → `app/tokens.css`
+- Design tokens in `app/tokens.css`
 - `next-themes` with `data-theme` (flash-free inline script)
 - Space Grotesk + JetBrains Mono via `next/font`
 - Content: typed modules in `lib/content/` (Payload when Neon is ready — see `docs/CMS.md`)

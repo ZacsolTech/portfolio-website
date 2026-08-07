@@ -3,7 +3,6 @@ export {
   CHAT_MODELS,
   getGenAI,
   hasGemini,
-  models,
 } from "./client";
 export {
   BlueprintSchema,
@@ -36,7 +35,7 @@ export {
 export { generateBlueprint } from "./gemini";
 export { extractSlots, rulesChatTurn, streamConsultantTurn, type ChatEvent } from "./chat";
 export { buildRulesBlueprint, classifySeed } from "./rules-engine";
-export { sanitizeSeed, sanitizeChatMessage } from "./sanitize";
+export { sanitizeChatMessage } from "./sanitize";
 export { limitConsultant, limitForm, getClientIp, type LimitKind } from "./rate-limit";
 export {
   getOrCreateSession,

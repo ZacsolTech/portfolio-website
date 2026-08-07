@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Badge, Card, CardBody, LinkArrow } from "@/components/ui";
 import type { PortfolioItem } from "@/lib/content";
 import { thumbClass } from "@/lib/seo";
@@ -53,11 +53,6 @@ function ProjectCardImage({ item, index }: { item: PortfolioItem; index: number 
   );
 }
 
-function readProjectParam(): string | null {
-  if (typeof window === "undefined") return null;
-  return new URLSearchParams(window.location.search).get("project");
-}
-
 function writeProjectParam(slug: string | null) {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
@@ -91,14 +86,6 @@ export function ProjectCardGrid({
     setActiveSlug(null);
     if (syncUrl) writeProjectParam(null);
   }, [syncUrl]);
-
-  useEffect(() => {
-    if (!syncUrl) return;
-    const fromUrl = readProjectParam();
-    if (fromUrl && source.some((i) => i.slug === fromUrl)) {
-      setActiveSlug(fromUrl);
-    }
-  }, [syncUrl, source]);
 
   const active = activeSlug ? source.find((i) => i.slug === activeSlug) : null;
   const activeIndex = active
@@ -185,7 +172,12 @@ export function ProjectCardGrid({
       </div>
 
       {active ? (
-        <ProjectDetailModal item={active} index={activeIndex} onClose={close} />
+        <ProjectDetailModal
+          key={active.slug}
+          item={active}
+          index={activeIndex}
+          onClose={close}
+        />
       ) : null}
     </>
   );

@@ -3,10 +3,8 @@ import type {
   ConsultantStep,
   LeakFix,
   LeakItem,
-  ProcessPhase,
   SiteInfo,
   SiteStat,
-  TechStackCategory,
 } from "./types";
 
 export const site: SiteInfo = {
@@ -76,72 +74,6 @@ export const clientLogos: ClientLogo[] = [
   { name: "Verdant" },
   { name: "Kestrel" },
   { name: "Ardent" },
-];
-
-export const processPhases: ProcessPhase[] = [
-  {
-    number: "01",
-    title: "Discovery",
-    body: "Goals, constraints, and the actual bottleneck — not a feature list.",
-    deliverable: "Scope + estimate",
-  },
-  {
-    number: "02",
-    title: "Concept",
-    body: "Architecture options with honest tradeoffs and the cost of each.",
-    deliverable: "Technical plan",
-  },
-  {
-    number: "03",
-    title: "Design",
-    body: "Flows, interface, and a design system your team can extend.",
-    deliverable: "Figma system",
-  },
-  {
-    number: "04",
-    title: "Build",
-    body: "Two-week cycles, deployed every Friday, reviewed with you.",
-    deliverable: "Staging build",
-  },
-  {
-    number: "05",
-    title: "Harden",
-    body: "Tests, performance, security and accessibility pass before launch.",
-    deliverable: "QA report",
-  },
-  {
-    number: "06",
-    title: "Launch",
-    body: "Deploy, monitor, hand over, and support while your team takes the wheel.",
-    deliverable: "Runbook + handover",
-  },
-];
-
-export const techStackCategories: TechStackCategory[] = [
-  {
-    label: "Frontend",
-    items: ["Next.js", "React", "TypeScript", "Tailwind"],
-  },
-  {
-    label: "Backend",
-    items: ["Node.js", "NestJS", "Python", ".NET"],
-  },
-  {
-    label: "Mobile",
-    items: ["React Native", "Flutter", "Swift", "PWA"],
-  },
-  {
-    label: "Data & ML",
-    items: ["PostgreSQL", "ClickHouse", "pandas", "scikit-learn"],
-  },
-  {
-    label: "Cloud & DevOps",
-    items: ["AWS", "Docker", "Kubernetes", "GitHub Actions"],
-  },
-  {
-    label: "AI",
-    items: ["Gemini", "Claude", "OpenAI", "LangChain", "pgvector"],
-  },
 ];
 
 export const leaks: LeakItem[] = [

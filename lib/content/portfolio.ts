@@ -167,14 +167,17 @@ export const portfolio: PortfolioItem[] = [
       {
         caption: "Agent workspace",
         alt: "Support agent workspace with analytics dashboard on screen",
+        src: "/projects/ai-support-agent/01.jpg",
       },
       {
         caption: "Escalation trail",
         alt: "Operations dashboard used for ticket escalation and review",
+        src: "/projects/ai-support-agent/02.jpg",
       },
       {
         caption: "Knowledge coverage",
         alt: "Team reviewing knowledge coverage on a shared workspace screen",
+        src: "/projects/ai-support-agent/03.jpg",
       },
     ],
     stack: ["Next.js", "Gemini", "pgvector", "PostgreSQL", "Resend"],
@@ -286,7 +289,3 @@ export const portfolio: PortfolioItem[] = [
     timeline: "8 weeks",
   },
 ];
-
-export function getPortfolioItem(slug: string): PortfolioItem | undefined {
-  return portfolio.find((p) => p.slug === slug);
-}
