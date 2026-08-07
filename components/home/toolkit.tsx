@@ -23,11 +23,11 @@ const tools = [
   },
   {
     icon: "Sparkles",
-    title: "Live product demos",
-    body: "The AI builds in our portfolio are running, not screenshotted. Open one and use it the way a customer would.",
+    title: "Project portfolio",
+    body: "Production systems across support, logistics, commerce and automation — with outcomes and stack written clearly.",
     href: "/portfolio",
-    cta: "Open the demos",
-    meta: "Interactive · no signup",
+    cta: "Browse projects",
+    meta: "Outcomes · no signup",
     seed: null,
   },
 ] as const;

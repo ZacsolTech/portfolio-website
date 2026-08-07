@@ -12,13 +12,12 @@ const serviceLinks = services.map((s) => ({
 const aiToolLinks = [
   { href: "/consultant", label: zac.consultant.name },
   { href: "/tools/estimator", label: zac.estimator.name },
-  { href: "/portfolio", label: "Interactive demos" },
 ] as const;
 
 const companyLinks = [
   { href: "/about", label: "About us" },
   { href: "/industries", label: "Industries" },
-  { href: "/portfolio", label: "Portfolio" },
+  { href: "/portfolio", label: "Projects" },
   { href: "/insights", label: "Insights" },
   { href: "/book", label: "Book a consultation" },
   { href: "/contact", label: "Contact" },

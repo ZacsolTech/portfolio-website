@@ -1,8 +1,6 @@
 import type { CollectionSlug } from "payload";
 
 const collectionPaths: Record<string, (slug: string) => string> = {
-  industries: (slug) => `/industries/${slug}`,
-  portfolio: (slug) => `/portfolio/${slug}`,
   insights: (slug) => `/insights/${slug}`,
 };
 

@@ -4,25 +4,25 @@ export const team: TeamMember[] = [
   {
     name: "Shehryar Afzal",
     role: "Founder & CEO",
-    bio: "Owns the consultant, the blueprint contract and which AI features earn a build. Senior engineer first — pitch decks second.",
+    bio: "Leads product direction, AI capability selection and the consulting experience — with engineering judgment ahead of pitch decks.",
     initials: "SA",
   },
   {
     name: "Syed Shayan Arshad",
     role: "CTO & Co-Founder",
-    bio: "Delivery, architecture and the Friday deploy habit. Fixed-scope phases with a change protocol you can actually hold.",
+    bio: "Owns architecture, delivery cadence and release quality. Fixed-scope phases with a clear change protocol.",
     initials: "SA",
   },
   {
     name: "N. Farooq",
     role: "Design lead",
-    bio: "Flows, interface and systems teams can extend after we leave. Structure before style — always.",
+    bio: "Defines product flows, interface systems and design foundations teams can extend after launch.",
     initials: "NF",
   },
   {
     name: "M. Khan",
     role: "Client engineering",
-    bio: "Embedded on client products: integrations, stabilisation and the unglamorous work that keeps production boring.",
+    bio: "Works inside client products on integrations, reliability and the operational work that keeps production stable.",
     initials: "MK",
   },
 ];

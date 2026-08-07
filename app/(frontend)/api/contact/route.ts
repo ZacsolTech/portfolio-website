@@ -34,7 +34,7 @@ const Body = z.object({
 	phone: z.string().trim().max(40).optional(),
 	service: z.string().trim().max(80).optional(),
 	budget: z.string().trim().max(40).optional(),
-	message: z.string().trim().min(10, "Tell us a little more.").max(4000),
+	message: z.string().trim().min(1, "Add a short message.").max(4000),
 	consent: z.literal(true, { message: "We need your agreement to reply by email." }),
 	utm: AttributionSchema.optional(),
 	turnstileToken: z.string().max(4000).optional(),

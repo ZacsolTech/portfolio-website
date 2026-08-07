@@ -177,7 +177,7 @@ export default function StyleguidePage() {
                   <div className="thumb thumb--b" data-label="Media" />
                 </CardMedia>
                 <CardBody>
-                  <Badge>Case study</Badge>
+                  <Badge>Project</Badge>
                   <Display size="d4" style={{ marginTop: "0.75rem" }}>
                     Media card
                   </Display>

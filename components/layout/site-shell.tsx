@@ -7,8 +7,8 @@ import { ZacDock, ZacProvider } from "@/components/zac";
 /**
  * The dock lives here, outside `<main>`, so an App Router navigation swaps the
  * page underneath it without remounting the panel. A visitor can start
- * scoping on a service page, browse three case studies while ZAC is still
- * open, and come back to the same conversation with its scroll position intact.
+ * scoping on a service page, browse three projects while ZAC is still open,
+ * and come back to the same conversation with its scroll position intact.
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   return (

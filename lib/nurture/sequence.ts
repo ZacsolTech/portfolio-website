@@ -3,11 +3,11 @@ import type { NurtureStepPayload } from "@/lib/notifications/types";
 /**
  * The day 2 / 5 / 12 follow-up sequence.
  *
- * `PAGES.md` specifies it exactly: roadmap delivery → day 2 relevant case study
- * → day 5 booking nudge → day 12 useful article, *all stopping on reply or
- * booking*. Three emails over twelve days is a deliberate ceiling — the site's
- * whole pitch is that we don't run sales sequences, so this has to stay short
- * enough that the claim on the gate ("no newsletter, no reselling") holds.
+ * Roadmap delivery → day 2 relevant project → day 5 booking nudge → day 12
+ * useful article, *all stopping on reply or booking*. Three emails over twelve
+ * days is a deliberate ceiling — the site's whole pitch is that we don't run
+ * sales sequences, so this has to stay short enough that the claim on the gate
+ * ("no newsletter, no reselling") holds.
  *
  * Copy lives here rather than in the template so changing what we say on day 5
  * is a content edit, not a layout edit.
@@ -34,9 +34,9 @@ export const NURTURE_STEPS: NurtureStep[] = [
 		heading: "The version of this we already shipped",
 		body: [
 			"Your roadmap is an estimate built from one conversation. The useful next thing is not another estimate — it's seeing how a comparable build actually went: what the first phase turned out to be, what we got wrong in week three, and what it cost by the end.",
-			"Our case studies are written that way on purpose. No logos-and-adjectives; the constraints, the decisions and the numbers.",
+			"Our project write-ups are written that way on purpose. No logos-and-adjectives; the constraints, the decisions and the numbers.",
 		],
-		ctaLabel: "Read the case studies",
+		ctaLabel: "Browse the projects",
 		ctaPath: "/portfolio",
 	},
 	{

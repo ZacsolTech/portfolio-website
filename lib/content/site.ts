@@ -234,12 +234,19 @@ export const consultantSteps: ConsultantStep[] = [
   },
 ];
 
-export const aboutPrinciples = [
-  "Senior-only teams — no junior hand-offs on your budget",
-  "Written decisions — scope and changes you can hold us to",
-  "Weekly deployables — a URL every Friday, not a status deck",
-  "No lock-in — code, infra and runbooks are yours",
-] as const;
+export const aboutMission = {
+  overline: "Mission",
+  titleLead: "We build software your organisation can",
+  titleAccent: "operate and extend.",
+  body: "ZACSOL designs and delivers production systems for support, logistics, commerce and automation. Every engagement includes defined scope, staged releases and documentation so your team can maintain and grow what we ship.",
+} as const;
+
+export const aboutStats: SiteStat[] = [
+  { value: "50+", label: "Production systems delivered" },
+  { value: "12", label: "Industries served" },
+  { value: "<1 day", label: "Average response time" },
+  { value: "100%", label: "Client-owned source and infrastructure" },
+];
 
 export const contactExpectations = [
   {

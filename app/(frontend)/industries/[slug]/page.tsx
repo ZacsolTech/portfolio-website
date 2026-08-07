@@ -4,12 +4,11 @@ import { notFound } from "next/navigation";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
-import { ServiceIcon } from "@/components/shared/service-icon";
-import { Badge, Card, CardBody, CardMedia, IconTile } from "@/components/ui";
-import { getIndustry, getPortfolio } from "@/lib/cms";
-import { getService, industries } from "@/lib/content";
-import { pageMetadata, thumbClass } from "@/lib/seo";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { ProjectCardGrid } from "@/components/shared/project-cards";
+import { ServiceIcon } from "@/components/shared/service-icon";
+import { getIndustry, getService, industries, portfolio } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -19,7 +18,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const industry = await getIndustry(slug);
+  const industry = getIndustry(slug);
   if (!industry) return {};
   return pageMetadata({
     title: `${industry.name} software`,
@@ -28,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: [
       `${industry.name.toLowerCase()} software development`,
       `${industry.name.toLowerCase()} digital products`,
-      "industry software agency",
+      "industry software",
       "custom software development",
     ],
   });
@@ -36,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function IndustryDetailPage({ params }: Props) {
   const { slug } = await params;
-  const [industry, portfolio] = await Promise.all([getIndustry(slug), getPortfolio()]);
+  const industry = getIndustry(slug);
   if (!industry) notFound();
 
   const relatedServices = industry.services
@@ -44,14 +43,15 @@ export default async function IndustryDetailPage({ params }: Props) {
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   const relatedWork = portfolio
-    .filter((p) =>
-      p.relatedServices.some((rs) => industry.services.includes(rs)) ||
-      p.sector.toLowerCase().includes(industry.name.split(" ")[0].toLowerCase()),
+    .filter(
+      (p) =>
+        p.relatedServices.some((rs) => industry.services.includes(rs)) ||
+        p.sector.toLowerCase().includes(industry.name.split(" ")[0].toLowerCase()),
     )
     .slice(0, 2);
 
   return (
-    <>
+    <div className="ind-detail">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },
@@ -59,6 +59,7 @@ export default async function IndustryDetailPage({ params }: Props) {
           { name: industry.name, path: `/industries/${industry.slug}` },
         ]}
       />
+
       <PageHero
         overline="Industry"
         breadcrumbs={[
@@ -66,42 +67,40 @@ export default async function IndustryDetailPage({ params }: Props) {
           { href: "/industries", label: "Industries" },
           { label: industry.name },
         ]}
-        title={industry.name}
-        lead={industry.problemOneLiner}
+        title={
+          <span className="ind-detail__title">
+            <span className="icon-tile icon-tile--gold" aria-hidden>
+              <ServiceIcon name={industry.icon} />
+            </span>
+            {industry.name}
+          </span>
+        }
+        lead={industry.seo.description}
         ctas={[
           {
             href: "/consultant",
-            label: `Describe your ${industry.name.toLowerCase()} problem`,
+            label: "Ask ZAC",
             variant: "gold",
             zac: { seed: `industry.${industry.slug}` },
           },
           { href: "/book", label: "Book a consultation", variant: "outline-dark" },
         ]}
-      >
-        <div style={{ marginTop: "1.5rem" }}>
-          <IconTile variant="gold">
-            <ServiceIcon name={industry.icon} />
-          </IconTile>
-        </div>
-      </PageHero>
+      />
 
       <section className="section section--paper">
         <div className="container">
-          <div className="sec-head">
-            <span className="overline">What we see</span>
+          <Reveal className="sec-head" style={{ maxWidth: "36rem" }}>
+            <span className="overline">Challenges</span>
             <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-              Problems that show up again and again
+              Problems we solve in{" "}
+              <span className="em-serif">{industry.name.toLowerCase()}</span>
             </h2>
-          </div>
-          <div className="grid-2">
+          </Reveal>
+          <div className="ind-detail__scope">
             {industry.problems.map((problem, i) => (
-              <Reveal key={problem} index={i}>
-                <Card>
-                  <span className="marker">{String(i + 1).padStart(2, "0")}</span>
-                  <p style={{ marginTop: "0.75rem", fontWeight: 500, lineHeight: 1.55 }}>
-                    {problem}
-                  </p>
-                </Card>
+              <Reveal key={problem} index={i} className="ind-detail__scope-item">
+                <span className="marker">{String(i + 1).padStart(2, "0")}</span>
+                <p>{problem}</p>
               </Reveal>
             ))}
           </div>
@@ -109,79 +108,67 @@ export default async function IndustryDetailPage({ params }: Props) {
       </section>
 
       <section className="section section--paper-alt">
-        <div className="container">
-          <div className="sec-head">
-            <span className="overline">What we build</span>
+        <div className="container ind-detail__compliance">
+          <Reveal>
+            <span className="overline">Compliance &amp; integration</span>
             <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-              Relevant service lines
+              Built for the rules your market{" "}
+              <span className="em-serif">actually has</span>
             </h2>
-          </div>
-          <div className="grid-3">
-            {relatedServices.map((svc, i) => (
-              <Reveal key={svc.slug} index={i}>
-                <Link href={`/services/${svc.slug}`} className="card-link">
-                  <Card>
-                    <IconTile>
-                      <ServiceIcon name={svc.icon} />
-                    </IconTile>
-                    <h3 className="d4" style={{ marginTop: "1rem" }}>
-                      {svc.title}
-                    </h3>
-                    <p className="body-sm" style={{ marginTop: "0.5rem" }}>
-                      {svc.blurb}
-                    </p>
-                  </Card>
-                </Link>
-              </Reveal>
-            ))}
-          </div>
+            <p className="lead" style={{ marginTop: "1.25rem" }}>
+              {industry.compliance}
+            </p>
+          </Reveal>
         </div>
       </section>
 
-      <section className="section section--paper">
-        <div className="container" style={{ maxWidth: "42rem" }}>
-          <span className="overline">Compliance &amp; integration</span>
-          <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-            Credibility notes
-          </h2>
-          <p className="lead" style={{ marginTop: "1.25rem" }}>
-            {industry.compliance}
-          </p>
-        </div>
-      </section>
+      {relatedServices.length > 0 ? (
+        <section className="section section--paper">
+          <div className="container">
+            <Reveal className="sec-head" style={{ maxWidth: "36rem" }}>
+              <span className="overline">Capabilities</span>
+              <h2 className="d3" style={{ marginTop: "0.75rem" }}>
+                How we deliver for this{" "}
+                <span className="em-serif">industry</span>
+              </h2>
+            </Reveal>
+            <div className="ind-detail__services">
+              {relatedServices.map((svc, i) => (
+                <Reveal key={svc.slug} index={i}>
+                  <Link href={`/services/${svc.slug}`} className="ind-detail__service">
+                    <span className="icon-tile icon-tile--sm" aria-hidden>
+                      <ServiceIcon name={svc.icon} size={18} />
+                    </span>
+                    <span className="ind-detail__service-body">
+                      <span className="ind-detail__service-title">{svc.shortTitle}</span>
+                      <span className="body-sm">{svc.blurb}</span>
+                    </span>
+                    <span className="ind-detail__service-arrow" aria-hidden>
+                      →
+                    </span>
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {relatedWork.length > 0 ? (
         <section className="section section--paper-alt">
           <div className="container">
-            <div className="sec-head">
-              <span className="overline">Related work</span>
-              <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-                Nearby case studies
-              </h2>
-            </div>
-            <div className="grid-2">
-              {relatedWork.map((item, i) => (
-                <Link key={item.slug} href={`/portfolio/${item.slug}`} className="card-link">
-                  <Card variant="media">
-                    <CardMedia>
-                      <div className={`thumb ${thumbClass(i)}`} data-label={item.sector} />
-                    </CardMedia>
-                    <CardBody>
-                      <Badge>{item.client}</Badge>
-                      <h3 className="d4" style={{ marginTop: "0.75rem" }}>
-                        {item.title}
-                      </h3>
-                      <p
-                        className="overline"
-                        style={{ marginTop: "auto", paddingTop: "1rem", color: "var(--accent-fg)" }}
-                      >
-                        {item.metric}
-                      </p>
-                    </CardBody>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+            <Reveal className="sec-head sec-head--split">
+              <div style={{ maxWidth: "36rem" }}>
+                <span className="overline">Selected projects</span>
+                <h2 className="d3" style={{ marginTop: "0.75rem" }}>
+                  Projects in <span className="em-serif">production</span>
+                </h2>
+              </div>
+              <Link href="/portfolio" className="link-u">
+                View portfolio →
+              </Link>
+            </Reveal>
+            <ProjectCardGrid items={relatedWork} layout="compact" columns="2" />
           </div>
         </section>
       ) : null}
@@ -189,11 +176,11 @@ export default async function IndustryDetailPage({ params }: Props) {
       <FinalCta
         title={
           <>
-            Describe your {industry.name.toLowerCase()} problem.{" "}
-            <span className="em-serif text-accent">Get a roadmap.</span>
+            Planning software for {industry.name.toLowerCase()}?{" "}
+            <span className="em-serif text-accent">Ask ZAC</span> or book a consultation.
           </>
         }
       />
-    </>
+    </div>
   );
 }

@@ -87,7 +87,7 @@ handler changes.
 
 ## Follow-up sequence
 
-Day 2 → case studies. Day 5 → booking nudge. Day 12 → one article, then it
+Day 2 → projects. Day 5 → booking nudge. Day 12 → one article, then it
 stops. Copy lives in [`lib/nurture/sequence.ts`](../lib/nurture/sequence.ts).
 
 Run by `GET /api/cron/nurture`, scheduled weekdays at 09:00 UTC in

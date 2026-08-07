@@ -59,28 +59,37 @@ export type PortfolioCategory =
   | "mobile"
   | "ai"
   | "data"
-  | "automation"
-  | "demo";
+  | "automation";
 
 export type ResultMetric = {
   value: string;
   label: string;
 };
 
+/** Visual for a project — real asset path or CSS frame fallback. */
+export type PortfolioImage = {
+  alt: string;
+  caption: string;
+  /** Public path e.g. `/projects/ai-support/dashboard.webp`. Optional until assets ship. */
+  src?: string;
+};
+
+/** A shipped project shown in the portfolio and related sections. */
 export type PortfolioItem = {
   slug: string;
   title: string;
-  client: string;
   sector: string;
-  metric: string;
   category: PortfolioCategory;
-  interactive: boolean;
+  /** Short blurb for cards. */
   summary: string;
-  problem: string;
-  built: string;
-  results: ResultMetric[];
+  /** Full project write-up for the detail modal (one or more paragraphs). */
+  description: string[];
+  /** Product visuals shown first in the modal. */
+  images: [PortfolioImage, PortfolioImage, ...PortfolioImage[]];
   stack: string[];
-  quote?: string;
+  /** Card metric / proof line. */
+  metric: string;
+  client: string;
   relatedServices: string[];
   timeline?: string;
 };

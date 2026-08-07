@@ -30,7 +30,7 @@ export default function TermsPage() {
 
           <h2>The site and tools</h2>
           <p>
-            Content, demos and AI tools (ZAC Consultant and ZAC Estimator) are provided for
+            Content and AI tools (ZAC Consultant and ZAC Estimator) are provided for
             informational and evaluation purposes. Outputs are indicative — not proposals,
             warranties or professional advice. Confirmed scope, timeline and pricing follow a
             discovery engagement.

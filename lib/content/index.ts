@@ -8,6 +8,7 @@ export type {
   LeakFix,
   LeakItem,
   PortfolioCategory,
+  PortfolioImage,
   PortfolioItem,
   ProcessPhase,
   ProcessStep,
@@ -31,7 +32,8 @@ export { team } from "./team";
 export { testimonials } from "./testimonials";
 export { faqs } from "./faqs";
 export {
-  aboutPrinciples,
+  aboutMission,
+  aboutStats,
   clientLogos,
   consultantSteps,
   contactExpectations,

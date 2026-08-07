@@ -3,24 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
-import { ZacLink } from "@/components/zac/zac-link";
 import { Reveal } from "@/components/motion/reveal";
-import { FaqList } from "@/components/shared/faq-list";
-import { ServiceIcon } from "@/components/shared/service-icon";
-import {
-  Badge,
-  Card,
-  CardBody,
-  CardMedia,
-  Check,
-  Chip,
-  Panel,
-  PanelRow,
-} from "@/components/ui";
-import { getPortfolio } from "@/lib/cms";
-import { getService, services } from "@/lib/content";
-import { pageMetadata, thumbClass } from "@/lib/seo";
 import { BreadcrumbJsonLd, FaqJsonLd, ServiceJsonLd } from "@/components/seo/json-ld";
+import { FaqList } from "@/components/shared/faq-list";
+import { ProjectCardGrid } from "@/components/shared/project-cards";
+import { ServiceIcon } from "@/components/shared/service-icon";
+import { Chip } from "@/components/ui";
+import { ZacLink } from "@/components/zac/zac-link";
+import { getService, portfolio, services } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -48,7 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
   const service = getService(slug);
-  const portfolio = await getPortfolio();
   if (!service) notFound();
 
   const related = portfolio
@@ -56,7 +46,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     .slice(0, 2);
 
   return (
-    <>
+    <div className="svc-detail">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },
@@ -70,6 +60,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         path={`/services/${service.slug}`}
       />
       <FaqJsonLd items={service.faqs} />
+
       <PageHero
         overline="Service"
         breadcrumbs={[
@@ -77,36 +68,45 @@ export default async function ServiceDetailPage({ params }: Props) {
           { href: "/services", label: "Services" },
           { label: service.shortTitle },
         ]}
-        title={service.title}
+        title={
+          <span className="svc-detail__title">
+            <span className="icon-tile icon-tile--gold" aria-hidden>
+              <ServiceIcon name={service.icon} />
+            </span>
+            {service.title}
+          </span>
+        }
         lead={service.blurb}
         ctas={[
-          { href: "/consultant", label: "Ask ZAC", variant: "gold" },
+          {
+            href: "/consultant",
+            label: "Ask ZAC",
+            variant: "gold",
+            zac: { seed: `service.${service.slug}` },
+          },
           { href: "/book", label: "Book a consultation", variant: "outline-dark" },
         ]}
       >
-        <div style={{ marginTop: "1.5rem" }}>
-          <span
-            className="icon-tile icon-tile--gold"
-            style={{ display: "inline-flex" }}
-            aria-hidden
-          >
-            <ServiceIcon name={service.icon} />
-          </span>
+        <div className="chips svc-detail__tech">
+          {service.tech.map((item) => (
+            <Chip key={item}>{item}</Chip>
+          ))}
         </div>
       </PageHero>
 
       <section className="section section--paper">
         <div className="container">
-          <div className="sec-head">
+          <Reveal className="sec-head" style={{ maxWidth: "36rem" }}>
             <span className="overline">What&apos;s included</span>
             <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-              Scope you can hold us to
+              Scope you can <span className="em-serif">hold us to</span>
             </h2>
-          </div>
-          <div className="grid-2" style={{ gap: "1rem" }}>
+          </Reveal>
+          <div className="svc-detail__scope">
             {service.included.map((item, i) => (
-              <Reveal key={item} index={i}>
-                <Check>{item}</Check>
+              <Reveal key={item} index={i} className="svc-detail__scope-item">
+                <span className="marker">{String(i + 1).padStart(2, "0")}</span>
+                <p>{item}</p>
               </Reveal>
             ))}
           </div>
@@ -115,175 +115,66 @@ export default async function ServiceDetailPage({ params }: Props) {
 
       <section className="section section--paper-alt">
         <div className="container">
-          <div className="sec-head">
-            <span className="overline">Our stack for this</span>
-            <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-              Tools matched to the job
-            </h2>
-          </div>
-          <div className="grid-3" style={{ gap: "1.5rem" }}>
-            {service.stackGroups.map((group) => (
-              <Reveal key={group.label}>
-                <div>
-                  <p className="overline">{group.label}</p>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: "0.375rem",
-                      marginTop: "0.75rem",
-                    }}
-                  >
-                    {group.items.map((item) => (
-                      <Chip key={item}>{item}</Chip>
-                    ))}
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section section--paper">
-        <div className="container">
-          <div className="sec-head">
+          <Reveal className="sec-head" style={{ maxWidth: "36rem" }}>
             <span className="overline">Process</span>
             <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-              How we deliver {service.shortTitle.toLowerCase()}
+              How we deliver{" "}
+              <span className="em-serif">{service.shortTitle.toLowerCase()}</span>
             </h2>
-          </div>
-          <Reveal>
-            <Panel>
+          </Reveal>
+          <Reveal index={1}>
+            <ol className="flow svc-detail__flow">
               {service.process.map((step, i) => (
-                <PanelRow key={step.title}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "auto 1fr",
-                      gap: "1.25rem",
-                      alignItems: "start",
-                    }}
-                  >
-                    <span
-                      className="icon-tile icon-tile--sm"
-                      style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem" }}
-                    >
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <h3 className="d4" style={{ margin: 0 }}>
-                        {step.title}
-                      </h3>
-                      <p className="body-sm" style={{ margin: "0.5rem 0 0" }}>
-                        {step.body}
-                      </p>
-                    </div>
-                  </div>
-                </PanelRow>
+                <li key={step.title} className="flow__i">
+                  <span className="flow__n">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="flow__body">
+                    <span className="flow__t">{step.title}</span>
+                    <span className="flow__d body-sm">{step.body}</span>
+                  </span>
+                </li>
               ))}
-            </Panel>
+            </ol>
           </Reveal>
         </div>
       </section>
 
       {related.length > 0 ? (
-        <section className="section section--paper-alt">
+        <section className="section section--paper">
           <div className="container">
-            <div className="sec-head">
-              <span className="overline">Related work</span>
-              <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-                Proof in production
-              </h2>
-            </div>
-            <div className="grid-2">
-              {related.map((item, i) => (
-                <Reveal key={item.slug} index={i}>
-                  <Link href={`/portfolio/${item.slug}`} className="card-link">
-                    <Card variant="media">
-                      <CardMedia>
-                        <div className={`thumb ${thumbClass(i)}`} data-label={item.sector} />
-                      </CardMedia>
-                      <CardBody>
-                        <Badge variant={item.interactive ? "gold" : "default"}>
-                          {item.interactive ? "Interactive" : "Case study"}
-                        </Badge>
-                        <h3 className="d4" style={{ marginTop: "0.75rem" }}>
-                          {item.title}
-                        </h3>
-                        <p className="body-sm" style={{ marginTop: "0.5rem" }}>
-                          {item.summary}
-                        </p>
-                        <p
-                          className="overline"
-                          style={{ marginTop: "auto", paddingTop: "1.25rem", color: "var(--accent-fg)" }}
-                        >
-                          {item.metric}
-                        </p>
-                      </CardBody>
-                    </Card>
-                  </Link>
-                </Reveal>
-              ))}
-            </div>
+            <Reveal className="sec-head sec-head--split">
+              <div>
+                <span className="overline">Related projects</span>
+                <h2 className="d3" style={{ marginTop: "0.75rem" }}>
+                  Proof in production
+                </h2>
+              </div>
+              <Link href="/portfolio" className="link-u">
+                All work →
+              </Link>
+            </Reveal>
+            <ProjectCardGrid items={related} layout="media" columns="2" />
           </div>
         </section>
       ) : null}
 
-      <section className="section section--paper">
-        <div className="container">
-          <div className="sec-head">
-            <span className="overline">Engagement shapes</span>
-            <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-              How we work together
-            </h2>
-          </div>
-          <div className="grid-3">
-            {service.engagement.map((shape, i) => (
-              <Reveal key={shape.title} index={i}>
-                <Card>
-                  <span className="overline">{shape.from}</span>
-                  <h3 className="d4" style={{ marginTop: "0.75rem" }}>
-                    {shape.title}
-                  </h3>
-                  <p className="body-sm" style={{ marginTop: "0.75rem" }}>
-                    {shape.body}
-                  </p>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="section section--paper-alt">
-        <div className="container">
-          <div className="grid-a grid-a--panel">
-            <div>
-              <span className="overline">FAQ</span>
-              <h2 className="d3" style={{ marginTop: "0.75rem" }}>
-                About {service.shortTitle.toLowerCase()}
-              </h2>
-              <p className="body-sm" style={{ marginTop: "1rem", maxWidth: "22rem" }}>
-                Not sure this is the right service? Ask ZAC.
-              </p>
-              <ZacLink
-                seed={`service.${service.slug}`}
-                className="link-u"
-                style={{ display: "inline-block", marginTop: "1rem" }}
-              >
-                Ask ZAC about {service.shortTitle.toLowerCase()} →
-              </ZacLink>
-              <ZacLink
-                seed={`cost.${service.slug}`}
-                className="link-u"
-                style={{ display: "block", marginTop: "0.5rem" }}
-              >
-                Or get a cost range →
-              </ZacLink>
-            </div>
+        <div className="container svc-detail__faq">
+          <Reveal className="sec-head" style={{ maxWidth: "32rem" }}>
+            <span className="overline">FAQ</span>
+            <h2 className="d3" style={{ marginTop: "0.75rem" }}>
+              About {service.shortTitle.toLowerCase()}
+            </h2>
+            <ZacLink
+              seed={`service.${service.slug}`}
+              className="link-u"
+              style={{ display: "inline-block", marginTop: "1rem" }}
+            >
+              Ask ZAC →
+            </ZacLink>
+          </Reveal>
+          <Reveal index={1}>
             <FaqList items={service.faqs} />
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -295,6 +186,6 @@ export default async function ServiceDetailPage({ params }: Props) {
           </>
         }
       />
-    </>
+    </div>
   );
 }

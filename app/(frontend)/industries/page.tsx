@@ -5,7 +5,7 @@ import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { ServiceIcon } from "@/components/shared/service-icon";
 import { IconTile } from "@/components/ui";
-import { getIndustries } from "@/lib/cms";
+import { industries } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -23,7 +23,6 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function IndustriesPage() {
-  const industries = await getIndustries();
   return (
     <>
       <PageHero

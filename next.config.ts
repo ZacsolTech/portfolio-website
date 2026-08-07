@@ -20,8 +20,28 @@ const nextConfig: NextConfig = {
     localPatterns: [
       { pathname: "/brand/**" },
       { pathname: "/media/**" },
+      { pathname: "/projects/**" },
       { pathname: "/api/media/file/**" },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/demos/:slug",
+        destination: "/portfolio?project=:slug",
+        permanent: true,
+      },
+      {
+        source: "/demos",
+        destination: "/portfolio",
+        permanent: true,
+      },
+      {
+        source: "/portfolio/:slug",
+        destination: "/portfolio?project=:slug",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [

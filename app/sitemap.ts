@@ -41,20 +41,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const portfolioRoutes = portfolio.map((p) => ({
-    url: absoluteUrl(`/portfolio/${p.slug}`),
+    url: absoluteUrl(`/portfolio?project=${p.slug}`),
     lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
-
-  const demoRoutes = portfolio
-    .filter((p) => p.interactive)
-    .map((p) => ({
-      url: absoluteUrl(`/demos/${p.slug}`),
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    }));
 
   const insightRoutes = insights.map((i) => ({
     url: absoluteUrl(`/insights/${i.slug}`),
@@ -68,7 +59,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...serviceRoutes,
     ...industryRoutes,
     ...portfolioRoutes,
-    ...demoRoutes,
     ...insightRoutes,
   ];
 }

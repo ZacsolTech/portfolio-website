@@ -9,6 +9,11 @@
     "lint": "eslint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "generate:types": "payload generate:types",
+    "migrate": "node scripts/apply-migration.cjs",
+    "migrate:testimonials": "node scripts/apply-migration.cjs 20260807_114500_drop_testimonials --apply",
+    "migrate:industries": "node scripts/apply-migration.cjs 20260807_121800_drop_industries --apply",
+    "migrate:faqs": "node scripts/apply-migration.cjs 20260807_122400_drop_faqs --apply",
+    "migrate:portfolio": "node scripts/apply-migration.cjs 20260807_123000_drop_portfolio --apply",
     "seed": "curl -X POST http://localhost:3000/api/seed",
     "eval:consultant": "tsx scripts/eval-consultant.ts"
   },

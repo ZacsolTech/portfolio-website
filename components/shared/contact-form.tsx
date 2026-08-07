@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Turnstile, useTurnstile } from "@/components/shared/turnstile";
 import { Check, Field, Input, Panel, Select, Textarea } from "@/components/ui";
 import { contactExpectations, services, site } from "@/lib/content";
@@ -19,10 +19,18 @@ export function ContactForm() {
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const turnstile = useTurnstile();
+	const consentRef = useRef<HTMLLabelElement>(null);
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (busy || !consent) return;
+		if (busy) return;
+
+		if (!consent) {
+			setError("Please agree to the privacy policy so we can reply by email.");
+			consentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+			consentRef.current?.querySelector("input")?.focus();
+			return;
+		}
 
 		const form = event.currentTarget;
 		const data = new FormData(form);
@@ -149,7 +157,6 @@ export function ContactForm() {
 						name="message"
 						rows={5}
 						required
-						minLength={10}
 						maxLength={4000}
 						placeholder="The goal, the bottleneck, timeline and constraints…"
 						style={{ marginTop: "1rem" }}
@@ -166,18 +173,31 @@ export function ContactForm() {
 					className="sr-only"
 				/>
 
-				<label className="consent">
+				<label
+					ref={consentRef}
+					className={`consent${error?.includes("privacy policy") ? " consent--error" : ""}`}
+				>
 					<input
 						type="checkbox"
 						name="consent"
 						checked={consent}
-						onChange={(event) => setConsent(event.target.checked)}
-						required
+						onChange={(event) => {
+							setConsent(event.target.checked);
+							if (event.target.checked) setError(null);
+						}}
+						aria-invalid={error?.includes("privacy policy") ? true : undefined}
+						aria-describedby={error ? "contact-form-error" : undefined}
 					/>
 					<span>
 						{CONSENT_TEXT} See our <Link href="/privacy">privacy policy</Link>.
 					</span>
 				</label>
+
+				{error ? (
+					<p id="contact-form-error" role="alert" className="form-error">
+						{error}
+					</p>
+				) : null}
 
 				<Turnstile key={turnstile.nonce} action="contact" onToken={turnstile.setToken} />
 
@@ -185,16 +205,10 @@ export function ContactForm() {
 					type="submit"
 					className="btn btn--gold btn--lg"
 					style={{ marginTop: "1.5rem", width: "100%" }}
-					disabled={busy || !consent}
+					disabled={busy}
 				>
 					{busy ? "Sending…" : "Send message"}
 				</button>
-
-				{error ? (
-					<p role="alert" className="form-error">
-						{error}
-					</p>
-				) : null}
 			</Panel>
 		</form>
 	);

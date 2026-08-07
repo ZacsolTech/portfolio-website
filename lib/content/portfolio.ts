@@ -3,26 +3,36 @@ import type { PortfolioItem } from "./types";
 export const portfolio: PortfolioItem[] = [
   {
     slug: "ai-support-agent",
-    title: "AI support agent — try it live",
+    title: "AI support agent",
     client: "Meridian Retail",
     sector: "Retail",
     metric: "68% of tickets deflected",
-    category: "demo",
-    interactive: true,
+    category: "ai",
     summary:
-      "Ask it anything a customer would. It answers from a knowledge base, escalates when unsure, and logs the lead.",
-    problem:
-      "Support volume grew faster than headcount. Agents spent the first minutes of every ticket re-finding policy answers that already lived in scattered docs.",
-    built:
-      "A retrieval-backed support agent with escalation to humans, lead capture on unresolved intents, and an evaluation set so answer quality doesn't silently drift. The same build powers the live demo on this site.",
-    results: [
-      { value: "68%", label: "Tickets deflected" },
-      { value: "<30s", label: "Median first response" },
-      { value: "1 team", label: "Knowledge owners, not a bot farm" },
+      "A knowledge-backed support agent that answers common questions, escalates with context, and captures unresolved leads.",
+    description: [
+      "Meridian Retail’s support volume outgrew headcount. Agents spent the first minutes of every ticket re-finding policy answers that already lived in scattered docs.",
+      "We shipped a retrieval-backed support agent that answers from a governed knowledge base, escalates to humans with full context, and captures unresolved intents as leads. An evaluation set keeps answer quality from drifting after launch.",
+      "In production, the agent deflects roughly two-thirds of inbound tickets with a median first response under thirty seconds — owned by one knowledge team, not a bot farm.",
+    ],
+    images: [
+      {
+        caption: "Agent workspace",
+        alt: "Support agent workspace with analytics dashboard on screen",
+        src: "/projects/ai-support-agent/01.jpg",
+      },
+      {
+        caption: "Escalation trail",
+        alt: "Operations dashboard used for ticket escalation and review",
+        src: "/projects/ai-support-agent/02.jpg",
+      },
+      {
+        caption: "Knowledge coverage",
+        alt: "Team reviewing knowledge coverage on a shared workspace screen",
+        src: "/projects/ai-support-agent/03.jpg",
+      },
     ],
     stack: ["Next.js", "Gemini", "pgvector", "PostgreSQL", "Resend"],
-    quote:
-      "The AI agent handles two-thirds of what used to reach a person, and it escalates the rest with the context already attached.",
     relatedServices: ["ai-automation", "web-development"],
     timeline: "10 weeks",
   },
@@ -33,21 +43,28 @@ export const portfolio: PortfolioItem[] = [
     sector: "Logistics",
     metric: "Dispatch time down 41%",
     category: "web",
-    interactive: false,
     summary:
       "Dispatch, routing and proof-of-work for 300 technicians across four regions.",
-    problem:
-      "Dispatchers built daily schedules by hand. Technicians worked from paper job packs. Proof of completion reached billing days later — and exceptions vanished into chat threads.",
-    built:
-      "A web dispatch console and mobile field app: skills-aware assignment, live job status, photo proof-of-work, and a same-day feed into invoicing. Regional managers see capacity without asking for a Friday export.",
-    results: [
-      { value: "41%", label: "Faster dispatch" },
-      { value: "300", label: "Technicians live in 14 weeks" },
-      { value: "Same day", label: "Proof into billing" },
+    description: [
+      "Dispatchers built daily schedules by hand. Technicians worked from paper job packs. Proof of completion reached billing days later, and exceptions disappeared into chat threads.",
+      "We delivered a web dispatch console and mobile field app: skills-aware assignment, live job status, photo proof-of-work, and a same-day feed into invoicing. Regional managers see capacity without waiting for a Friday export.",
+      "Three hundred technicians moved off paper in fourteen weeks. Dispatch time dropped 41%, with proof of work reaching billing the same day.",
+    ],
+    images: [
+      {
+        caption: "Dispatch console",
+        alt: "Dispatch board with technician capacity and live job assignments",
+      },
+      {
+        caption: "Field app",
+        alt: "Mobile field app showing job details and photo proof-of-work capture",
+      },
+      {
+        caption: "Billing feed",
+        alt: "Same-day proof feed into invoicing with exception queue",
+      },
     ],
     stack: ["Next.js", "React Native", "Node.js", "PostgreSQL", "Redis"],
-    quote:
-      "Three hundred technicians moved off paper in fourteen weeks. Nothing broke, and nobody needed a training week.",
     relatedServices: [
       "custom-software",
       "mobile-app-development",
@@ -62,21 +79,28 @@ export const portfolio: PortfolioItem[] = [
     sector: "Retail",
     metric: "Zero lost orders in 6 months",
     category: "automation",
-    interactive: false,
     summary:
       "Orders from chat and email channels flow straight into stock, invoicing and delivery tracking.",
-    problem:
-      "Wholesale orders arrived in chat threads and inboxes. Staff re-typed them into inventory. Every busy week, lines were missed in the scroll — and stock truth disagreed with what sales had promised.",
-    built:
-      "An intake pipeline that turns channel messages into structured orders, checks stock, raises invoices and pushes delivery status back to the customer. Exceptions land in a queue humans clear — not a silent miss.",
-    results: [
-      { value: "0", label: "Orders lost in six months" },
-      { value: "9 wks", label: "Discovery to production" },
-      { value: "1 source", label: "Of stock truth" },
+    description: [
+      "Wholesale orders arrived in chat threads and inboxes. Staff re-typed them into inventory. Busy weeks meant missed lines in the scroll — and stock truth disagreed with what sales had promised.",
+      "We built an intake pipeline that turns channel messages into structured orders, checks stock, raises invoices, and pushes delivery status back to the customer. Exceptions land in a human queue instead of failing silently.",
+      "From discovery to production in nine weeks. Six months later: zero lost orders and one source of stock truth across sales and warehouse.",
+    ],
+    images: [
+      {
+        caption: "Channel intake",
+        alt: "Order intake pipeline converting chat and email into structured orders",
+      },
+      {
+        caption: "Stock check",
+        alt: "Inventory confirmation screen before order commitment",
+      },
+      {
+        caption: "Exception queue",
+        alt: "Human exception queue for orders that need review",
+      },
     ],
     stack: ["Node.js", "PostgreSQL", "workflow engine", "Next.js"],
-    quote:
-      "We used to lose orders in the chat scroll every single day. Since launch, not one.",
     relatedServices: [
       "business-process-automation",
       "custom-software",
@@ -90,18 +114,27 @@ export const portfolio: PortfolioItem[] = [
     client: "Northwind Commerce",
     sector: "Retail",
     metric: "Stock truth in one screen",
-    category: "demo",
-    interactive: true,
+    category: "web",
     summary:
-      "Click through seeded orders, stock levels and fulfilment states — a live ops console, not a screenshot.",
-    problem:
+      "A single operations console for orders, stock levels and fulfilment exceptions.",
+    description: [
       "Ops ran the business from three exports and a shared sheet. By the time stock was wrong, sales had already oversold.",
-    built:
-      "A role-aware operations dashboard: orders, inventory and exceptions on one surface, with drill-downs that match how warehouse and sales actually argue about numbers. Seeded demo data so visitors can click without credentials.",
-    results: [
-      { value: "1", label: "Ops surface instead of three exports" },
-      { value: "Live", label: "Exception queue" },
-      { value: "Demo", label: "Clickable on this site" },
+      "We built a role-aware operations dashboard: orders, inventory and exceptions on one surface, with drill-downs that match how warehouse and sales actually argue about numbers.",
+      "One live ops surface replaced three exports. Exception queues stay shared, and stock truth is the same for every team.",
+    ],
+    images: [
+      {
+        caption: "Ops overview",
+        alt: "Operations dashboard showing orders, stock and fulfilment status",
+      },
+      {
+        caption: "Stock detail",
+        alt: "Inventory detail view with warehouse-level stock levels",
+      },
+      {
+        caption: "Exceptions",
+        alt: "Fulfilment exception queue with owners and status",
+      },
     ],
     stack: ["Next.js", "TypeScript", "PostgreSQL", "Recharts"],
     relatedServices: ["web-development", "data-science"],
@@ -113,18 +146,27 @@ export const portfolio: PortfolioItem[] = [
     client: "Bancroft Finance",
     sector: "Fintech",
     metric: "Invoice fields in seconds",
-    category: "demo",
-    interactive: true,
+    category: "ai",
     summary:
-      "Upload an invoice and watch structured fields populate — extraction with review, not blind trust.",
-    problem:
-      "AP staff re-keyed invoices into the ledger. Error rates climbed with volume, and month-end became a reconciliation festival.",
-    built:
-      "An extraction pipeline with confidence scores, human review for low-confidence fields, and a clean export into the existing finance system. The interactive demo uses the same UX pattern with sample documents.",
-    results: [
-      { value: "Seconds", label: "To structured fields" },
-      { value: "Review", label: "Gate on low confidence" },
-      { value: "API", label: "Into existing finance tools" },
+      "Invoice extraction with confidence scores and human review before finance systems are updated.",
+    description: [
+      "AP staff re-keyed invoices into the ledger. Error rates climbed with volume, and month-end turned into a reconciliation festival.",
+      "We shipped an extraction pipeline with confidence scores, human review for low-confidence fields, and a clean export into the existing finance system.",
+      "Structured fields land in seconds. Low-confidence values never reach the ledger without a person in the loop.",
+    ],
+    images: [
+      {
+        caption: "Upload & extract",
+        alt: "Document upload screen with invoice extraction in progress",
+      },
+      {
+        caption: "Confidence review",
+        alt: "Human review UI highlighting low-confidence extracted fields",
+      },
+      {
+        caption: "Finance export",
+        alt: "Export confirmation into the finance system API",
+      },
     ],
     stack: ["Python", "Gemini", "Next.js", "PostgreSQL"],
     relatedServices: ["ai-automation", "business-process-automation"],
@@ -137,17 +179,26 @@ export const portfolio: PortfolioItem[] = [
     sector: "Healthcare",
     metric: "Intake time cut in half",
     category: "web",
-    interactive: false,
     summary:
       "Structured intake, triage queues and visit context that travels with the patient — not a paper pack.",
-    problem:
+    description: [
       "Front desk collected the same history on paper every visit. Clinical staff rebuilt context from memory and incomplete notes.",
-    built:
-      "A web intake flow with role-based triage boards, visit summaries and audit logs. Designed so temporary staff can run it without a week of training.",
-    results: [
-      { value: "50%", label: "Faster intake" },
-      { value: "0 paper", label: "Packs at front desk" },
-      { value: "Audit", label: "Trail on every access" },
+      "We delivered a web intake flow with role-based triage boards, visit summaries and audit logs — designed so temporary staff can run it without a week of training.",
+      "Intake time fell by half. Paper packs left the front desk, and every access carries an audit trail.",
+    ],
+    images: [
+      {
+        caption: "Patient intake",
+        alt: "Structured clinic intake form on a tablet-friendly layout",
+      },
+      {
+        caption: "Triage board",
+        alt: "Role-based triage board with visit priority queues",
+      },
+      {
+        caption: "Visit summary",
+        alt: "Visit summary view with clinical context for the next staff member",
+      },
     ],
     stack: ["Next.js", "PostgreSQL", "SSO", "encrypted storage"],
     relatedServices: ["custom-software", "ui-ux-design", "web-development"],
@@ -160,17 +211,26 @@ export const portfolio: PortfolioItem[] = [
     sector: "Professional services",
     metric: "3× output, same review team",
     category: "automation",
-    interactive: false,
     summary:
       "Brief to draft to video assembly to scheduled publish — with brand gates humans still own.",
-    problem:
+    description: [
       "A small editorial team spent most of the week on assembly and scheduling. Draft quality varied; publishing slipped whenever someone was out.",
-    built:
-      "An automated pipeline: brief templates, brand-constrained drafting, human approval, media assembly and multi-channel scheduling. Analytics feed the next brief instead of dying in a spreadsheet.",
-    results: [
-      { value: "3×", label: "Publish volume" },
-      { value: "Same", label: "Review headcount" },
-      { value: "Gates", label: "On every public asset" },
+      "We automated the pipeline: brief templates, brand-constrained drafting, human approval, media assembly and multi-channel scheduling. Analytics feed the next brief instead of dying in a spreadsheet.",
+      "Publish volume tripled with the same review headcount. Every public asset still passes a human gate.",
+    ],
+    images: [
+      {
+        caption: "Brief intake",
+        alt: "Content brief template intake for the publish pipeline",
+      },
+      {
+        caption: "Approval gate",
+        alt: "Human brand approval step before media assembly",
+      },
+      {
+        caption: "Schedule board",
+        alt: "Multi-channel publish schedule with status and analytics feedback",
+      },
     ],
     stack: ["Node.js", "LLM pipelines", "CMS APIs", "schedulers"],
     relatedServices: ["content-automation", "ai-automation"],

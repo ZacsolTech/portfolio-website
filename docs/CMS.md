@@ -1,13 +1,14 @@
 # Content layer (Sprint 3)
 
-Payload CMS 3 is live against Neon Postgres. Static TypeScript modules in `lib/content/` remain as the fallback and seed source.
+Payload CMS 3 is live against Neon Postgres. Most marketing content is now
+code-only in `lib/content/`. Insights remain CMS-backed (with a static fallback).
 
 ## Admin
 
 1. Start the app: `pnpm dev`
 2. Open [http://localhost:3000/admin](http://localhost:3000/admin)
 3. Create the first admin user (email + password) on first visit
-4. Edit Industries, Portfolio, Insights, Testimonials, FAQs, Media
+4. Edit Insights, Media, and Sales collections (Leads, Bookings, Roadmaps, Subscribers)
 
 ## Seed
 
@@ -18,34 +19,54 @@ pnpm seed
 # → POST http://localhost:3000/api/seed
 ```
 
-In production, set `SEED_SECRET` and send header `x-seed-secret: <value>`.
+Seeds **Insights** only. In production, set `SEED_SECRET` and send header `x-seed-secret: <value>`.
+
+## Migrations
+
+`pnpm payload migrate` fails on Node 24 in this repo
+(`ERR_REQUIRE_ASYNC_MODULE` from `@payloadcms/richtext-lexical` top-level await
+when the CLI `require()`s `payload.config.ts`). Use the direct SQL runner instead:
+
+```bash
+pnpm run migrate -- --list
+pnpm run migrate -- <migration-name> --check
+pnpm run migrate -- <migration-name> --apply
+# one-shot drops:
+pnpm migrate:testimonials
+pnpm migrate:industries
+pnpm migrate:faqs
+pnpm migrate:portfolio
+```
+
+That writes the same SQL as `migrations/*.ts` and records a row in
+`payload_migrations`.
 
 ## Collections
 
 | Collection   | Source module                 | Drafts |
 |--------------|-------------------------------|--------|
-| Industries   | `lib/content/industries.ts`   | yes    |
-| Portfolio    | `lib/content/portfolio.ts`    | yes    |
 | Insights     | `lib/content/insights.ts`     | yes    |
-| Testimonials | `lib/content/testimonials.ts` | no     |
-| Faqs         | `lib/content/faqs.ts`         | no     |
 | Media        | uploads → `public/media`      | —      |
 | Users        | admin auth                    | —      |
+| Leads        | runtime capture               | —      |
+| Bookings     | runtime capture               | —      |
+| Roadmaps     | runtime capture               | —      |
+| Subscribers  | runtime capture               | —      |
 
-Code-only (not in CMS): `lib/content/services.ts`, `lib/content/team.ts`, `lib/content/site.ts`, `lib/content/zac.ts`.
+Code-only (not in CMS): `lib/content/services.ts`, `lib/content/industries.ts`, `lib/content/portfolio.ts`, `lib/content/faqs.ts`, `lib/content/testimonials.ts`, `lib/content/team.ts`, `lib/content/site.ts`, `lib/content/zac.ts`.
 
 ## Frontend data
 
-CMS-backed pages call `lib/cms.ts` helpers (`getPortfolioItem`, `getIndustry`, …). Flow:
+Insights pages call `lib/cms.ts` helpers (`getInsight`, `getInsights`). Flow:
 
 1. Try Payload Local API
-2. On failure / empty DB → fall back to `lib/content/*`
+2. On failure / empty DB → fall back to `lib/content/insights.ts`
 
-Services and team are imported directly from `lib/content/*`.
+Services, industries, portfolio, FAQs, testimonials and team are imported directly from `lib/content/*`.
 
 ## Draft preview
 
-Industries, Portfolio and Insights support **drafts** + **autosave**.
+Insights support **drafts** + **autosave**.
 
 1. Set `PREVIEW_SECRET` in `.env` (see `.env.example`)
 2. In `/admin`, open a document → click **Preview** (or open Live Preview)
