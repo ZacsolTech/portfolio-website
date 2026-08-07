@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -34,15 +34,37 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  const imageCount = item.images.length;
+  const canZoom = Boolean(item.images[activeImage]?.src ?? item.images[0]?.src);
+
+  const goPrev = useCallback(() => {
+    setActiveImage((prev) => (prev - 1 + imageCount) % imageCount);
+  }, [imageCount]);
+
+  const goNext = useCallback(() => {
+    setActiveImage((prev) => (prev + 1) % imageCount);
+  }, [imageCount]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        if (lightboxOpen) {
+          setLightboxOpen(false);
+          return;
+        }
         onClose();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNext();
       }
     },
-    [onClose],
+    [onClose, goPrev, goNext, lightboxOpen],
   );
 
   useEffect(() => {
@@ -51,6 +73,7 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
 
   useEffect(() => {
     setActiveImage(0);
+    setLightboxOpen(false);
   }, [item.slug]);
 
   useEffect(() => {
@@ -87,6 +110,7 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
   const primary = item.images[activeImage] ?? item.images[0];
 
   return createPortal(
+    <>
     <div className="project-modal" role="presentation">
       <button
         type="button"
@@ -103,7 +127,12 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
         onKeyDown={onPanelKeyDown}
       >
         <header className="project-modal__header">
-          <span className="overline">Project</span>
+          <div className="project-modal__header-meta">
+            <span className="badge">{item.sector}</span>
+            <span className="project-modal__header-title" id={titleId}>
+              {item.title}
+            </span>
+          </div>
           <button
             ref={closeRef}
             type="button"
@@ -116,8 +145,8 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
         </header>
 
         <div className="project-modal__scroll">
-          {/* 1. Project images — fills first modal screen */}
-          <section className="project-modal__gallery" aria-label="Project images">
+          {/* Main stage + parallel thumbnail column */}
+          <section className="project-modal__carousel" aria-label="Project images">
             <div className="project-modal__showcase">
               <div className="project-modal__stage">
                 {primary.src ? (
@@ -126,34 +155,57 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
                     alt={primary.alt}
                     fill
                     className="project-modal__photo"
-                    sizes="(max-width: 640px) 100vw, 46rem"
+                    sizes="(max-width: 768px) 100vw, 48rem"
                     priority
                   />
                 ) : (
                   <div
                     className={`thumb ${thumbClass(index + activeImage)} project-modal__frame`}
-                    data-label=""
+                    data-label={primary.caption}
                     role="img"
                     aria-label={primary.alt}
-                  >
-                    <div className="project-modal__ui" aria-hidden>
-                      <span className="project-modal__ui-bar" />
-                      <span className="project-modal__ui-row" />
-                      <span className="project-modal__ui-row project-modal__ui-row--short" />
-                      <div className="project-modal__ui-grid">
-                        <span />
-                        <span />
-                        <span />
-                        <span />
-                      </div>
-                    </div>
-                  </div>
+                  />
                 )}
+
+                {canZoom ? (
+                  <button
+                    type="button"
+                    className="project-modal__zoom"
+                    onClick={() => setLightboxOpen(true)}
+                    aria-label="Zoom image"
+                  >
+                    <ZoomIn size={16} aria-hidden />
+                  </button>
+                ) : null}
+
+                {imageCount > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      className="project-modal__nav project-modal__nav--prev"
+                      onClick={goPrev}
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft size={18} aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      className="project-modal__nav project-modal__nav--next"
+                      onClick={goNext}
+                      aria-label="Next image"
+                    >
+                      <ChevronRight size={18} aria-hidden />
+                    </button>
+                    <div className="project-modal__counter">
+                      {activeImage + 1} / {imageCount}
+                    </div>
+                  </>
+                ) : null}
               </div>
 
-              {item.images.length > 1 ? (
-                <aside className="project-modal__rail" aria-label="Image thumbnails">
-                  <div className="project-modal__thumbs" role="tablist" aria-label="Select image">
+              {imageCount > 1 ? (
+                <aside className="project-modal__rail" aria-label="More images">
+                  <div className="project-modal__strip" role="tablist" aria-label="Select image">
                     {item.images.map((img, i) => (
                       <button
                         key={`${img.caption}-${i}`}
@@ -161,89 +213,71 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
                         role="tab"
                         aria-selected={activeImage === i}
                         aria-label={img.caption}
-                        className={`project-modal__thumb-btn${activeImage === i ? " project-modal__thumb-btn--on" : ""}`}
+                        className={`project-modal__strip-btn${activeImage === i ? " project-modal__strip-btn--on" : ""}`}
                         onClick={() => setActiveImage(i)}
                       >
                         {img.src ? (
-                          <span className="project-modal__thumb-media">
-                            <Image
-                              src={img.src}
-                              alt=""
-                              fill
-                              className="project-modal__photo"
-                              sizes="140px"
-                            />
-                          </span>
+                          <Image
+                            src={img.src}
+                            alt=""
+                            fill
+                            className="project-modal__strip-img"
+                            sizes="120px"
+                          />
                         ) : (
                           <div
-                            className={`thumb ${thumbClass(index + i)} project-modal__thumb-frame`}
+                            className={`thumb ${thumbClass(index + i)} project-modal__strip-fallback`}
                             data-label=""
                             aria-hidden
-                          >
-                            <span className="project-modal__thumb-num">
-                              {String(i + 1).padStart(2, "0")}
-                            </span>
-                          </div>
+                          />
                         )}
                       </button>
                     ))}
                   </div>
                 </aside>
               ) : null}
-
-              <div className="project-modal__meta">
-                <span className="project-modal__index">
-                  {String(activeImage + 1).padStart(2, "0")}
-                  <span aria-hidden> / </span>
-                  {String(item.images.length).padStart(2, "0")}
-                </span>
-                <p className="project-modal__caption">{primary.caption}</p>
-              </div>
             </div>
+
+            <p className="project-modal__caption">{primary.caption}</p>
           </section>
 
           <div className="project-modal__details">
-          {/* 2. Title · sector · category */}
-          <section className="project-modal__identity" aria-label="Project overview">
-            <div className="project-modal__identity-cell">
-              <span className="overline">Title</span>
-              <h2 id={titleId} className="project-modal__title">
-                {item.title}
-              </h2>
-            </div>
-            <div className="project-modal__identity-cell">
-              <span className="overline">Sector</span>
-              <p className="project-modal__identity-value">{item.sector}</p>
-            </div>
-            <div className="project-modal__identity-cell">
-              <span className="overline">Category</span>
-              <p className="project-modal__identity-value">
-                {categoryLabel(item.category)}
-              </p>
-            </div>
-          </section>
-
-          {/* 3. Tech stack */}
-          <section className="project-modal__stack">
-            <span className="overline">Tech stack</span>
-            <div className="project-modal__chips">
-              {item.stack.map((s) => (
-                <Chip key={s}>{s}</Chip>
-              ))}
-            </div>
-          </section>
-
-          {/* 4. Description */}
-          <section className="project-modal__description">
-            <span className="overline">Description</span>
-            <div className="project-modal__copy">
-              {item.description.map((para) => (
-                <p key={para.slice(0, 48)} className="body-sm">
-                  {para}
+            <section className="project-modal__identity" aria-label="Project overview">
+              <div className="project-modal__identity-cell">
+                <span className="overline">Title</span>
+                <h2 className="project-modal__title">{item.title}</h2>
+              </div>
+              <div className="project-modal__identity-cell">
+                <span className="overline">Sector</span>
+                <p className="project-modal__identity-value">{item.sector}</p>
+              </div>
+              <div className="project-modal__identity-cell">
+                <span className="overline">Category</span>
+                <p className="project-modal__identity-value">
+                  {categoryLabel(item.category)}
                 </p>
-              ))}
-            </div>
-          </section>
+              </div>
+            </section>
+
+            <section className="project-modal__stack">
+              <span className="overline">Tech stack</span>
+              <div className="project-modal__chips">
+                {item.stack.map((s) => (
+                  <Chip key={s}>{s}</Chip>
+                ))}
+              </div>
+            </section>
+
+            <section className="project-modal__description">
+              <span className="overline">Description</span>
+              <div className="project-modal__copy">
+                {item.description.map((para) => (
+                  <p key={para.slice(0, 48)} className="body-sm">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </section>
           </div>
         </div>
 
@@ -256,7 +290,72 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
           </Link>
         </footer>
       </div>
-    </div>,
+    </div>
+
+    {lightboxOpen && primary.src ? (
+      <div
+        className="project-lightbox"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${item.title} — full image`}
+        onClick={() => setLightboxOpen(false)}
+      >
+        <button
+          type="button"
+          className="project-lightbox__close"
+          onClick={() => setLightboxOpen(false)}
+          aria-label="Close zoom"
+        >
+          <X size={22} aria-hidden />
+        </button>
+
+        <div
+          className="project-lightbox__frame"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Image
+            src={primary.src}
+            alt={primary.alt}
+            fill
+            className="project-lightbox__photo"
+            sizes="100vw"
+            quality={100}
+            priority
+          />
+        </div>
+
+        {imageCount > 1 ? (
+          <>
+            <button
+              type="button"
+              className="project-lightbox__nav project-lightbox__nav--prev"
+              onClick={(e) => {
+                e.stopPropagation();
+                goPrev();
+              }}
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={26} aria-hidden />
+            </button>
+            <button
+              type="button"
+              className="project-lightbox__nav project-lightbox__nav--next"
+              onClick={(e) => {
+                e.stopPropagation();
+                goNext();
+              }}
+              aria-label="Next image"
+            >
+              <ChevronRight size={26} aria-hidden />
+            </button>
+            <div className="project-lightbox__counter">
+              {activeImage + 1} / {imageCount}
+            </div>
+          </>
+        ) : null}
+      </div>
+    ) : null}
+    </>,
     document.body,
   );
 }

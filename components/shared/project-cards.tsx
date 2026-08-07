@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Card, CardBody, CardMedia, LinkArrow } from "@/components/ui";
+import { Badge, Card, CardBody, LinkArrow } from "@/components/ui";
 import type { PortfolioItem } from "@/lib/content";
 import { thumbClass } from "@/lib/seo";
 import { ProjectDetailModal } from "./project-modal";
@@ -10,15 +11,11 @@ type Layout = "featured" | "media" | "compact";
 
 type Props = {
   items: PortfolioItem[];
-  /** Resolve modal content from the full catalog when `items` is filtered */
   catalog?: PortfolioItem[];
-  /** visual density for different page sections */
   layout?: Layout;
   columns?: "2" | "3";
-  /** Sync open project to ?project= on the portfolio index */
   syncUrl?: boolean;
   initialSlug?: string | null;
-  /** Offset into thumb palette when nesting multiple grids */
   thumbOffset?: number;
 };
 
@@ -26,6 +23,34 @@ function categoryLabel(category: string) {
   if (category === "ai") return "AI";
   if (category === "automation") return "Automation";
   return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+function cardImageSrc(item: PortfolioItem): string | undefined {
+  return item.thumbnail ?? item.images.find((img) => img.src)?.src;
+}
+
+/** Fixed-height cover thumb — same pattern as personal portfolio cards. */
+function ProjectCardImage({ item, index }: { item: PortfolioItem; index: number }) {
+  const src = cardImageSrc(item);
+
+  return (
+    <div className="project-card-media">
+      {src ? (
+        <Image
+          src={src}
+          alt={item.title}
+          fill
+          className="project-card-media__img"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+      ) : (
+        <div className={`thumb ${thumbClass(index)}`} data-label={item.sector} />
+      )}
+      <div className="project-card-media__hint" aria-hidden>
+        <span>View project</span>
+      </div>
+    </div>
+  );
 }
 
 function readProjectParam(): string | null {
@@ -95,10 +120,7 @@ export function ProjectCardGrid({
           >
             {layout === "featured" ? (
               <Card variant="media" className="work-card">
-                <div
-                  className={`thumb ${thumbClass(i + thumbOffset)}`}
-                  data-label={item.sector}
-                />
+                <ProjectCardImage item={item} index={i + thumbOffset} />
                 <CardBody>
                   <div className="work-card__meta">
                     <Badge>{item.sector}</Badge>
@@ -116,12 +138,7 @@ export function ProjectCardGrid({
               </Card>
             ) : layout === "compact" ? (
               <Card variant="media">
-                <CardMedia>
-                  <div
-                    className={`thumb ${thumbClass(i + thumbOffset)}`}
-                    data-label={item.sector}
-                  />
-                </CardMedia>
+                <ProjectCardImage item={item} index={i + thumbOffset} />
                 <CardBody>
                   <Badge>{item.sector}</Badge>
                   <h3 className="d4" style={{ marginTop: "0.75rem" }}>
@@ -141,30 +158,25 @@ export function ProjectCardGrid({
               </Card>
             ) : (
               <Card variant="media">
-                <CardMedia>
-                  <div
-                    className={`thumb ${thumbClass(i + thumbOffset)}`}
-                    data-label={item.sector}
-                  />
-                </CardMedia>
+                <ProjectCardImage item={item} index={i + thumbOffset} />
                 <CardBody>
-                  <Badge>{item.sector}</Badge>
+                  <div className="project-card-meta">
+                    <Badge>{item.sector}</Badge>
+                  </div>
                   <h2 className="d4" style={{ marginTop: "0.75rem" }}>
                     {item.title}
                   </h2>
-                  <p className="body-sm" style={{ marginTop: "0.5rem", flex: 1 }}>
-                    {item.summary}
-                  </p>
-                  <p
-                    style={{
-                      marginTop: "1rem",
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 600,
-                      color: "var(--text-ink)",
-                    }}
-                  >
-                    {item.metric}
-                  </p>
+                  <p className="body-sm project-card-summary">{item.summary}</p>
+                  <div className="project-card-tech">
+                    {item.stack.slice(0, 4).map((t) => (
+                      <span key={t} className="chip">
+                        {t}
+                      </span>
+                    ))}
+                    {item.stack.length > 4 ? (
+                      <span className="chip">+{item.stack.length - 4}</span>
+                    ) : null}
+                  </div>
                 </CardBody>
               </Card>
             )}

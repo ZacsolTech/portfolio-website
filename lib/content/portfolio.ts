@@ -2,6 +2,154 @@ import type { PortfolioItem } from "./types";
 
 export const portfolio: PortfolioItem[] = [
   {
+    slug: "opply-ai",
+    title: "Opply AI — Student Email Assistant",
+    client: "Opply",
+    sector: "Education",
+    metric: "Email to ranked opportunities",
+    category: "web",
+    summary:
+      "An AI-powered SaaS assistant that integrates with Gmail and WhatsApp to extract, rank, and track academic and professional opportunities.",
+    description: [
+      "An AI-powered SaaS assistant that integrates with Gmail and WhatsApp to extract, rank, and track academic and professional opportunities for students.",
+      "Direct Gmail integration handles automated email processing and sync. Manual batch uploads parse with real-time progress over WebSockets. LangChain and Mistral AI tool-calling pipelines extract structured data, then a profile-fit ranking system matches opportunities to eligibility — with high-priority alerts pushed to WhatsApp via Twilio.",
+      "Unstructured inbox noise becomes a structured opportunity pipeline. Structured LLM tool-calling schemas keep extraction grounded. Async backend jobs keep the product interactive under load. Deployed on Vercel and Render.",
+    ],
+    thumbnail: "/projects/opply/thumbnail.png",
+    images: [
+      {
+        caption: "Opportunity inbox",
+        alt: "Opply AI dashboard showing extracted student opportunities from email",
+        src: "/projects/opply/1.png",
+      },
+      {
+        caption: "Ranking & fit",
+        alt: "Opply profile fit ranking view for academic and professional opportunities",
+        src: "/projects/opply/2.png",
+      },
+      {
+        caption: "Extraction pipeline",
+        alt: "Opply email processing and structured opportunity extraction view",
+        src: "/projects/opply/3.png",
+      },
+      {
+        caption: "WhatsApp alerts",
+        alt: "Opply high-priority opportunity alerts delivered via WhatsApp",
+        src: "/projects/opply/4.png",
+      },
+    ],
+    stack: [
+      "React",
+      "FastAPI",
+      "LangChain",
+      "Mistral AI",
+      "Twilio API",
+      "SQLModel",
+      "WebSockets",
+    ],
+    relatedServices: ["ai-automation", "web-development", "custom-software"],
+    timeline: "Vercel + Render",
+  },
+  {
+    slug: "plant-disease",
+    title: "Plant Disease Classification",
+    client: "Agri research",
+    sector: "Agriculture",
+    metric: "Explainable disease detection",
+    category: "data",
+    summary:
+      "Deep learning system for plant disease detection using transfer learning, with visual interpretability and production-ready deployment.",
+    description: [
+      "A deep learning system for plant disease detection using transfer learning, with visual interpretability and a production-ready inference app.",
+      "The CNN combines VGG16 and Inception with transfer learning. Grad-CAM heatmaps explain which regions drove each prediction. A Streamlit app serves real-time inference on uploaded leaf images.",
+      "High classification accuracy across disease categories. Grad-CAM gives end users transparent model reasoning. The Streamlit deployment delivers instant inference in production.",
+    ],
+    thumbnail: "/projects/plant/thumbnail.png",
+    images: [
+      {
+        caption: "Inference app",
+        alt: "Streamlit plant disease classification app with uploaded leaf image",
+        src: "/projects/plant/1.png",
+      },
+      {
+        caption: "Grad-CAM",
+        alt: "Grad-CAM heatmap showing model attention for plant disease prediction",
+        src: "/projects/plant/2.png",
+      },
+    ],
+    stack: ["Python", "TensorFlow", "VGG16", "Inception", "Grad-CAM", "Streamlit"],
+    relatedServices: ["data-science", "ai-automation"],
+    timeline: "Streamlit",
+  },
+  {
+    slug: "ai-content-generation",
+    title: "AI content generation pipeline",
+    client: "Crypto Geek / multi-brand",
+    sector: "Media",
+    metric: "Data → script → published video",
+    category: "automation",
+    summary:
+      "An n8n multi-agent pipeline that pulls live market data, runs technical, fundamental and strategy analysis, then generates and publishes AI avatar videos.",
+    description: [
+      "A scheduled n8n workflow that turns raw market and news data into finished short-form video content — without a daily production team in the loop.",
+      "Each morning the pipeline pulls Binance spot and futures feeds (price, OHLCV, order book, open interest, funding, long/short and taker ratios), CoinGecko fundamentals, Fear & Greed, CryptoCompare news and Cointelegraph RSS. A prepare step packs that into structured context for three parallel AI agents: technical analysis, fundamental analysis and trading strategy. Their outputs merge, an avatar is selected by day, and two script agents write distinct video scripts.",
+      "Scripts are formatted into HeyGen payloads, videos are created via the HeyGen API, then a wait-and-poll loop retrieves final URLs once rendering completes. The same system powers crypto market Shorts and has been reused for fitness and Instagram-style vertical content — proof the pipeline is brand-agnostic, not a one-off script.",
+    ],
+    thumbnail: "/projects/ai-content-generation/main.png",
+    images: [
+      {
+        caption: "Full n8n workflow",
+        alt: "n8n AI content generation workflow canvas from schedule trigger through HeyGen video output",
+        src: "/projects/ai-content-generation/main.png",
+      },
+      {
+        caption: "Data collection",
+        alt: "n8n nodes fetching Binance, CoinGecko, Fear and Greed and crypto news APIs",
+        src: "/projects/ai-content-generation/data-collection.png",
+      },
+      {
+        caption: "Multi-agent scripts",
+        alt: "Technical, fundamental and trading strategy AI agents merging into video script generators",
+        src: "/projects/ai-content-generation/script.png",
+      },
+      {
+        caption: "HeyGen render loop",
+        alt: "HeyGen API create video nodes with status polling and wait loops",
+        src: "/projects/ai-content-generation/generate-and-post.png",
+      },
+      {
+        caption: "Crypto Geek YouTube",
+        alt: "Crypto Geek YouTube channel with AI-generated Shorts thumbnails",
+        src: "/projects/ai-content-generation/example-crypto-yt.png",
+      },
+      {
+        caption: "Kiri Gym YouTube",
+        alt: "Kiri Gym YouTube channel showing fitness content produced by the same pipeline",
+        src: "/projects/ai-content-generation/example-gym-yt.png",
+      },
+      {
+        caption: "Instagram output",
+        alt: "Instagram profile showing vertical posts generated by the AI content pipeline",
+        src: "/projects/ai-content-generation/example-insta.png",
+      },
+    ],
+    stack: [
+      "n8n",
+      "HeyGen API",
+      "OpenAI / LLMs",
+      "Binance API",
+      "CoinGecko",
+      "JavaScript",
+      "RSS / news APIs",
+    ],
+    relatedServices: [
+      "content-automation",
+      "ai-automation",
+      "business-process-automation",
+    ],
+    timeline: "n8n + HeyGen",
+  },
+  {
     slug: "ai-support-agent",
     title: "AI support agent",
     client: "Meridian Retail",
@@ -19,17 +167,14 @@ export const portfolio: PortfolioItem[] = [
       {
         caption: "Agent workspace",
         alt: "Support agent workspace with analytics dashboard on screen",
-        src: "/projects/ai-support-agent/01.jpg",
       },
       {
         caption: "Escalation trail",
         alt: "Operations dashboard used for ticket escalation and review",
-        src: "/projects/ai-support-agent/02.jpg",
       },
       {
         caption: "Knowledge coverage",
         alt: "Team reviewing knowledge coverage on a shared workspace screen",
-        src: "/projects/ai-support-agent/03.jpg",
       },
     ],
     stack: ["Next.js", "Gemini", "pgvector", "PostgreSQL", "Resend"],
@@ -109,38 +254,6 @@ export const portfolio: PortfolioItem[] = [
     timeline: "9 weeks",
   },
   {
-    slug: "inventory-order-dashboard",
-    title: "Inventory & order dashboard",
-    client: "Northwind Commerce",
-    sector: "Retail",
-    metric: "Stock truth in one screen",
-    category: "web",
-    summary:
-      "A single operations console for orders, stock levels and fulfilment exceptions.",
-    description: [
-      "Ops ran the business from three exports and a shared sheet. By the time stock was wrong, sales had already oversold.",
-      "We built a role-aware operations dashboard: orders, inventory and exceptions on one surface, with drill-downs that match how warehouse and sales actually argue about numbers.",
-      "One live ops surface replaced three exports. Exception queues stay shared, and stock truth is the same for every team.",
-    ],
-    images: [
-      {
-        caption: "Ops overview",
-        alt: "Operations dashboard showing orders, stock and fulfilment status",
-      },
-      {
-        caption: "Stock detail",
-        alt: "Inventory detail view with warehouse-level stock levels",
-      },
-      {
-        caption: "Exceptions",
-        alt: "Fulfilment exception queue with owners and status",
-      },
-    ],
-    stack: ["Next.js", "TypeScript", "PostgreSQL", "Recharts"],
-    relatedServices: ["web-development", "data-science"],
-    timeline: "6 weeks",
-  },
-  {
     slug: "document-data-extractor",
     title: "Document data extractor",
     client: "Bancroft Finance",
@@ -171,70 +284,6 @@ export const portfolio: PortfolioItem[] = [
     stack: ["Python", "Gemini", "Next.js", "PostgreSQL"],
     relatedServices: ["ai-automation", "business-process-automation"],
     timeline: "8 weeks",
-  },
-  {
-    slug: "clinic-intake-triage",
-    title: "Clinic intake & triage console",
-    client: "Kestrel Health",
-    sector: "Healthcare",
-    metric: "Intake time cut in half",
-    category: "web",
-    summary:
-      "Structured intake, triage queues and visit context that travels with the patient — not a paper pack.",
-    description: [
-      "Front desk collected the same history on paper every visit. Clinical staff rebuilt context from memory and incomplete notes.",
-      "We delivered a web intake flow with role-based triage boards, visit summaries and audit logs — designed so temporary staff can run it without a week of training.",
-      "Intake time fell by half. Paper packs left the front desk, and every access carries an audit trail.",
-    ],
-    images: [
-      {
-        caption: "Patient intake",
-        alt: "Structured clinic intake form on a tablet-friendly layout",
-      },
-      {
-        caption: "Triage board",
-        alt: "Role-based triage board with visit priority queues",
-      },
-      {
-        caption: "Visit summary",
-        alt: "Visit summary view with clinical context for the next staff member",
-      },
-    ],
-    stack: ["Next.js", "PostgreSQL", "SSO", "encrypted storage"],
-    relatedServices: ["custom-software", "ui-ux-design", "web-development"],
-    timeline: "12 weeks",
-  },
-  {
-    slug: "content-publish-pipeline",
-    title: "Script-to-publish content pipeline",
-    client: "Ardent Media",
-    sector: "Professional services",
-    metric: "3× output, same review team",
-    category: "automation",
-    summary:
-      "Brief to draft to video assembly to scheduled publish — with brand gates humans still own.",
-    description: [
-      "A small editorial team spent most of the week on assembly and scheduling. Draft quality varied; publishing slipped whenever someone was out.",
-      "We automated the pipeline: brief templates, brand-constrained drafting, human approval, media assembly and multi-channel scheduling. Analytics feed the next brief instead of dying in a spreadsheet.",
-      "Publish volume tripled with the same review headcount. Every public asset still passes a human gate.",
-    ],
-    images: [
-      {
-        caption: "Brief intake",
-        alt: "Content brief template intake for the publish pipeline",
-      },
-      {
-        caption: "Approval gate",
-        alt: "Human brand approval step before media assembly",
-      },
-      {
-        caption: "Schedule board",
-        alt: "Multi-channel publish schedule with status and analytics feedback",
-      },
-    ],
-    stack: ["Node.js", "LLM pipelines", "CMS APIs", "schedulers"],
-    relatedServices: ["content-automation", "ai-automation"],
-    timeline: "11 weeks",
   },
 ];
 

@@ -84,6 +84,8 @@ export type PortfolioItem = {
   summary: string;
   /** Full project write-up for the detail modal (one or more paragraphs). */
   description: string[];
+  /** Card / list preview image. Falls back to first `images[].src`. */
+  thumbnail?: string;
   /** Product visuals shown first in the modal. */
   images: [PortfolioImage, PortfolioImage, ...PortfolioImage[]];
   stack: string[];

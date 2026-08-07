@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
       { pathname: "/brand/**" },
       { pathname: "/media/**" },
       { pathname: "/projects/**" },
+      { pathname: "/opply/**" },
+      { pathname: "/plant/**" },
       { pathname: "/api/media/file/**" },
     ],
   },
