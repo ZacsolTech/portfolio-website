@@ -30,8 +30,6 @@ async function draftQuery() {
   }
 }
 
-// ── Insights ──────────────────────────────────────────────
-
 export async function getInsights(): Promise<Insight[]> {
   try {
     const payload = await getPayloadClient()

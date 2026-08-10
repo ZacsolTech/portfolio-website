@@ -16,7 +16,7 @@ visible; the priced half is blurred behind an email gate.
 
 ## Conversation model
 
-State lives **server-side** (`lib/ai/session.ts`), keyed by an unguessable
+State lives **server-side** (`src/lib/ai/session.ts`), keyed by an unguessable
 session uuid held in the visitor's `sessionStorage`. The client sends only the
 session id and the new message. It cannot supply transcript, slots or a
 blueprint — otherwise a crafted request could forge assistant turns to steer the

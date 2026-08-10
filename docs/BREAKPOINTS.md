@@ -1,6 +1,6 @@
 # Breakpoint strategy (Sprint 1)
 
-Locked layout breakpoints for the ZACSOL site. Values live in `app/tokens.css` media queries.
+Locked layout breakpoints for the ZACSOL site. Values live in `src/app/tokens.css` media queries.
 
 | Token | Width | Role |
 |-------|-------|------|

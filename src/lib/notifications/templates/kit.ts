@@ -112,11 +112,6 @@ export function paragraph(text: string, opts?: { muted?: boolean }): string {
 	return `<p style="margin:20px 0 0;font-size:15px;line-height:1.65;color:${color};">${esc(text)}</p>`;
 }
 
-/** Paragraph that may contain pre-escaped inline markup built by a template. */
-export function rawParagraph(html: string): string {
-	return `<p style="margin:20px 0 0;font-size:15px;line-height:1.65;color:${palette.ink};">${html}</p>`;
-}
-
 export function card(inner: string): string {
 	return `<div style="margin:24px 0 0;padding:20px;background:${palette.paper};border-radius:12px;border:1px solid ${palette.line};">${inner}</div>`;
 }

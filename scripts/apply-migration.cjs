@@ -26,7 +26,7 @@ const APPLY = process.argv.includes('--apply')
 const LIST = process.argv.includes('--list') || NAME === '--list'
 
 /**
- * Kept in lockstep with migrations/<NAME>.ts — see the note above on why this
+ * Kept in lockstep with src/migrations/<NAME>.ts — see the note above on why this
  * cannot simply import that file through the Payload CLI.
  *
  * `preflight` is optional SQL that must return `{ n: 0 }` (or be skipped) before

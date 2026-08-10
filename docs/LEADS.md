@@ -11,8 +11,8 @@ Every surface produces the same record — the normalised lead from `PAGES.md`:
 { source, seed, answers, solution, contact, consent, utm }
 ```
 
-Defined once in [`lib/leads/schema.ts`](../lib/leads/schema.ts), written once by
-[`captureLead`](../lib/leads/capture.ts), stored in the `leads` collection.
+Defined once in [`src/lib/leads/schema.ts`](../src/lib/leads/schema.ts), written once by
+[`captureLead`](../src/lib/leads/capture.ts), stored in the `leads` collection.
 Adding a surface means calling `captureLead` — not adding a column.
 
 | Source | Where | Blocking? |
@@ -56,7 +56,7 @@ which keeps it outside the consent banner.
 
 ## Notifications
 
-`lib/notifications/` is a **channel registry**, not an email helper. Call sites
+`src/lib/notifications/` is a **channel registry**, not an email helper. Call sites
 emit a semantic event; channels decide how to render it.
 
 ```ts
@@ -88,7 +88,7 @@ handler changes.
 ## Follow-up sequence
 
 Day 2 → projects. Day 5 → booking nudge. Day 12 → one article, then it
-stops. Copy lives in [`lib/nurture/sequence.ts`](../lib/nurture/sequence.ts).
+stops. Copy lives in [`src/lib/nurture/sequence.ts`](../src/lib/nurture/sequence.ts).
 
 Run by `GET /api/cron/nurture`, scheduled weekdays at 09:00 UTC in
 [`vercel.json`](../vercel.json).
@@ -137,7 +137,7 @@ Two providers, chosen by one variable:
 The built-in path:
 
 - Availability is generated from `BOOKING_*` office hours in
-  [`lib/booking/availability.ts`](../lib/booking/availability.ts), minus anything
+  [`src/lib/booking/availability.ts`](../src/lib/booking/availability.ts), minus anything
   already booked.
 - Slots are offered as **UTC instants** and rendered in the *visitor's* timezone.
   A slot offered as 11:00 in Karachi is 08:00 in London; showing the wrong one is

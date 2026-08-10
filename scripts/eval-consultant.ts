@@ -8,24 +8,24 @@
  *
  * Usage: pnpm eval:consultant
  */
-import { CONSULTANT_EVAL_CASES } from "../lib/ai/eval-cases";
-import { isExplicitBlueprintRequest, rulesChatTurn } from "../lib/ai/chat";
-import { extractPartialString, parseJsonLoose } from "../lib/ai/partial-json";
-import { buildRulesBlueprint, classifySeed } from "../lib/ai/rules-engine";
+import { CONSULTANT_EVAL_CASES } from "@/lib/ai/eval-cases";
+import { isExplicitBlueprintRequest, rulesChatTurn } from "@/lib/ai/chat";
+import { extractPartialString, parseJsonLoose } from "@/lib/ai/partial-json";
+import { buildRulesBlueprint, classifySeed } from "@/lib/ai/rules-engine";
 import {
   BlueprintSchema,
   normalizeScale,
   normalizeTimeline,
   type Slots,
-} from "../lib/ai/schema";
-import { mergeSlots, missingSlots, slotProgress, slotsComplete } from "../lib/ai/slots";
+} from "@/lib/ai/schema";
+import { mergeSlots, missingSlots, slotProgress, slotsComplete } from "@/lib/ai/slots";
 import {
   inferEstimatorSlots,
   isExplicitEstimateRequest,
   rulesEstimatorTurn,
-} from "../lib/estimator/chat";
-import { priceProject, resolveInputs } from "../lib/estimator/pricing";
-import type { EstimatorSlots, LeverOverrides } from "../lib/estimator/schema";
+} from "@/lib/estimator/chat";
+import { priceProject, resolveInputs } from "@/lib/estimator/pricing";
+import type { EstimatorSlots, LeverOverrides } from "@/lib/estimator/schema";
 
 let failed = 0;
 let passed = 0;

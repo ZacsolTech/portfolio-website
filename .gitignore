@@ -50,4 +50,4 @@ next-env.d.ts
 # payload
 /public/media/*
 !/public/media/.gitkeep
-payload-types.ts
+src/payload-types.ts

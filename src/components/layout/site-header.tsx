@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Logo } from "@/components/layout/logo";
 import { ZacLink } from "@/components/zac/zac-link";
 import { isNavActive, mainNav } from "@/lib/nav";

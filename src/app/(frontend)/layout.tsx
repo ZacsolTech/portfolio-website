@@ -3,13 +3,12 @@ import { Instrument_Serif, JetBrains_Mono, Space_Grotesk } from "next/font/googl
 import { SiteShell } from "@/components/layout/site-shell";
 import { AttributionTracker } from "@/components/shared/attribution-tracker";
 import { SiteJsonLd } from "@/components/seo/json-ld";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeScript } from "@/components/theme-script";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ThemeScript } from "@/components/theme/theme-script";
 import { site } from "@/lib/content";
 import { absoluteUrl, defaultKeywords, defaultOgImage, siteUrl } from "@/lib/seo";
 import "../globals.css";
 
-/* 700 was loaded but never used — nothing in the system goes above 600. */
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600"],

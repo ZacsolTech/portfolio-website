@@ -5,7 +5,6 @@ import {
   EstimateSchema,
   EstimatorSlotsSchema,
   LeverOverridesSchema,
-  type EstimatorStage,
 } from "./schema";
 
 /**
@@ -89,11 +88,4 @@ export function appendEstimatorMessage(
     ...session,
     messages: [...session.messages, message].slice(-MAX_MESSAGES),
   };
-}
-
-export function withEstimatorStage(
-  session: EstimatorSession,
-  stage: EstimatorStage,
-): EstimatorSession {
-  return { ...session, stage };
 }

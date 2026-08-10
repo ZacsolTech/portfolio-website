@@ -30,9 +30,6 @@ export const ZAC_ROUTES: Record<ZacMode, string> = {
   estimator: "/tools/estimator",
 };
 
-/** Pages that *are* a mode. The dock and launcher stand down on these. */
-export const ZAC_PAGE_PATHS: readonly string[] = Object.values(ZAC_ROUTES);
-
 export type ZacModeMeta = {
   /** Segmented-control label — short enough for a 420px panel. */
   tab: string;

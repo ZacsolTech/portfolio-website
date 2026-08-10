@@ -1,7 +1,7 @@
 # Content layer (Sprint 3)
 
 Payload CMS 3 is live against Neon Postgres. Most marketing content is now
-code-only in `lib/content/`. Insights remain CMS-backed (with a static fallback).
+code-only in `src/lib/content/`. Insights remain CMS-backed (with a static fallback).
 
 ## Admin
 
@@ -25,7 +25,7 @@ Seeds **Insights** only. In production, set `SEED_SECRET` and send header `x-see
 
 `pnpm payload migrate` fails on Node 24 in this repo
 (`ERR_REQUIRE_ASYNC_MODULE` from `@payloadcms/richtext-lexical` top-level await
-when the CLI `require()`s `payload.config.ts`). Use the direct SQL runner instead:
+when the CLI `require()`s `src/payload.config.ts`). Use the direct SQL runner instead:
 
 ```bash
 pnpm run migrate -- --list
@@ -33,14 +33,14 @@ pnpm run migrate -- <migration-name> --check
 pnpm run migrate -- <migration-name> --apply
 ```
 
-That writes the same SQL as `migrations/*.ts` and records a row in
+That writes the same SQL as `src/migrations/*.ts` and records a row in
 `payload_migrations`.
 
 ## Collections
 
 | Collection   | Source module                 | Drafts |
 |--------------|-------------------------------|--------|
-| Insights     | `lib/content/insights.ts`     | yes    |
+| Insights     | `src/lib/content/insights.ts`     | yes    |
 | Media        | uploads → `public/media`      | —      |
 | Users        | admin auth                    | —      |
 | Leads        | runtime capture               | —      |
@@ -48,16 +48,16 @@ That writes the same SQL as `migrations/*.ts` and records a row in
 | Roadmaps     | runtime capture               | —      |
 | Subscribers  | runtime capture               | —      |
 
-Code-only (not in CMS): `lib/content/services.ts`, `lib/content/industries.ts`, `lib/content/portfolio.ts`, `lib/content/faqs.ts`, `lib/content/testimonials.ts`, `lib/content/team.ts`, `lib/content/site.ts`, `lib/content/zac.ts`.
+Code-only (not in CMS): `src/lib/content/services.ts`, `src/lib/content/industries.ts`, `src/lib/content/portfolio.ts`, `src/lib/content/faqs.ts`, `src/lib/content/testimonials.ts`, `src/lib/content/team.ts`, `src/lib/content/site.ts`, `src/lib/content/zac.ts`.
 
 ## Frontend data
 
-Insights pages call `lib/cms.ts` helpers (`getInsight`, `getInsights`). Flow:
+Insights pages call `src/lib/cms.ts` helpers (`getInsight`, `getInsights`). Flow:
 
 1. Try Payload Local API
-2. On failure / empty DB → fall back to `lib/content/insights.ts`
+2. On failure / empty DB → fall back to `src/lib/content/insights.ts`
 
-Services, industries, portfolio, FAQs, testimonials and team are imported directly from `lib/content/*`.
+Services, industries, portfolio, FAQs, testimonials and team are imported directly from `src/lib/content/*`.
 
 ## Draft preview
 

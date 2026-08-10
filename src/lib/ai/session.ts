@@ -4,10 +4,7 @@ import {
   ChatMessageSchema,
   SlotsSchema,
   STAGES,
-  type Blueprint,
   type ChatMessage,
-  type Slots,
-  type Stage,
 } from "./schema";
 import { z } from "zod";
 
@@ -98,19 +95,4 @@ export function appendMessage(
     ...session,
     messages: [...session.messages, message].slice(-MAX_MESSAGES),
   };
-}
-
-export function withStage(session: ConsultantSession, stage: Stage): ConsultantSession {
-  return { ...session, stage };
-}
-
-export function withSlots(session: ConsultantSession, slots: Slots): ConsultantSession {
-  return { ...session, slots };
-}
-
-export function withBlueprint(
-  session: ConsultantSession,
-  blueprint: Blueprint,
-): ConsultantSession {
-  return { ...session, blueprint, stage: "blueprint" };
 }

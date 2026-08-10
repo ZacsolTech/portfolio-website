@@ -23,12 +23,6 @@ export type TurnstileResult =
 
 let warned = false;
 
-export function isTurnstileConfigured(): boolean {
-	return Boolean(
-		process.env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-	);
-}
-
 function warnOnce(): void {
 	if (warned) return;
 	warned = true;

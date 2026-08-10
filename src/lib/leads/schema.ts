@@ -27,14 +27,6 @@ export const LEAD_SOURCES = [
 export const LeadSourceSchema = z.enum(LEAD_SOURCES);
 export type LeadSource = z.infer<typeof LeadSourceSchema>;
 
-export const LEAD_SOURCE_LABELS: Record<LeadSource, string> = {
-	consultant: "AI Consultant",
-	estimator: "Cost Estimator",
-	contact: "Contact form",
-	booking: "Booking",
-	newsletter: "Newsletter",
-};
-
 /* -------------------------------- contact -------------------------------- */
 
 /**
@@ -152,23 +144,6 @@ export const LeadInputSchema = z.object({
 });
 
 export type LeadInput = z.infer<typeof LeadInputSchema>;
-
-/**
- * The subset a browser is allowed to send.
- *
- * Everything price-bearing (`solution`, `transcript`, `engine`) is added
- * server-side from session state — a crafted request must never be able to
- * mail itself a fabricated quote or poison the CRM with an invented figure.
- */
-export const ClientLeadFieldsSchema = z.object({
-	utm: AttributionSchema.optional(),
-	turnstileToken: z.string().max(4000).optional(),
-	/**
-	 * Honeypot. Accepted by the schema on purpose — rejecting it with a 400
-	 * would tell a bot exactly which field to stop filling. Checked separately.
-	 */
-	company: z.string().max(200).optional(),
-});
 
 /** Build a timestamped consent record from a checkbox and its visible label. */
 export function consentRecord(granted: boolean, text: string) {

@@ -19,7 +19,7 @@ blur-gate is deliberately *not* reused here.)
 The consultant answers *"what should we build?"*; the estimator answers
 *"what will it cost?"*. That difference drives the architecture.
 
-`lib/estimator/pricing.ts` computes every figure. The model runs the
+`src/lib/estimator/pricing.ts` computes every figure. The model runs the
 conversation and writes the narrative, and is explicitly forbidden from
 quoting a number in chat. This is not caution for its own sake:
 
@@ -67,7 +67,7 @@ estimate built mostly on defaults visibly looks like one:
 ## Conversation
 
 Five slots must be established: `summary`, `projectType`, `platform`, `scope`,
-`timeline`. State is server-side (`lib/estimator/session.ts`) — the client
+`timeline`. State is server-side (`src/lib/estimator/session.ts`) — the client
 sends only a session id and a message, so no payload can bend the price.
 
 Four more (`scale`, `designState`, `integrations`, `regulated`) are **never
