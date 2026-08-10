@@ -32,9 +32,6 @@ importers:
       '@upstash/redis':
         specifier: ^1.38.1
         version: 1.38.1
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
       graphql:
         specifier: ^17.0.2
         version: 17.0.2
@@ -78,6 +75,9 @@ importers:
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       eslint:
         specifier: ^9
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
