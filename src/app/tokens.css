@@ -5,7 +5,7 @@
    Themes: data-theme="light" | "dark"  (see theme.js)
    ========================================================================== */
 
-/* Fonts via next/font — see app/layout.tsx (--font-space-grotesk, --font-jetbrains-mono) */
+/* Fonts via next/font — see app/layout.tsx (--font-space-grotesk, --font-jetbrains-mono → IBM Plex Mono) */
 
 :root {
   /* ---------- Absolute zinc ramp ---------- */

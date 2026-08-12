@@ -11,7 +11,7 @@ See also [LEADS.md](./LEADS.md) for how the lead pipeline fits together, and
 
 | Variable | If missing / wrong |
 |----------|--------------------|
-| `NEXT_PUBLIC_APP_URL` | **Every link in the blueprint email points at `localhost`.** Recipients get "connection refused". Also breaks canonical URLs, OG tags and the sitemap. Must be the real origin, e.g. `https://zacsol.com` |
+| `NEXT_PUBLIC_APP_URL` | **Every link in the blueprint email points at `localhost`.** Recipients get "connection refused". Also breaks canonical URLs, OG tags and the sitemap. Must be the real origin, e.g. `https://zacsol.tech` |
 | `RESEND_FROM_EMAIL` | Blueprint delivery is skipped. `onboarding@resend.dev` only delivers to the Resend account owner — it is a testing sender, not a production one. Needs a verified domain |
 | `RESEND_API_KEY` | Same: delivery skipped. The lead is still captured and logged |
 | `GEMINI_API_KEY` | Both tools silently fall back to their deterministic engines. Visitors get canned replies, not a conversation |
@@ -99,7 +99,7 @@ Every one of these degrades silently, so check them rather than assuming.
 **Crons** — after deploy, trigger the nurture job by hand and read the JSON summary:
 
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://zacsol.com/api/cron/nurture
+curl -H "Authorization: Bearer $CRON_SECRET" https://zacsol.tech/api/cron/nurture
 ```
 
 ## 4. Model quota

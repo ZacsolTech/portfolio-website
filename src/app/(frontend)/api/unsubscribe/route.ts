@@ -1,4 +1,5 @@
 import { getClientIp, limitForm } from "@/lib/ai/rate-limit";
+import { site } from "@/lib/content";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -76,7 +77,7 @@ function page(title: string, body: string, status = 200): Response {
   p{margin:0 0 1rem;color:#3f3f46}
   a{color:#18181b}
 </style></head>
-<body><main><h1>${title}</h1>${body}<p><a href="/">Back to zacsol.com</a></p></main></body></html>`,
+<body><main><h1>${title}</h1>${body}<p><a href="/">Back to ${site.domain}</a></p></main></body></html>`,
 		{
 			status,
 			headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },

@@ -13,8 +13,8 @@ export const site: SiteInfo = {
   tagline: "AI-powered software agency",
   description:
     "An AI-powered software agency. We build web, mobile, AI automation and custom systems that ship on time and hand over clean.",
-  email: "hello@zacsol.com",
-  domain: "zacsol.com",
+  email: "info@zacsol.tech",
+  domain: "zacsol.tech",
   copyright: "© 2026 ZACSOL. All rights reserved.",
   newsletterBlurb:
     "Short, practical writing on AI, automation and shipping software. No sales sequences.",

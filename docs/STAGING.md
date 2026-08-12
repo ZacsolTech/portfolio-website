@@ -43,7 +43,7 @@ way for a UAT click to reach a real customer.
 | `NEXT_PUBLIC_APP_URL` | The staging URL. Wrong value = every email links to the wrong host |
 | `PAYLOAD_SECRET` | Its own value. A shared secret means a staging session is valid in production |
 | `RESEND_API_KEY` | Its own key, so staging sends are separable in the Resend dashboard |
-| `RESEND_FROM_EMAIL` | A subdomain sender, e.g. `staging@mail.zacsol.com` — a staging bounce must not damage the production domain's reputation |
+| `RESEND_FROM_EMAIL` | A subdomain sender, e.g. `staging@mail.zacsol.tech` — a staging bounce must not damage the production domain's reputation |
 | `LEADS_NOTIFY_EMAIL` | A team address, not the real sales inbox |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` | Its own Upstash database. Sharing means staging traffic burns production rate-limit budget |
 | `GEMINI_API_KEY` | Can be shared; watch the shared quota |
@@ -62,7 +62,7 @@ To exercise it deliberately:
 
 ```bash
 curl -H "Authorization: Bearer $STAGING_CRON_SECRET" \
-  https://staging.zacsol.com/api/cron/nurture
+  https://staging.zacsol.tech/api/cron/nurture
 ```
 
 It returns a JSON summary (`due`, `sent`, `failed`) rather than an empty 200, so

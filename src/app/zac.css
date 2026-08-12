@@ -784,17 +784,6 @@ body:has(.consultant-page--shell) .chat-shell-main {
   text-overflow: ellipsis;
   min-width: 0;
 }
-.chat-app__name-short {
-  display: none;
-}
-@media (max-width: 639px) {
-  .chat-app__name-full {
-    display: none;
-  }
-  .chat-app__name-short {
-    display: inline;
-  }
-}
 @media (min-width: 640px) {
   .chat-app__name {
     font-size: 0.9375rem;

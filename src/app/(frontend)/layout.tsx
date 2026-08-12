@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from "next/font/google";
 import { SiteShell } from "@/components/layout/site-shell";
 import { AttributionTracker } from "@/components/shared/attribution-tracker";
 import { SiteJsonLd } from "@/components/seo/json-ld";
@@ -17,7 +17,12 @@ const spaceGrotesk = Space_Grotesk({
   preload: true,
 });
 
-const jetbrainsMono = JetBrains_Mono({
+/*
+  JetBrains Mono via next/font/google is currently broken on Turbopack builds:
+  Google returns 404 for the woff2 URLs Next embeds, which fails Vercel deploys.
+  IBM Plex Mono is the same job (code/UI mono) with working font files.
+*/
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   variable: "--font-jetbrains-mono",
@@ -121,7 +126,7 @@ export default function FrontendLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <head>
         <ThemeScript />

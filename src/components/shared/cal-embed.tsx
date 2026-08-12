@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { site } from "@/lib/content";
 
 /**
  * Cal.com inline embed.
@@ -88,7 +89,7 @@ export function CalEmbed({ calLink }: { calLink: string }) {
 		return (
 			<p className="body-sm" role="alert" style={{ padding: "2rem 1rem" }}>
 				The booking calendar couldn&apos;t load. Email{" "}
-				<a href="mailto:hello@zacsol.com">hello@zacsol.com</a> and we&apos;ll find a time.
+				<a href={`mailto:${site.email}`}>{site.email}</a> and we&apos;ll find a time.
 			</p>
 		);
 	}

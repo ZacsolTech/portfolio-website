@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
+import { site } from "@/lib/content";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  let host = "zacsol.com";
+  let host = site.domain;
   try {
     host = new URL(siteUrl).host;
   } catch {

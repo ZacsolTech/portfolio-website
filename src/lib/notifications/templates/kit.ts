@@ -57,7 +57,7 @@ export function safeUrl(value: string | null | undefined): string {
 }
 
 export function appUrl(): string {
-	return (process.env.NEXT_PUBLIC_APP_URL || "https://zacsol.com").replace(/\/$/, "");
+	return (process.env.NEXT_PUBLIC_APP_URL || "https://zacsol.tech").replace(/\/$/, "");
 }
 
 export function absolute(path: string): string {

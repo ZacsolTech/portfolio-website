@@ -7,7 +7,7 @@ import { Field, Input, Panel, Textarea } from "@/components/ui";
 import { Turnstile, useTurnstile } from "@/components/shared/turnstile";
 import { CalEmbed } from "@/components/shared/cal-embed";
 import { readAttribution } from "@/lib/leads/attribution";
-import { team } from "@/lib/content";
+import { site, team } from "@/lib/content";
 
 /**
  * Booking panel.
@@ -481,7 +481,7 @@ export function BookingPanel() {
 						<div role="status">
 							<p className="body-sm">
 								Nothing free in the next few weeks. Email{" "}
-								<a href="mailto:hello@zacsol.com">hello@zacsol.com</a> and we&apos;ll find a
+								<a href={`mailto:${site.email}`}>{site.email}</a> and we&apos;ll find a
 								time.
 							</p>
 						</div>

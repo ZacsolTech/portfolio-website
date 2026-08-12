@@ -71,10 +71,7 @@ export function ZacFrame({
           <span className="chat-app__mark" aria-hidden>
             ZAC
           </span>
-          <p className="chat-app__name">
-            <span className="chat-app__name-full">{title}</span>
-            <span className="chat-app__name-short">{shortTitle}</span>
-          </p>
+          <p className="chat-app__name">{shortTitle}</p>
           {subtitle ? (
             <>
               <span className="chat-app__dot" aria-hidden>
