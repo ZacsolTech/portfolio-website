@@ -46,11 +46,16 @@ export default async function RoadmapPage({ params }: Params) {
 	return (
 		// Pinned to the light palette: the recipient is usually someone the
 		// sender forwarded it to, and a dark-mode quote reads as a screenshot
-		// rather than a proposal.
+		// rather than a proposal. Site chrome is hidden via CSS so the page
+		// reads as a document, not a website section.
 		<div className="roadmap-page" data-theme="light">
+			<a href="#roadmap-doc" className="sr-only">
+				Skip to roadmap
+			</a>
 			<RoadmapDocument
 				name={roadmap.name}
 				blueprint={roadmap.blueprint}
+				prototype={roadmap.prototype}
 				slots={roadmap.slots}
 				createdAt={roadmap.createdAt}
 				shareUrl={roadmapUrl(roadmap.token)}

@@ -104,6 +104,10 @@ const MIGRATIONS = {
       refuseIfPositive: false,
     },
   },
+  '20260810_090000_roadmap_prototype': {
+    // Additive and nullable, so it is safe to re-run and needs no preflight.
+    sql: 'ALTER TABLE "roadmaps" ADD COLUMN IF NOT EXISTS "prototype" jsonb;',
+  },
 }
 
 function normalizeDatabaseUrl(url) {

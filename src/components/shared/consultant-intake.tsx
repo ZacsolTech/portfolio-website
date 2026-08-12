@@ -11,7 +11,10 @@ import {
   type SlotKey,
   type Slots,
 } from "@/lib/ai/schema";
+import { PrototypeView } from "@/components/prototype/prototype-view";
+import type { Prototype } from "@/lib/ai/prototype-schema";
 import { Turnstile, useTurnstile } from "@/components/shared/turnstile";
+import { ChatComposer, ChatTyping, ChatWelcome } from "@/components/zac/chat-page";
 import { ZacFrame, type ZacSurface } from "@/components/zac/zac-frame";
 import { zac } from "@/lib/content/zac";
 import { loadSeed, readPageHandoff, readPageSeedId, type ZacSeed } from "@/lib/zac/seeds";
@@ -20,6 +23,43 @@ import { readAttribution } from "@/lib/leads/attribution";
 const SESSION_KEY = "zacsol_consultant_session";
 /** The estimator writes its own id here; a handoff reads it back. */
 const ESTIMATOR_SESSION_KEY = "zacsol_estimator_session";
+/** Survives refresh when the server session store drops the lead. */
+const unlockKey = (sessionId: string) => `zacsol_consultant_unlock:${sessionId}`;
+
+type UnlockPersist = {
+  roadmapUrl: string | null;
+  emailed: boolean;
+  message: string;
+};
+
+function readUnlock(sessionId: string): UnlockPersist | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(unlockKey(sessionId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as UnlockPersist;
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeUnlock(sessionId: string, data: UnlockPersist) {
+  try {
+    sessionStorage.setItem(unlockKey(sessionId), JSON.stringify(data));
+  } catch {
+    // Private mode — server restore still handles Redis/DB recovery.
+  }
+}
+
+function clearUnlock(sessionId: string) {
+  try {
+    sessionStorage.removeItem(unlockKey(sessionId));
+  } catch {
+    // ignore
+  }
+}
 
 const GREETING = zac.consultant.greeting;
 
@@ -66,53 +106,6 @@ function getOrCreateSessionId() {
 }
 
 /* ------------------------------- primitives ------------------------------- */
-
-function Typing() {
-  return (
-    <div className="msg msg--bot">
-      <div className="msg__avatar" aria-hidden>
-        {zac.avatar}
-      </div>
-      <div className="msg__bubble">
-        <span className="typing">
-          <span />
-          <span />
-          <span />
-        </span>
-        <span className="sr-only">{zac.consultant.ariaTyping}</span>
-      </div>
-    </div>
-  );
-}
-
-function IntakeProgress({ slots, progress }: { slots: Slots; progress: number }) {
-  return (
-    <div className="intake" aria-label={`Intake ${progress}% complete`}>
-      <div className="intake__bar">
-        <span style={{ width: `${progress}%` }} />
-      </div>
-      <ul className="intake__slots">
-        {SLOT_KEYS.map((key: SlotKey) => {
-          const value = slots[key]?.trim();
-          const filled = Boolean(value);
-          return (
-            <li key={key} className={filled ? "is-filled" : undefined}>
-              <span className="intake__tick" aria-hidden>
-                {filled ? "✓" : "○"}
-              </span>
-              <span className="intake__label">{SLOT_LABELS[key]}</span>
-              {filled ? (
-                <span className="intake__value" title={value}>
-                  {value!.length > 36 ? `${value!.slice(0, 35).trimEnd()}…` : value}
-                </span>
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
 
 function GeneratingPanel() {
   return (
@@ -201,8 +194,20 @@ function BlueprintTeaser({ blueprint }: { blueprint: Blueprint }) {
   );
 }
 
-/** Gated half: the numbers and detail worth an email address. */
-function BlueprintDetail({ blueprint }: { blueprint: Blueprint }) {
+/**
+ * Gated half: the numbers and detail worth an email address.
+ *
+ * The prototype leads it. Everything else here is a claim about what we would
+ * do; the mock is the only part that demonstrates we understood the problem,
+ * and it is what makes the address worth giving up.
+ */
+function BlueprintDetail({
+  blueprint,
+  prototype,
+}: {
+  blueprint: Blueprint;
+  prototype: Prototype | null;
+}) {
   // Cumulative week offsets, derived rather than accumulated — the React
   // compiler rejects mutation that outlives the render.
   const timeline = blueprint.phases.map((phase, i) => {
@@ -212,6 +217,11 @@ function BlueprintDetail({ blueprint }: { blueprint: Blueprint }) {
 
   return (
     <div className="blueprint">
+      {prototype ? (
+        <Row label="A first look" className="bp-row--proto">
+          <PrototypeView prototype={prototype} />
+        </Row>
+      ) : null}
       <Row label="Investment band">
         <div className="bp-row__v">
           {formatMoneyBand(blueprint.costBandUsd[0], blueprint.costBandUsd[1])}
@@ -341,6 +351,7 @@ export function ConsultantIntake({
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const [blueprint, setBlueprint] = useState<Blueprint | null>(null);
+  const [prototype, setPrototype] = useState<Prototype | null>(null);
   const [usedFallback, setUsedFallback] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
@@ -349,6 +360,7 @@ export function ConsultantIntake({
   const [email, setEmail] = useState("");
   /** Honeypot — real users never fill a field they cannot see. */
   const [honeypot, setHoneypot] = useState("");
+  const honeypotRef = useRef<HTMLInputElement>(null);
   const [emailed, setEmailed] = useState(false);
   const [doneMessage, setDoneMessage] = useState("");
   const [roadmapUrl, setRoadmapUrl] = useState<string | null>(null);
@@ -404,6 +416,7 @@ export function ConsultantIntake({
           const data = (await res.json()) as {
             messages: ChatMessage[];
             blueprint: Blueprint | null;
+            prototype: Prototype | null;
             captured: boolean;
             roadmapUrl: string | null;
             slots: Slots;
@@ -428,13 +441,27 @@ export function ConsultantIntake({
 
             if (data.blueprint) {
               setBlueprint(data.blueprint);
+              setPrototype(data.prototype ?? null);
               setUsedFallback(data.blueprint.source === "rules");
-              if (data.captured) {
+              const localUnlock = readUnlock(sessionId);
+              if (data.captured || localUnlock) {
                 setPhase("captured");
                 setUnlocked(true);
-                setEmailed(true);
-                setRoadmapUrl(data.roadmapUrl);
-                setDoneMessage("Your roadmap is on its way.");
+                setEmailed(data.captured || Boolean(localUnlock?.emailed));
+                setRoadmapUrl(data.roadmapUrl ?? localUnlock?.roadmapUrl ?? null);
+                setDoneMessage(
+                  localUnlock?.message ||
+                    (data.captured
+                      ? "Your roadmap is ready."
+                      : "Your roadmap is on its way."),
+                );
+                if (data.captured && data.roadmapUrl) {
+                  writeUnlock(sessionId, {
+                    roadmapUrl: data.roadmapUrl,
+                    emailed: true,
+                    message: "Your roadmap is ready.",
+                  });
+                }
               } else {
                 setPhase("blueprint");
                 setGateOpen(true);
@@ -476,6 +503,7 @@ export function ConsultantIntake({
       });
       const data = (await res.json()) as {
         blueprint?: Blueprint;
+        prototype?: Prototype | null;
         usedFallback?: boolean;
         error?: string;
       };
@@ -485,6 +513,7 @@ export function ConsultantIntake({
       }
 
       setBlueprint(data.blueprint);
+      setPrototype(data.prototype ?? null);
       setUsedFallback(Boolean(data.usedFallback));
       setPhase("blueprint");
       // Let the document land before the gate slides over it.
@@ -728,6 +757,9 @@ export function ConsultantIntake({
     setBusy(true);
 
     try {
+      // Prefer the live DOM value — autofill can fill inputs without React state.
+      const hpValue = (honeypotRef.current?.value ?? honeypot).trim();
+
       const res = await fetch("/api/consultant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -736,12 +768,13 @@ export function ConsultantIntake({
           sessionId,
           name: name.trim(),
           email: email.trim(),
-          company: honeypot,
+          hp: hpValue || undefined,
           utm: readAttribution(),
           turnstileToken: turnstile.token ?? undefined,
         }),
       });
       const data = (await res.json()) as {
+        ok?: boolean;
         queued?: boolean;
         alreadySent?: boolean;
         roadmapUrl?: string | null;
@@ -750,15 +783,31 @@ export function ConsultantIntake({
       };
       if (!res.ok) throw new Error(data.error || "Could not send your roadmap.");
 
+      const unlockedNow = Boolean(data.queued || data.alreadySent || data.roadmapUrl);
+      if (!unlockedNow) {
+        throw new Error(
+          "Could not unlock your roadmap. Please try again — if this keeps happening, refresh the page.",
+        );
+      }
+
+      const roadmap = data.roadmapUrl ?? null;
+      const message = data.message ?? "";
       setEmailed(Boolean(data.queued || data.alreadySent));
-      setRoadmapUrl(data.roadmapUrl ?? null);
-      setDoneMessage(data.message ?? "");
+      setRoadmapUrl(roadmap);
+      setDoneMessage(message);
       setUnlocked(true);
       setPhase("captured");
+      writeUnlock(sessionId, {
+        roadmapUrl: roadmap,
+        emailed: Boolean(data.queued || data.alreadySent),
+        message,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send your roadmap.");
       // Turnstile tokens are single-use; a retry needs a fresh one.
       turnstile.reset();
+      if (honeypotRef.current) honeypotRef.current.value = "";
+      setHoneypot("");
     } finally {
       setBusy(false);
     }
@@ -773,6 +822,7 @@ export function ConsultantIntake({
         body: JSON.stringify({ action: "reset", sessionId }),
       });
       sessionStorage.removeItem(SESSION_KEY);
+      clearUnlock(sessionId);
     } catch {
       // A reload still gives them a clean slate.
     }
@@ -801,6 +851,7 @@ export function ConsultantIntake({
     setComplete(false);
     setSuggestions([]);
     setBlueprint(null);
+    setPrototype(null);
     setUsedFallback(false);
     setGateOpen(false);
     setUnlocked(false);
@@ -818,152 +869,177 @@ export function ConsultantIntake({
 
   const barTitle =
     phase === "generating"
-      ? `${zac.consultant.consoleTitle} · generating`
+      ? "Building your roadmap"
       : phase === "blueprint" || phase === "captured"
-        ? `${zac.consultant.consoleTitle} · blueprint`
-        : `${zac.consultant.consoleTitle} · chat`;
+        ? "Your solution blueprint"
+        : zac.consultant.name;
+
+  const barSubtitle =
+    phase === "chat"
+      ? "Solution consultant · free"
+      : phase === "generating"
+        ? "Usually under a minute"
+        : "Scoped from your conversation";
 
   const canSend = text.trim().length >= 2 && !busy;
   const userTurns = messages.filter((m) => m.who === "user").length;
+  const isFresh = userTurns === 0;
+  const isPage = surface === "page";
 
-  const body = (
-    <>
+  const ctaBlock =
+    complete ? (
+      <div className={`consultant-cta${isPage ? " consultant-cta--page" : ""}`}>
+        <div className="consultant-cta__head">
+          <p className="consultant-cta__note">
+            Here&apos;s what I&apos;ve got. Anything wrong, just tell me below — it
+            changes the estimate.
+          </p>
+          <dl className="consultant-cta__recap">
+            {SLOT_KEYS.filter((key) => key !== "problem").map((key) => (
+              <div key={key}>
+                <dt>{SLOT_LABELS[key]}</dt>
+                <dd>{slots[key]}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <button
+          type="button"
+          className="btn btn--gold"
+          onClick={() => void generateBlueprint()}
+          disabled={busy}
+        >
+          Build my solution blueprint
+        </button>
+      </div>
+    ) : userTurns >= 6 ? (
+      <div
+        className={`consultant-cta consultant-cta--soft${isPage ? " consultant-cta--page" : ""}`}
+      >
+        <p className="consultant-cta__note">
+          We can keep going, or I can build the blueprint now and flag what I had
+          to assume.
+        </p>
+        <button
+          type="button"
+          className="btn btn--outline-dark"
+          onClick={() => void generateBlueprint()}
+          disabled={busy}
+        >
+          Build it with what you have
+        </button>
+      </div>
+    ) : null;
+
+  const suggestionBlock =
+    suggestions.length > 0 && !busy && userTurns >= 1 ? (
+      <div className={`replies${isPage ? " replies--page" : ""}`}>
+        {suggestions.slice(0, 2).map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            className="reply"
+            onClick={() => void sendMessage(suggestion)}
+            disabled={busy}
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+    ) : null;
+
+  const chatUI =
+    phase === "chat" ? (
+      <>
+        <div
+          className={`chat-app__thread${isPage ? "" : " chat-app__thread--dock"}`}
+          ref={chatRef}
+        >
+          {!isPage ? (
+            <div
+              className="dock-progress"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+              aria-label={`Intake ${progress}% complete`}
+            >
+              <span className="dock-progress__label">{progress}%</span>
+              <span className="dock-progress__track" aria-hidden>
+                <span style={{ width: `${progress}%` }} />
+              </span>
+            </div>
+          ) : null}
+
           {carried.length > 0 ? (
             <p className="zac-carried" role="status">
               Carried over from your estimate: {carried.join(" · ")}
             </p>
           ) : null}
 
-          {phase === "chat" ? (
-            <>
-              <div
-                className={surface === "dock" ? "zac-pane__thread" : "zac-pane__thread--page"}
-                ref={surface === "dock" ? chatRef : undefined}
-              >
-              <IntakeProgress slots={slots} progress={progress} />
-
-              <div
-                className="chat chat--pane"
-                ref={surface === "dock" ? undefined : chatRef}
-                role="log"
-                aria-live="polite"
-                aria-atomic="false"
-                aria-label={zac.consultant.ariaChat}
-              >
-                <div className="chat__inner">
-                  <div className="chat__spacer" aria-hidden />
-                  {messages.map((message) => (
-                    <div key={message.id} className={`msg msg--${message.who}`}>
-                      <div className="msg__avatar" aria-hidden>
-                        {message.who === "bot" ? zac.avatar : "YOU"}
+          {isFresh ? (
+            <ChatWelcome
+              title="What should we solve?"
+              body={GREETING}
+              starters={zac.consultant.starters.slice(0, 2)}
+              onPick={(starter) => void sendMessage(starter)}
+              compact={!isPage}
+            />
+          ) : (
+            <div
+              className="chat-stream"
+              role="log"
+              aria-live="polite"
+              aria-atomic="false"
+              aria-label={zac.consultant.ariaChat}
+            >
+              {messages
+                .filter(
+                  (message, index) =>
+                    !(index === 0 && message.who === "bot" && message.text === GREETING),
+                )
+                .map((message) => (
+                  <div key={message.id} className={`chat-msg chat-msg--${message.who}`}>
+                    {message.who === "bot" ? (
+                      <div className="chat-msg__avatar" aria-hidden>
+                        {zac.avatar}
                       </div>
-                      <div className="msg__bubble">
-                        {message.text}
-                        {message.streaming ? <span className="caret" aria-hidden /> : null}
-                      </div>
+                    ) : null}
+                    <div className="chat-msg__body">
+                      {message.text}
+                      {message.streaming ? <span className="caret" aria-hidden /> : null}
                     </div>
-                  ))}
-                  {typing ? <Typing /> : null}
-                </div>
-              </div>
-
-              {suggestions.length > 0 && !busy && userTurns >= 1 ? (
-                <div className="replies" style={{ marginTop: "1rem" }}>
-                  {suggestions.slice(0, 2).map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      className="reply"
-                      onClick={() => void sendMessage(suggestion)}
-                      disabled={busy}
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-
-              {complete ? (
-                <div className="consultant-cta">
-                  <div className="consultant-cta__head">
-                    <p className="consultant-cta__note">
-                      Here&apos;s what I&apos;ve got. Anything wrong, just tell me
-                      below — it changes the estimate.
-                    </p>
-                    <dl className="consultant-cta__recap">
-                      {SLOT_KEYS.filter((key) => key !== "problem").map((key) => (
-                        <div key={key}>
-                          <dt>{SLOT_LABELS[key]}</dt>
-                          <dd>{slots[key]}</dd>
-                        </div>
-                      ))}
-                    </dl>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn--gold"
-                    onClick={() => void generateBlueprint()}
-                    disabled={busy}
-                  >
-                    Build my solution blueprint
-                  </button>
-                </div>
-              ) : userTurns >= 6 ? (
-                // Escape hatch: some visitors never answer a given question, and
-                // an endless loop is worse than a blueprint with an assumption.
-                <div className="consultant-cta consultant-cta--soft">
-                  <p className="consultant-cta__note">
-                    We can keep going, or I can build the blueprint now and flag
-                    what I had to assume.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn--outline-dark"
-                    onClick={() => void generateBlueprint()}
-                    disabled={busy}
-                  >
-                    Build it with what you have
-                  </button>
-                </div>
-              ) : null}
-              </div>
+                ))}
+              {typing ? <ChatTyping label={zac.consultant.ariaTyping} /> : null}
+              {ctaBlock}
+            </div>
+          )}
+        </div>
 
-              <form
-                className="composer"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void sendMessage(text);
-                }}
-              >
-                <label className="sr-only" htmlFor="consultant-input">
-                  Message {zac.name}
-                </label>
-                <textarea
-                  id="consultant-input"
-                  ref={inputRef}
-                  rows={2}
-                  value={text}
-                  onChange={(event) => setText(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                      event.preventDefault();
-                      void sendMessage(text);
-                    }
-                  }}
-                  placeholder={
-                    messages.length <= 1
-                      ? "Describe the problem in your own words…"
-                      : "Type your reply…"
-                  }
-                  disabled={busy || restoring}
-                  maxLength={4000}
-                />
-                <button type="submit" className="btn btn--gold" disabled={!canSend}>
-                  {busy ? "…" : "Send"}
-                </button>
-              </form>
-            </>
-          ) : null}
+        <div className={`chat-app__dock${isPage ? "" : " chat-app__dock--panel"}`}>
+          {suggestionBlock}
+          <ChatComposer
+            id={isPage ? "consultant-input" : "consultant-input-dock"}
+            label={`Message ${zac.name}`}
+            value={text}
+            onChange={setText}
+            onSubmit={() => void sendMessage(text)}
+            disabled={busy || restoring}
+            canSend={canSend}
+            placeholder={
+              isFresh ? "Describe the problem in your own words…" : "Reply to ZAC…"
+            }
+            inputRef={inputRef}
+            hint={isPage ? undefined : ""}
+          />
+        </div>
+      </>
+    ) : null;
+
+  const body = (
+    <>
+          {chatUI}
 
           {phase === "generating" ? <GeneratingPanel /> : null}
 
@@ -980,7 +1056,7 @@ export function ConsultantIntake({
               <div className={`gate__locked${unlocked ? " is-unlocked" : ""}`}>
                 {/* inert keeps the blurred detail out of tab order and a11y tree */}
                 <div className={unlocked ? undefined : "gate__veiled"} inert={!unlocked}>
-                  <BlueprintDetail blueprint={blueprint} />
+                  <BlueprintDetail blueprint={blueprint} prototype={prototype} />
                 </div>
 
                 {!unlocked && gateOpen ? (
@@ -1026,15 +1102,20 @@ export function ConsultantIntake({
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                       />
-                      {/* Off-screen, not display:none, so bots still fill it. */}
+                      {/*
+                        Honeypot: nonsense name so autofill never fills it.
+                        Never name this company/name/email — that silently
+                        discarded real unlocks.
+                      */}
                       <input
+                        ref={honeypotRef}
                         type="text"
-                        name="company"
+                        name="zac_hp"
                         tabIndex={-1}
                         autoComplete="off"
                         aria-hidden
                         className="sr-only"
-                        value={honeypot}
+                        defaultValue=""
                         onChange={(event) => setHoneypot(event.target.value)}
                       />
                       <Turnstile
@@ -1042,6 +1123,11 @@ export function ConsultantIntake({
                         action="consultant-gate"
                         onToken={turnstile.setToken}
                       />
+                      {error ? (
+                        <p role="alert" className="consultant-error" style={{ marginTop: 0 }}>
+                          {error}
+                        </p>
+                      ) : null}
                       <button
                         type="submit"
                         className="btn btn--gold gate__submit"
@@ -1131,45 +1217,20 @@ export function ConsultantIntake({
   }
 
   return (
-    <div className="consultant-layout">
-      <ZacFrame surface="page" title={barTitle} phase={phase}>
-        {body}
-      </ZacFrame>
-
-      <aside className="consultant-aside">
-        <div className="aside-card">
-          <h3>How it works</h3>
-          <ul>
-            <li>Describe the real bottleneck</li>
-            <li>{zac.consultant.name} asks follow-ups, one at a time</li>
-            <li>You get a scoped roadmap on screen</li>
-            <li>Unlock costs and phases with your email</li>
-          </ul>
-        </div>
-        <div className="aside-card">
-          <h3>Answer honestly</h3>
-          <p>
-            The blueprint tracks the quality of the conversation. Vague in, generic out.
-          </p>
-        </div>
-        <div className="aside-card aside-card--accent">
-          <h3>Prefer a human?</h3>
-          <p style={{ marginBottom: "1rem" }}>
-            Thirty minutes with a senior engineer. Not a sales script.
-          </p>
-          <Link href="/book" className="btn btn--gold" style={{ width: "100%" }}>
-            Book a consultation
-          </Link>
-        </div>
-        <div className="aside-card">
-          <h3>Other free tools</h3>
-          <ul>
-            <li>
-              <Link href="/tools/estimator">{zac.estimator.name}</Link>
-            </li>
-          </ul>
-        </div>
-      </aside>
-    </div>
+    <ZacFrame
+      surface="page"
+      title={barTitle}
+      subtitle={barSubtitle}
+      phase={phase}
+      progress={phase === "chat" ? progress : undefined}
+      barTrailing={
+        <Link href="/tools/estimator" className="chat-app__link">
+          <span className="chat-app__link-long">Switch to Estimator</span>
+          <span className="chat-app__link-short">Estimator</span>
+        </Link>
+      }
+    >
+      {body}
+    </ZacFrame>
   );
 }

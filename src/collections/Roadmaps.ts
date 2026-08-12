@@ -59,6 +59,14 @@ export const Roadmaps: CollectionConfig = {
       required: true,
       admin: { description: 'Frozen at mint time — the document must not change under a shared link.' },
     },
+    {
+      name: 'prototype',
+      type: 'json',
+      admin: {
+        description:
+          'Generated visual mock shown with the roadmap. Frozen alongside the blueprint; null when one could not be drawn.',
+      },
+    },
     { name: 'slots', type: 'json', admin: { description: 'Intake that produced it.' } },
     {
       name: 'views',

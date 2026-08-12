@@ -2,10 +2,12 @@ import { after } from "next/server";
 import { z } from "zod";
 import { extractSlots, streamConsultantTurn } from "@/lib/ai/chat";
 import { generateBlueprint } from "@/lib/ai/gemini";
+import { generatePrototype } from "@/lib/ai/prototype";
+import { isRenderable } from "@/lib/ai/prototype-schema";
 import { getClientIp, limitConsultant, type LimitKind } from "@/lib/ai/rate-limit";
 import { sanitizeChatMessage } from "@/lib/ai/sanitize";
 import { slotsToAnswers, type Slots } from "@/lib/ai/schema";
-import { captureLead, updateLead } from "@/lib/leads/capture";
+import { captureLead, findCaptureBySessionId, updateLead } from "@/lib/leads/capture";
 import {
 	AttributionSchema,
 	consentRecord,
@@ -73,8 +75,11 @@ const GateBody = z.object({
   consent: z.boolean().optional(),
   utm: AttributionSchema.optional(),
   turnstileToken: z.string().max(4000).optional(),
-  /** Honeypot — accepted so a bot gets no signal, checked in the handler. */
-  company: z.string().max(200).optional(),
+  /**
+   * Honeypot — must not be named `company`/`name`/`email` or browser autofill
+   * fills it and the real visitor is silently discarded.
+   */
+  hp: z.string().max(200).optional(),
 });
 
 const ResetBody = z.object({
@@ -171,11 +176,35 @@ export async function GET(request: Request) {
   const parsed = SessionId.safeParse(sessionId);
   if (!parsed.success) return json({ error: "Invalid session id." }, 400);
 
-  const session = await getOrCreateSession(parsed.data);
+  let session = await getOrCreateSession(parsed.data);
+
+  /*
+    Session store is short-lived (Redis TTL / in-memory). The lead row in
+    Postgres is durable. If the visitor already passed the gate but the
+    session forgot `lead`, recover it so refresh does not re-ask for email.
+  */
+  if (session.blueprint && !session.lead) {
+    const capture = await findCaptureBySessionId(parsed.data);
+    if (capture) {
+      session = {
+        ...session,
+        stage: "captured",
+        lead: {
+          name: capture.name,
+          email: capture.email,
+          at: Date.now(),
+          roadmapUrl: capture.roadmapUrl,
+        },
+      };
+      await saveSession(session);
+    }
+  }
+
   return json({
     ok: true,
     messages: session.messages,
     blueprint: session.blueprint,
+    prototype: session.prototype,
     captured: Boolean(session.lead),
     roadmapUrl: session.lead?.roadmapUrl ?? null,
     ...publicState(session),
@@ -376,6 +405,7 @@ async function handleBlueprint(request: Request, body: z.infer<typeof BlueprintB
     return json({
       ok: true,
       blueprint: session.blueprint,
+      prototype: session.prototype,
       usedFallback: session.blueprint.source === "rules",
       ...publicState(session),
     });
@@ -403,10 +433,22 @@ async function handleBlueprint(request: Request, body: z.infer<typeof BlueprintB
 
   const result = await generateBlueprint({ seed, answers });
 
+  // The mock is drawn from the blueprint, so it has to wait for it — but it
+  // must never be able to cost the visitor the blueprint itself. `generate
+  // Prototype` swallows its own failures and returns null; this is the only
+  // reason the two are not run in parallel.
+  const drawn = await generatePrototype({
+    seed,
+    answers,
+    blueprint: result.blueprint,
+  });
+  const prototype = isRenderable(drawn.prototype) ? drawn.prototype : null;
+
   const next: ConsultantSession = {
     ...session,
     slots,
     blueprint: result.blueprint,
+    prototype,
     stage: "blueprint",
   };
   await saveSession(next);
@@ -415,6 +457,7 @@ async function handleBlueprint(request: Request, body: z.infer<typeof BlueprintB
     {
       ok: true,
       blueprint: result.blueprint,
+      prototype,
       usedFallback: result.usedFallback,
       model: result.model ?? null,
       ...publicState(next),
@@ -427,9 +470,10 @@ async function handleBlueprint(request: Request, body: z.infer<typeof BlueprintB
 /* ----------------------------------- gate ---------------------------------- */
 
 async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
-  // Silent success: a bot that filled the honeypot gets no signal to tune against.
-  if (body.company) {
-    return json({ ok: true, queued: true, email: body.email, message: "On its way." });
+  // Silent discard for bots. Field must stay obscure — autofill on `company`
+  // was rejecting real visitors with a no-op unlock.
+  if (body.hp?.trim()) {
+    return json({ ok: true });
   }
 
   const human = await verifyTurnstile({
@@ -513,6 +557,9 @@ async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
     name: body.name,
     email: body.email,
     blueprint,
+    // Frozen with the blueprint: the recipient of a forwarded link must see
+    // the same mock the sender saw, not one regenerated on read.
+    prototype: session.prototype,
     slots: session.slots,
     leadId: saved.stored ? saved.id : undefined,
   });
@@ -614,6 +661,7 @@ async function handleReset(body: z.infer<typeof ResetBody>) {
     slots: {},
     stage: "gathering",
     blueprint: null,
+    prototype: null,
     lead: null,
     createdAt: Date.now(),
     updatedAt: Date.now(),

@@ -11,6 +11,8 @@
 import { CONSULTANT_EVAL_CASES } from "@/lib/ai/eval-cases";
 import { isExplicitBlueprintRequest, rulesChatTurn } from "@/lib/ai/chat";
 import { extractPartialString, parseJsonLoose } from "@/lib/ai/partial-json";
+import { buildRulesPrototype, normalizePrototype } from "@/lib/ai/prototype";
+import { isRenderable } from "@/lib/ai/prototype-schema";
 import { buildRulesBlueprint, classifySeed } from "@/lib/ai/rules-engine";
 import {
   BlueprintSchema,
@@ -24,8 +26,13 @@ import {
   isExplicitEstimateRequest,
   rulesEstimatorTurn,
 } from "@/lib/estimator/chat";
+import { CATALOG_KEYS, catalogEntry, priceSelection } from "@/lib/estimator/catalog";
 import { priceProject, resolveInputs } from "@/lib/estimator/pricing";
-import type { EstimatorSlots, LeverOverrides } from "@/lib/estimator/schema";
+import {
+  BuildPlanSchema,
+  type EstimatorSlots,
+  type LeverOverrides,
+} from "@/lib/estimator/schema";
 
 let failed = 0;
 let passed = 0;
@@ -247,7 +254,7 @@ const project: EstimatorSlots = {
   regulated: false,
 };
 
-const priced = priceProject(project);
+const priced = priceProject({ slots: project });
 check("low is below high", priced.lowUsd < priced.highUsd, `${priced.lowUsd}/${priced.highUsd}`);
 check("duration low <= high", priced.durationWeeks[0] <= priced.durationWeeks[1]);
 check("effort is positive", priced.effortWeeks > 0);
@@ -263,7 +270,7 @@ check(
 );
 
 // Determinism is the whole reason pricing lives outside the model.
-const repeat = priceProject(project);
+const repeat = priceProject({ slots: project });
 eq("same inputs, same low", repeat.lowUsd, priced.lowUsd);
 eq("same inputs, same high", repeat.highUsd, priced.highUsd);
 
@@ -278,14 +285,14 @@ const dearer: [string, LeverOverrides][] = [
   ["design from scratch", { designState: "Nothing yet — start from scratch" }],
 ];
 for (const [label, override] of dearer) {
-  const adjusted = priceProject(project, override);
+  const adjusted = priceProject({ slots: project, overrides: override });
   check(
     `${label} raises the price`,
     adjusted.highUsd > priced.highUsd,
     `${priced.highUsd} → ${adjusted.highUsd}`,
   );
 }
-const cheaper = priceProject(project, { designState: "Designs ready to build" });
+const cheaper = priceProject({ slots: project, overrides: { designState: "Designs ready to build" } });
 check(
   "build-ready designs lower the price",
   cheaper.highUsd < priced.highUsd,
@@ -300,7 +307,7 @@ const bareSlots: EstimatorSlots = {
   scope: "Full product",
   timeline: "Next 6 months",
 };
-const bare = priceProject(bareSlots);
+const bare = priceProject({ slots: bareSlots });
 
 check("unanswered refinements lower confidence", bare.confidence < priced.confidence);
 const bareSpread = (bare.highUsd - bare.lowUsd) / bare.highUsd;
@@ -336,13 +343,295 @@ const scenarios: [string, EstimatorSlots, number, number][] = [
   ],
 ];
 for (const [label, slots, min, max] of scenarios) {
-  const result = priceProject(slots);
+  const result = priceProject({ slots });
   check(
     `${label} lands in a sane band`,
     result.lowUsd >= min && result.highUsd <= max,
     `${result.lowUsd}–${result.highUsd}, expected within ${min}–${max}`,
   );
   check(`${label} has a positive duration`, result.durationWeeks[0] > 0);
+}
+
+section("Plan-driven pricing");
+{
+  // The point of the plan is that two projects sharing a projectType can cost
+  // wildly different amounts. If these two converge, the lookup table has
+  // effectively come back and the estimator is rule-based again.
+  const automationSlots: EstimatorSlots = {
+    summary: "Wire our Shopify orders into Slack and a Google Sheet with n8n",
+    projectType: "AI / automation",
+    platform: "Internal only",
+    scope: "Add to an existing system",
+    timeline: "This quarter",
+    scale: "Under 1k users",
+    designState: "Designs ready to build",
+    integrations: 2,
+    regulated: false,
+  };
+  const resolvedAutomation = resolveInputs(automationSlots);
+  const baseline = {
+    scale: resolvedAutomation.scale as "Under 1k users",
+    designState: resolvedAutomation.designState as "Designs ready to build",
+    integrations: resolvedAutomation.integrations,
+    regulated: resolvedAutomation.regulated,
+  };
+
+  const smallPlan = BuildPlanSchema.parse({
+    approach: "Two n8n workflows against the existing Shopify webhook.",
+    tasks: [
+      { name: "Map the order fields we care about", discipline: "Discovery & scoping", weeks: 0.5 },
+      { name: "Build the Shopify → Slack workflow", discipline: "Engineering", weeks: 1 },
+      { name: "Build the Sheet append and dedupe", discipline: "Engineering", weeks: 0.75 },
+      { name: "Test against a week of live orders", discipline: "QA & hardening", weeks: 0.5 },
+    ],
+    runCosts: [
+      { key: "n8n-cloud-starter", usage: [{ meter: "executions", volume: 1_800 }] },
+      { key: "monitoring-basic" },
+    ],
+    baseline,
+    source: "gemini",
+  });
+
+  const bigPlan = BuildPlanSchema.parse({
+    approach: "A retrieval platform with its own ingestion pipeline and evaluation harness.",
+    tasks: [
+      { name: "Discovery and corpus audit", discipline: "Discovery & scoping", weeks: 3 },
+      { name: "Ingestion and chunking pipeline", discipline: "AI & data", weeks: 6 },
+      { name: "Retrieval API and reranking", discipline: "Engineering", weeks: 8 },
+      { name: "Evaluation harness", discipline: "AI & data", weeks: 4 },
+      { name: "Admin console", discipline: "Engineering", weeks: 5 },
+      { name: "Hardening and load testing", discipline: "QA & hardening", weeks: 3 },
+    ],
+    runCosts: [
+      {
+        key: "gemini-pro",
+        usage: [
+          { meter: "input-tokens", volume: 120_000_000 },
+          { meter: "output-tokens", volume: 20_000_000 },
+        ],
+      },
+      { key: "aws-medium" },
+    ],
+    baseline,
+    source: "gemini",
+  });
+
+  const small = priceProject({ slots: automationSlots, plan: smallPlan, rate: 4000 });
+  const big = priceProject({ slots: automationSlots, plan: bigPlan, rate: 4000 });
+
+  check(
+    "a small automation prices far below a platform of the same project type",
+    big.highUsd > small.highUsd * 4,
+    `${small.lowUsd}–${small.highUsd} vs ${big.lowUsd}–${big.highUsd}`,
+  );
+  check(
+    "a two-week automation is not quoted as a quarter of work",
+    small.effortWeeks < 6,
+    `${small.effortWeeks} person-weeks`,
+  );
+
+  const planShareSum = small.breakdown.reduce((sum, line) => sum + line.share, 0);
+  check(
+    "planned breakdown shares still sum to 1",
+    Math.abs(planShareSum - 1) < 0.0001,
+    `sum=${planShareSum}`,
+  );
+  check(
+    "breakdown names the actual work, not generic workstreams",
+    small.breakdown.some((line) => line.name.includes("Slack")),
+    small.breakdown.map((l) => l.name).join(" | "),
+  );
+
+  // Determinism has to survive the plan, or the engine's whole promise fails.
+  const planRepeat = priceProject({ slots: automationSlots, plan: smallPlan, rate: 4000 });
+  eq("same plan, same low", planRepeat.lowUsd, small.lowUsd);
+  eq("same plan, same high", planRepeat.highUsd, small.highUsd);
+
+  section("Running costs");
+  check("a costed plan produces a monthly bill", Boolean(small.runCosts));
+  const run = small.runCosts!;
+  eq("every catalog key resolved to a line", run.lines.length, 2);
+  check(
+    "monthly band brackets the midpoint",
+    run.monthlyLowUsd <= run.monthlyMidUsd && run.monthlyMidUsd <= run.monthlyHighUsd,
+    `${run.monthlyLowUsd}/${run.monthlyMidUsd}/${run.monthlyHighUsd}`,
+  );
+  check(
+    "line monthlies reconcile with the total",
+    Math.abs(run.lines.reduce((s, l) => s + l.monthlyUsd, 0) - run.monthlyMidUsd) < 1,
+  );
+  check(
+    "usage inside an included allowance is not billed",
+    run.lines.find((l) => l.key === "n8n-cloud-starter")?.meteredUsd === 0,
+  );
+  check(
+    "first year exceeds the build alone",
+    run.firstYearHighUsd > small.highUsd,
+    `${run.firstYearHighUsd} vs ${small.highUsd}`,
+  );
+
+  // Token spend is the line clients are most often surprised by, so it has to
+  // track volume rather than sitting at a flat placeholder.
+  const aiRun = big.runCosts!;
+  const aiLine = aiRun.lines.find((l) => l.key === "gemini-pro");
+  check("model usage is metered, not flat", (aiLine?.meteredUsd ?? 0) > 300, `${aiLine?.meteredUsd}`);
+
+  check(
+    "licence fees are no longer listed as excluded once they are priced",
+    !small.exclusions.some((e) => /licence and infrastructure/i.test(e)),
+    small.exclusions.join(" | "),
+  );
+
+  section("Levers still move a planned estimate");
+  const scaledUp = priceProject({
+    slots: automationSlots,
+    overrides: { scale: "100k+ / high transaction volume" },
+    plan: smallPlan,
+    rate: 4000,
+  });
+  check(
+    "scaling up raises the build",
+    scaledUp.highUsd > small.highUsd,
+    `${small.highUsd} → ${scaledUp.highUsd}`,
+  );
+  check(
+    "scaling up raises metered usage harder than the build",
+    scaledUp.runCosts!.monthlyMidUsd > run.monthlyMidUsd,
+    `${run.monthlyMidUsd} → ${scaledUp.runCosts!.monthlyMidUsd}`,
+  );
+  check(
+    "a plan is not double-charged for the scale it was written at",
+    Math.abs(priceProject({ slots: automationSlots, plan: smallPlan, rate: 4000 }).lowUsd - small.lowUsd) < 1,
+  );
+}
+
+section("Prototype normalisation");
+{
+  // Everything a model gets wrong in one payload: a placeholder section, an
+  // edge into a node that does not exist, a ragged table row, a bogus accent
+  // and dashboard fields on a workflow.
+  const messy = normalizePrototype({
+    kind: "workflow",
+    productName: "Bella Vista Orders",
+    caption: "How an order would move through the system.",
+    accent: "chartreuse",
+    nodes: [
+      { id: "a", label: "Order arrives on WhatsApp", kind: "trigger", app: "WhatsApp" },
+      { id: "b", label: "Classify and route", kind: "ai" },
+      { id: "c", label: "Write to the kitchen board", kind: "output" },
+      { id: "", label: "unnamed", kind: "action" },
+    ],
+    edges: [
+      { from: "a", to: "b" },
+      { from: "b", to: "c", label: "in stock" },
+      { from: "b", to: "ghost" },
+      { from: "c", to: "c" },
+    ],
+    kpis: [{ label: "Orders", value: "120" }],
+    sections: [{ type: "hero", title: "Your headline here" }],
+  });
+
+  eq("a node without an id is dropped", messy.nodes.length, 3);
+  eq("an edge to a missing node is dropped", messy.edges.length, 2);
+  check("a self-edge is dropped", !messy.edges.some((e) => e.from === e.to));
+  eq("an unknown accent falls back", messy.accent, "lime");
+  eq("dashboard fields are cleared on a workflow", messy.kpis.length, 0);
+  eq("section fields are cleared on a workflow", messy.sections.length, 0);
+  check("a workflow with a trigger and an output renders", isRenderable(messy));
+
+  const placeholders = normalizePrototype({
+    kind: "landing",
+    productName: "Bella Vista",
+    caption: "A homepage concept for the restaurant.",
+    accent: "amber",
+    sections: [
+      { type: "hero", title: "Your headline here", body: "Lorem ipsum dolor sit amet" },
+      {
+        type: "list",
+        title: "Menu",
+        items: [
+          { title: "Tagliatelle al ragù", body: "Slow-cooked beef", price: "€18" },
+          { title: "Feature One", body: "Placeholder" },
+        ],
+      },
+    ],
+  });
+
+  check(
+    "a placeholder hero is dropped rather than shown",
+    !placeholders.sections.some((s) => s.type === "hero"),
+  );
+  eq("a placeholder item is dropped, its siblings kept", placeholders.sections[0]?.items.length, 1);
+  check(
+    "a landing page reduced to one section is not renderable",
+    !isRenderable(placeholders),
+    `${placeholders.sections.length} section(s)`,
+  );
+
+  const ragged = normalizePrototype({
+    kind: "dashboard",
+    productName: "Ops",
+    caption: "The board your dispatchers would watch.",
+    accent: "sky",
+    kpis: [
+      { label: "Missed orders", value: "4", delta: "12%", trend: "down", goodWhen: "down" },
+      { label: "On time", value: "96%", delta: "3%", trend: "up" },
+    ],
+    chart: { title: "Orders per day", points: [{ label: "Mon", value: 12 }] },
+    table: {
+      title: "Live orders",
+      columns: ["Order", "Driver", "Status"],
+      rows: [["#1041", "Ana", "En route"], ["#1042"]],
+      statusColumn: 9,
+    },
+  });
+
+  check("a chart with too few points is dropped", ragged.chart === undefined);
+  check(
+    "a short table row is padded, not dropped",
+    ragged.table?.rows.every((row) => row.length === 3) ?? false,
+    JSON.stringify(ragged.table?.rows),
+  );
+  check("an out-of-range status column is discarded", ragged.table?.statusColumn === undefined);
+  check("a dashboard with kpis and a table renders", isRenderable(ragged));
+
+  const fallback = buildRulesPrototype({
+    answers: { industry: "Logistics", current: "Spreadsheets", scale: "10–50 users", timeline: "Within 3 months" },
+    blueprint: {
+      title: "Dispatch board that replaces the spreadsheet",
+      serviceTitle: "Custom software",
+      features: ["Ingest jobs", "Assign drivers", "Track delivery"],
+    },
+  });
+  check("the offline prototype still renders", isRenderable(fallback));
+  eq("the offline prototype is a flow", fallback.kind, "workflow");
+  check(
+    "the offline prototype chains every node",
+    fallback.edges.length === fallback.nodes.length - 1,
+  );
+}
+
+section("Catalog integrity");
+{
+  // Every key the model is offered has to price, or the bill silently loses a
+  // line the client will still be charged for.
+  for (const key of CATALOG_KEYS) {
+    const entry = catalogEntry(key)!;
+    const priced = priceSelection({
+      key,
+      qty: 2,
+      usage: (entry.meters ?? []).map((m) => ({ meter: m.id, volume: m.per })),
+    });
+    check(`${key} prices`, Boolean(priced) && priced!.monthlyUsd >= 0);
+
+    // A zero rate models unlimited usage on a fixed fee, which no vendor
+    // sells — it would quote a client four times their allowance at the
+    // entry-tier price and never flag it.
+    for (const meter of entry.meters ?? []) {
+      check(`${key}/${meter.id} charges for overage`, meter.unitUsd > 0);
+    }
+  }
+  check("an unknown key is dropped, not guessed", priceSelection({ key: "not-a-real-key" }) === null);
 }
 
 section("Estimator fallback chat");

@@ -1,4 +1,5 @@
 import { nextNurtureRun } from "@/lib/nurture/sequence";
+import { roadmapUrl as toRoadmapUrl } from "@/lib/roadmaps/store";
 import type { LeadInput } from "./schema";
 
 /**
@@ -247,5 +248,53 @@ export async function stopNurture(email: string, reason: string): Promise<void> 
 		);
 	} catch (err) {
 		console.error(`[leads] could not stop nurture for ${email}:`, err);
+	}
+}
+
+/**
+ * Recover a gate capture after the short-lived session store forgot the lead.
+ * Used on consultant restore so a refresh does not re-ask for the email.
+ */
+export async function findCaptureBySessionId(sessionId: string): Promise<{
+	name: string;
+	email: string;
+	roadmapUrl: string | null;
+} | null> {
+	if (!sessionId) return null;
+
+	try {
+		const payload = await payloadClient();
+		const found = await payload.find({
+			collection: "leads",
+			where: {
+				and: [
+					{ sessionId: { equals: sessionId } },
+					{ channel: { equals: "consultant" } },
+				],
+			},
+			limit: 1,
+			depth: 1,
+			overrideAccess: true,
+			sort: "-createdAt",
+		});
+
+		const lead = found.docs[0];
+		if (!lead || typeof lead.email !== "string" || typeof lead.name !== "string") {
+			return null;
+		}
+
+		let url: string | null = null;
+		const roadmap = lead.roadmap;
+		if (roadmap && typeof roadmap === "object" && "token" in roadmap) {
+			const token = (roadmap as { token?: unknown }).token;
+			if (typeof token === "string" && token) {
+				url = toRoadmapUrl(token);
+			}
+		}
+
+		return { name: lead.name, email: lead.email, roadmapUrl: url };
+	} catch (err) {
+		console.error("[leads] session capture lookup failed:", err);
+		return null;
 	}
 }

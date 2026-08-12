@@ -9,13 +9,18 @@ import { ZacDock, ZacProvider } from "@/components/zac";
  * page underneath it without remounting the panel. A visitor can start
  * scoping on a service page, browse three projects while ZAC is still open,
  * and come back to the same conversation with its scroll position intact.
+ *
+ * Immersive chat routes (`/consultant`, `/tools/estimator`) keep this tree
+ * mounted for session continuity, but hide the marketing chrome via CSS
+ * keyed off `.consultant-page--shell` — so this file stays a Server Component
+ * and can still render `PreviewBanner` (`next/headers`).
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <ZacProvider>
       <PreviewBanner />
       <SiteHeader />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 chat-shell-main">{children}</main>
       <SiteFooter />
       <ZacDock />
     </ZacProvider>

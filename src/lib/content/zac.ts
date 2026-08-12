@@ -30,6 +30,20 @@ export const zac = {
     /** Opening line in chat */
     greeting:
       "I'm ZAC — ZACSOL's solution consultant. Tell me what's slowing your business down, or the product you're trying to build — plain language is fine. I'll ask a few questions, then put together a solution blueprint with scope, timeline and cost.",
+    /**
+     * Starter prompts on the empty thread.
+     *
+     * Specific on purpose. A blank box asking someone to "describe your
+     * problem" gets a one-line answer that scopes to nothing; four concrete
+     * problems show the level of detail that actually produces a good
+     * blueprint, and one of them is usually close enough to click.
+     */
+    starters: [
+      "We take orders over WhatsApp and lose track of them",
+      "My team re-types the same data into three systems",
+      "I want an app our field engineers can use offline",
+      "Our booking process is a phone call and a paper diary",
+    ],
     /** Meta / SEO */
     pageTitle: "ZAC Consultant",
     pageDescription:
@@ -55,6 +69,13 @@ export const zac = {
       "Five questions on scope, platform and timeline. A cost band with assumptions written out so you can challenge them.",
     greeting:
       "I'm ZAC — ZACSOL's cost estimator. I price software builds for a living. Tell me what you want built and I'll give you a real cost range — what drives it, where it could go over, and what's included. Completely free, no email, nothing held back.",
+    /** Empty-thread starters — same job as consultant starters. */
+    starters: [
+      "A customer portal with login, invoices and support tickets",
+      "An iOS and Android app for field technicians",
+      "Rebuild our WordPress site as a modern web app",
+      "An internal dashboard that pulls from three existing tools",
+    ],
     ariaTyping: "ZAC is typing",
   },
 } as const;

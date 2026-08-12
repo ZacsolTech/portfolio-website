@@ -2,21 +2,22 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CATEGORY_LABELS, type RunCostCategory } from "@/lib/estimator/catalog";
 import { priceProject } from "@/lib/estimator/pricing";
 import {
   DESIGN_STATES,
-  REQUIRED_SLOTS,
   SCALES,
-  SLOT_LABELS,
   TIMELINES,
   formatBand,
+  formatMonthly,
   formatUsd,
   type Estimate,
   type EstimatorSlots,
   type LeverOverrides,
-  type RequiredSlotKey,
+  type RunCostSummary,
 } from "@/lib/estimator/schema";
 import { EstimateCapture } from "@/components/shared/estimate-capture";
+import { ChatComposer, ChatTyping, ChatWelcome } from "@/components/zac/chat-page";
 import { ZacFrame, type ZacSurface } from "@/components/zac/zac-frame";
 import { zac } from "@/lib/content/zac";
 import { loadSeed, readPageSeedId, type ZacSeed } from "@/lib/zac/seeds";
@@ -61,60 +62,6 @@ function getOrCreateSessionId() {
 }
 
 /* ------------------------------- primitives ------------------------------- */
-
-function Typing() {
-  return (
-    <div className="msg msg--bot">
-      <div className="msg__avatar" aria-hidden>
-        {zac.avatar}
-      </div>
-      <div className="msg__bubble">
-        <span className="typing">
-          <span />
-          <span />
-          <span />
-        </span>
-        <span className="sr-only">{zac.estimator.ariaTyping}</span>
-      </div>
-    </div>
-  );
-}
-
-function IntakeProgress({
-  slots,
-  progress,
-}: {
-  slots: EstimatorSlots;
-  progress: number;
-}) {
-  return (
-    <div className="intake" aria-label={`Intake ${progress}% complete`}>
-      <div className="intake__bar">
-        <span style={{ width: `${progress}%` }} />
-      </div>
-      <ul className="intake__slots">
-        {REQUIRED_SLOTS.map((key: RequiredSlotKey) => {
-          const raw = slots[key];
-          const value = typeof raw === "string" ? raw.trim() : raw != null ? String(raw) : "";
-          const filled = Boolean(value);
-          return (
-            <li key={key} className={filled ? "is-filled" : undefined}>
-              <span className="intake__tick" aria-hidden>
-                {filled ? "✓" : "○"}
-              </span>
-              <span className="intake__label">{SLOT_LABELS[key]}</span>
-              {filled ? (
-                <span className="intake__value" title={value}>
-                  {value.length > 36 ? `${value.slice(0, 35).trimEnd()}…` : value}
-                </span>
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
 
 function PricingPanel() {
   return (
@@ -247,6 +194,93 @@ function Levers({
 
 /* ------------------------------ estimate view ----------------------------- */
 
+/**
+ * The monthly bill, grouped by what each service is for.
+ *
+ * Split into fixed and usage columns deliberately. A subscription is a number
+ * we can stand behind; a usage projection is a guess about someone else's
+ * business, and showing them in one blended figure hides which half of the
+ * bill is actually uncertain — which is exactly the half a client needs to
+ * plan around.
+ */
+function RunCostTable({ run }: { run: RunCostSummary }) {
+  const groups = new Map<RunCostCategory, typeof run.lines>();
+  for (const line of run.lines) {
+    const list = groups.get(line.category) ?? [];
+    list.push(line);
+    groups.set(line.category, list);
+  }
+
+  const metered = run.lines.reduce((sum, l) => sum + l.meteredUsd, 0);
+
+  return (
+    <section className="est__section">
+      <h4 className="est__h">What it costs to run</h4>
+      <p className="est__sub">
+        Third-party services this project needs once it is live. These are billed to you
+        directly by each vendor, not by us.
+      </p>
+
+      <div className="est__table-wrap">
+        <table className="est__table est__table--run">
+          <thead>
+            <tr>
+              <th scope="col">Service</th>
+              <th scope="col">Fixed</th>
+              <th scope="col">Usage</th>
+              <th scope="col">Monthly</th>
+            </tr>
+          </thead>
+          {[...groups].map(([category, lines]) => (
+            <tbody key={category}>
+              <tr className="est__group">
+                <th scope="rowgroup" colSpan={4}>
+                  {CATEGORY_LABELS[category]}
+                </th>
+              </tr>
+              {lines.map((line) => (
+                <tr key={line.key}>
+                  <th scope="row">
+                    <span className="est__vendor">
+                      {line.vendor} <span>{line.plan}</span>
+                    </span>
+                    {line.why ? <span className="est__note">{line.why}</span> : null}
+                    {line.meterDetail.map((detail) => (
+                      <span key={detail} className="est__meter">
+                        {detail}
+                      </span>
+                    ))}
+                    {line.cheaperAlternative ? (
+                      <span className="est__note est__note--alt">{line.cheaperAlternative}</span>
+                    ) : null}
+                  </th>
+                  <td>{line.fixedUsd > 0 ? formatMonthly(line.fixedUsd) : "—"}</td>
+                  <td>{line.meteredUsd > 0 ? formatMonthly(line.meteredUsd) : "—"}</td>
+                  <td className="est__strong">{formatMonthly(line.monthlyUsd)}</td>
+                </tr>
+              ))}
+            </tbody>
+          ))}
+          <tfoot>
+            <tr>
+              <th scope="row">Total per month</th>
+              <td>{formatMonthly(run.lines.reduce((s, l) => s + l.fixedUsd, 0))}</td>
+              <td>{formatMonthly(metered)}</td>
+              <td className="est__strong">{formatMonthly(run.monthlyMidUsd)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <p className="est__fine">
+        Vendor list prices checked {run.pricesAsOf}. Fixed fees are firm; usage figures are
+        projections at the scale above and are the part of this bill that moves — which is
+        why the monthly range runs to {formatMonthly(run.monthlyHighUsd)}.
+      </p>
+    </section>
+  );
+}
+
 function EstimateView({
   estimate,
   resolved,
@@ -259,16 +293,47 @@ function EstimateView({
   stale: boolean;
 }) {
   const maxShare = Math.max(...estimate.breakdown.map((line) => line.share));
+  const run = estimate.runCosts;
 
   return (
     <div className={`est${stale ? " est--stale" : ""}`}>
       <div className="est__headline">
-        <p className="overline overline--gold">Indicative investment</p>
-        <div className="est__band">{formatBand(estimate.lowUsd, estimate.highUsd)}</div>
+        {/*
+          Two figures, side by side, because a build price on its own has
+          misled every client who ever signed one. The month is what they
+          live with after we hand over.
+        */}
+        <div className={`est__figures${run ? " est__figures--pair" : ""}`}>
+          <div className="est__figure">
+            <p className="overline overline--gold">To build</p>
+            <div className="est__band">{formatBand(estimate.lowUsd, estimate.highUsd)}</div>
+            <p className="est__figure-sub">one-off, {estimate.durationWeeks[0]}–
+              {estimate.durationWeeks[1]} weeks
+            </p>
+          </div>
+          {run ? (
+            <div className="est__figure est__figure--run">
+              <p className="overline">To run</p>
+              <div className="est__band est__band--run">
+                {formatMonthly(run.monthlyMidUsd)}
+                <span className="est__per">/mo</span>
+              </div>
+              <p className="est__figure-sub">
+                {formatMonthly(run.monthlyLowUsd)}–{formatMonthly(run.monthlyHighUsd)} depending
+                on usage
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        {run ? (
+          <p className="est__first-year">
+            First year all-in, build plus twelve months of running cost:{" "}
+            <strong>{formatBand(run.firstYearLowUsd, run.firstYearHighUsd)}</strong>
+          </p>
+        ) : null}
+
         <div className="est__meta">
-          <span>
-            {estimate.durationWeeks[0]}–{estimate.durationWeeks[1]} weeks
-          </span>
           <span>{estimate.team}</span>
           <span>{estimate.effortWeeks} person-weeks</span>
         </div>
@@ -297,15 +362,22 @@ function EstimateView({
         ))}
       </ul>
 
+      {estimate.approach ? (
+        <div className="est__approach">
+          <p className="overline">How we&apos;d build it</p>
+          <p>{estimate.approach}</p>
+        </div>
+      ) : null}
+
       {estimate.narrative ? <p className="est__narrative">{estimate.narrative}</p> : null}
 
       <section className="est__section">
-        <h4 className="est__h">Where the money goes</h4>
+        <h4 className="est__h">The work</h4>
         <div className="est__table-wrap">
           <table className="est__table">
             <thead>
               <tr>
-                <th scope="col">Workstream</th>
+                <th scope="col">Task</th>
                 <th scope="col">Effort</th>
                 <th scope="col">Range</th>
               </tr>
@@ -318,6 +390,10 @@ function EstimateView({
                       <span style={{ width: `${(line.share / maxShare) * 100}%` }} />
                     </span>
                     {line.name}
+                    {line.discipline && line.discipline !== line.name ? (
+                      <span className="est__tag">{line.discipline}</span>
+                    ) : null}
+                    {line.note ? <span className="est__note">{line.note}</span> : null}
                   </th>
                   <td>{line.weeks} wk</td>
                   <td>{formatBand(line.lowUsd, line.highUsd)}</td>
@@ -327,6 +403,8 @@ function EstimateView({
           </table>
         </div>
       </section>
+
+      {run ? <RunCostTable run={run} /> : null}
 
       {estimate.drivers.length > 0 ? (
         <section className="est__section">
@@ -390,9 +468,11 @@ function EstimateView({
           {summary.length > 180 ? "…" : ""}
         </p>
         <p className="est__fine">
-          Priced by a deterministic model at {formatUsd(estimate.blendedRateUsd)} per
-          person-week — the same inputs always produce the same figure. It is an estimate
-          from a short conversation, not a quote; a fixed price follows discovery.
+          Scoped from your conversation, then priced by a deterministic engine at{" "}
+          {formatUsd(estimate.blendedRateUsd)} per person-week — the same plan always
+          produces the same figure, and every third-party price comes from a maintained
+          list rather than being improvised. It is an estimate from a short conversation,
+          not a quote; a fixed price follows discovery.
         </p>
       </section>
     </div>
@@ -596,7 +676,14 @@ export function EstimatorWizard({
     (next: LeverOverrides) => {
       setOverrides(next);
 
-      const localEstimate = priceProject(slots, next, estimate?.blendedRateUsd);
+      // Re-priced against the plan the server scoped, so a lever changes what
+      // the project costs without changing what the project is.
+      const localEstimate = priceProject({
+        slots,
+        overrides: next,
+        plan: estimate?.plan,
+        rate: estimate?.blendedRateUsd,
+      });
       setEstimate((prev) => ({
         ...localEstimate,
         // Prose describes the project, not the exact figures — keep it.
@@ -628,7 +715,7 @@ export function EstimatorWizard({
         });
       }, 400);
     },
-    [slots, estimate?.blendedRateUsd, sessionId],
+    [slots, estimate?.blendedRateUsd, estimate?.plan, sessionId],
   );
 
   /* --------------------------------- chat -------------------------------- */
@@ -819,133 +906,158 @@ export function EstimatorWizard({
 
   const canSend = text.trim().length >= 2 && !busy;
   const userTurns = messages.filter((m) => m.who === "user").length;
+  const isFresh = userTurns === 0;
+  const isPage = surface === "page";
 
   const barTitle =
     phase === "pricing"
-      ? zac.estimator.consoleTitlePricing
+      ? "Running the numbers"
       : phase === "estimate"
-        ? zac.estimator.consoleTitleResult
-        : zac.estimator.consoleTitleChat;
+        ? "Your cost estimate"
+        : zac.estimator.name;
 
-  const body = (
-    <>
-        {phase === "chat" ? (
-          <>
+  const barSubtitle =
+    phase === "chat"
+      ? "Cost estimator · free · no email"
+      : phase === "pricing"
+        ? "Usually a few seconds"
+        : "Adjust the levers to see what moves the number";
+
+  const ctaBlock =
+    complete ? (
+      <div className={`consultant-cta${isPage ? " consultant-cta--page" : ""}`}>
+        <p className="consultant-cta__note">
+          I have enough to price this. You can fine-tune the assumptions on the
+          next screen.
+        </p>
+        <button
+          type="button"
+          className="btn btn--gold"
+          onClick={() => void runEstimate()}
+          disabled={busy}
+        >
+          Show me the numbers
+        </button>
+      </div>
+    ) : userTurns >= 4 ? (
+      <div
+        className={`consultant-cta consultant-cta--soft${isPage ? " consultant-cta--page" : ""}`}
+      >
+        <p className="consultant-cta__note">
+          We can keep going, or I can price it now using sensible defaults you can
+          adjust afterwards.
+        </p>
+        <button
+          type="button"
+          className="btn btn--outline-dark"
+          onClick={() => void runEstimate()}
+          disabled={busy}
+        >
+          Price it with what you have
+        </button>
+      </div>
+    ) : null;
+
+  const suggestionBlock =
+    suggestions.length > 0 && !busy && userTurns >= 1 ? (
+      <div className={`replies${isPage ? " replies--page" : ""}`}>
+        {suggestions.slice(0, 2).map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            className="reply"
+            onClick={() => void sendMessage(suggestion)}
+            disabled={busy}
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+    ) : null;
+
+  const chatUI =
+    phase === "chat" ? (
+      <>
+        <div
+          className={`chat-app__thread${isPage ? "" : " chat-app__thread--dock"}`}
+          ref={chatRef}
+        >
+          {!isPage ? (
             <div
-              className={surface === "dock" ? "zac-pane__thread" : "zac-pane__thread--page"}
-              ref={surface === "dock" ? chatRef : undefined}
+              className="dock-progress"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+              aria-label={`Intake ${progress}% complete`}
             >
-            <IntakeProgress slots={slots} progress={progress} />
+              <span className="dock-progress__label">{progress}%</span>
+              <span className="dock-progress__track" aria-hidden>
+                <span style={{ width: `${progress}%` }} />
+              </span>
+            </div>
+          ) : null}
 
+          {isFresh ? (
+            <ChatWelcome
+              title="What will it cost?"
+              body={GREETING}
+              starters={zac.estimator.starters.slice(0, 2)}
+              onPick={(starter) => void sendMessage(starter)}
+              compact={!isPage}
+            />
+          ) : (
             <div
-              className="chat chat--pane"
-              ref={surface === "dock" ? undefined : chatRef}
+              className="chat-stream"
               role="log"
               aria-live="polite"
               aria-label={zac.estimator.ariaChat}
             >
-              <div className="chat__inner">
-                <div className="chat__spacer" aria-hidden />
-                {messages.map((message) => (
-                  <div key={message.id} className={`msg msg--${message.who}`}>
-                    <div className="msg__avatar" aria-hidden>
-                      {message.who === "bot" ? zac.avatar : "YOU"}
-                    </div>
-                    <div className="msg__bubble">
+              {messages
+                .filter(
+                  (message, index) =>
+                    !(index === 0 && message.who === "bot" && message.text === GREETING),
+                )
+                .map((message) => (
+                  <div key={message.id} className={`chat-msg chat-msg--${message.who}`}>
+                    {message.who === "bot" ? (
+                      <div className="chat-msg__avatar" aria-hidden>
+                        {zac.avatar}
+                      </div>
+                    ) : null}
+                    <div className="chat-msg__body">
                       {message.text}
                       {message.streaming ? <span className="caret" aria-hidden /> : null}
                     </div>
                   </div>
                 ))}
-                {typing ? <Typing /> : null}
-              </div>
+              {typing ? <ChatTyping label={zac.estimator.ariaTyping} /> : null}
+              {ctaBlock}
             </div>
+          )}
+        </div>
 
-            {suggestions.length > 0 && !busy && userTurns >= 1 ? (
-              <div className="replies" style={{ marginTop: "1rem" }}>
-                {suggestions.slice(0, 2).map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    className="reply"
-                    onClick={() => void sendMessage(suggestion)}
-                    disabled={busy}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            ) : null}
+        <div className={`chat-app__dock${isPage ? "" : " chat-app__dock--panel"}`}>
+          {suggestionBlock}
+          <ChatComposer
+            id={isPage ? "estimator-input" : "estimator-input-dock"}
+            label="Message the estimator"
+            value={text}
+            onChange={setText}
+            onSubmit={() => void sendMessage(text)}
+            disabled={busy || restoring}
+            canSend={canSend}
+            placeholder={isFresh ? "What do you want built?" : "Reply to ZAC…"}
+            inputRef={inputRef}
+            hint={isPage ? undefined : ""}
+          />
+        </div>
+      </>
+    ) : null;
 
-            {complete ? (
-              <div className="consultant-cta">
-                <p className="consultant-cta__note">
-                  I have enough to price this. You can fine-tune the assumptions on
-                  the next screen.
-                </p>
-                <button
-                  type="button"
-                  className="btn btn--gold"
-                  onClick={() => void runEstimate()}
-                  disabled={busy}
-                >
-                  Show me the numbers
-                </button>
-              </div>
-            ) : userTurns >= 4 ? (
-              <div className="consultant-cta consultant-cta--soft">
-                <p className="consultant-cta__note">
-                  We can keep going, or I can price it now using sensible defaults
-                  you can adjust afterwards.
-                </p>
-                <button
-                  type="button"
-                  className="btn btn--outline-dark"
-                  onClick={() => void runEstimate()}
-                  disabled={busy}
-                >
-                  Price it with what you have
-                </button>
-              </div>
-            ) : null}
-            </div>
-
-            <form
-              className="composer"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void sendMessage(text);
-              }}
-            >
-              <label className="sr-only" htmlFor="estimator-input">
-                Message the estimator
-              </label>
-              <textarea
-                id="estimator-input"
-                ref={inputRef}
-                rows={2}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    void sendMessage(text);
-                  }
-                }}
-                placeholder={
-                  messages.length <= 1
-                    ? "What do you want built?"
-                    : "Type your reply…"
-                }
-                disabled={busy || restoring}
-                maxLength={4000}
-              />
-              <button type="submit" className="btn btn--gold" disabled={!canSend}>
-                {busy ? "…" : "Send"}
-              </button>
-            </form>
-          </>
-        ) : null}
+  const body = (
+    <>
+        {chatUI}
 
         {phase === "pricing" ? <PricingPanel /> : null}
 
@@ -1015,7 +1127,21 @@ export function EstimatorWizard({
   );
 
   return (
-    <ZacFrame surface={surface} title={barTitle} phase={phase}>
+    <ZacFrame
+      surface={surface}
+      title={barTitle}
+      subtitle={isPage ? barSubtitle : undefined}
+      phase={phase}
+      progress={isPage && phase === "chat" ? progress : undefined}
+      barTrailing={
+        isPage ? (
+          <Link href="/consultant" className="chat-app__link">
+            <span className="chat-app__link-long">Switch to Consultant</span>
+            <span className="chat-app__link-short">Consultant</span>
+          </Link>
+        ) : undefined
+      }
+    >
       {body}
     </ZacFrame>
   );

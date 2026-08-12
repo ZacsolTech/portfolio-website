@@ -9,7 +9,7 @@ const ConsultantIntake = dynamic(
   {
     loading: () => (
       <div
-        className="console console--app"
+        className="chat-app"
         aria-busy="true"
         aria-label={zac.consultant.ariaLoading}
       />
@@ -34,31 +34,19 @@ export const metadata: Metadata = pageMetadata({
 /**
  * The focus-mode surface for ZAC Consultant.
  *
- * Most conversations happen in the dock, on whatever page prompted them. This
- * route is the search landing page, the "open full view" target, and the
- * no-JS fallback every ZacLink points at — so it reads the same `seed` and
- * `from` contract the dock does.
+ * Most conversations happen in the dock. This route is the search landing
+ * page, the "open full view" target, and the no-JS fallback — laid out as a
+ * full-viewport chat app so the thread and composer get the whole screen.
  */
 export default function ConsultantPage() {
   return (
-    <div className="consultant-page consultant-page--app on-dark">
-      <div className="container">
-        <header className="consultant-page__head">
-          <span className="overline overline--gold">{zac.consultant.name}</span>
-          <h1 className="d3">
-            Most agencies ask for your budget.{" "}
-            <span className="em-serif">We ask what&apos;s broken.</span>
-          </h1>
-          <p className="body-sm consultant-page__sub">
-            Describe the bottleneck in a conversation. Get a solution roadmap on screen —
-            then decide whether you want the PDF or a human conversation.
-          </p>
-        </header>
+    <div className="consultant-page consultant-page--app consultant-page--shell">
+      <div className="zac-shell">
+        <h1 className="sr-only">
+          {zac.consultant.name} — describe your business problem, get a solution
+          roadmap
+        </h1>
 
-        {/* `seed` and `from` are read from the URL inside the widget, in the
-            browser. Touching `searchParams` here would opt this keyword
-            landing page out of static rendering for a query string that most
-            visits never carry. */}
         <ConsultantIntake surface="page" />
       </div>
     </div>

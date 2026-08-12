@@ -924,6 +924,34 @@ h1, h2, h3, h4 {
 .btn--outline-dark { background: transparent; color: #fff; border-color: var(--line-on-dark-strong); }
 .btn--outline-dark:hover { background: #fff; color: var(--z-950); }
 
+/*
+  Light theme: outline-dark was written for zinc surfaces, so on paper it
+  rendered white-on-white. Default to ink on light; restore white only inside
+  surfaces that stay dark (footer, console, dock, explicit on-dark).
+*/
+[data-theme="light"] .btn--outline-dark {
+  color: var(--text-ink);
+  border-color: var(--line-strong);
+  background: transparent;
+}
+[data-theme="light"] .btn--outline-dark:hover {
+  background: var(--text-ink);
+  color: var(--paper);
+}
+[data-theme="light"] .on-dark .btn--outline-dark,
+[data-theme="light"] .footer .btn--outline-dark,
+[data-theme="light"] .console .btn--outline-dark {
+  color: #fff;
+  border-color: var(--line-on-dark-strong);
+  background: transparent;
+}
+[data-theme="light"] .on-dark .btn--outline-dark:hover,
+[data-theme="light"] .footer .btn--outline-dark:hover,
+[data-theme="light"] .console .btn--outline-dark:hover {
+  background: #fff;
+  color: var(--z-950);
+}
+
 .btn--lg { height: 3.5rem; padding-inline: 2.25rem; font-size: 1rem; }
 .btn--sm { height: 2rem; padding-inline: 1.25rem; font-size: 0.8125rem; }
 
@@ -2012,6 +2040,129 @@ body.nav-open { overflow: hidden; }
   color: rgba(255,255,255,0.42);
 }
 .est__actions { justify-content: flex-start; margin-top: 2rem; }
+
+/* ---- Build cost and running cost, side by side ----
+   Two figures with equal billing. A build price shown alone is the reason
+   clients get surprised in month three, so the month never sits below a fold
+   or behind a toggle — it sits next to the number it qualifies. */
+.est__figures {
+  display: grid; gap: 1.25rem; grid-template-columns: 1fr;
+  align-items: end; justify-items: center;
+}
+@media (min-width: 640px) {
+  .est__figures--pair {
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1.75rem;
+  }
+  /*
+    Every track is placed explicitly. Auto-placement puts the ::before first
+    (it is the first item in grid order), which advanced the cursor past
+    column 1 and pushed the running cost onto a second row — the two figures
+    have to sit on one line or the comparison they exist to make is lost.
+  */
+  .est__figures--pair::before {
+    content: ''; grid-column: 2; grid-row: 1; align-self: stretch;
+    width: 1px; background: rgba(255,255,255,0.12);
+  }
+  .est__figures--pair .est__figure {
+    grid-column: 1; grid-row: 1; justify-self: end; text-align: right;
+  }
+  .est__figures--pair .est__figure--run {
+    grid-column: 3; grid-row: 1; justify-self: start; text-align: left;
+  }
+  /* Half the width means half the headroom: at the full-width size the build
+     band wrapped mid-range, and "$31k –" on its own line reads as a typo. */
+  .est__figures--pair .est__band { font-size: clamp(1.5rem, 4.4vw, 2.25rem); }
+}
+.est__figure { display: grid; gap: 0.25rem; }
+.est__band--run {
+  /* The running cost is real but secondary — same weight, less shout. */
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  color: rgba(255,255,255,0.9);
+}
+.est__per {
+  font-size: 0.5em; font-weight: 500;
+  color: rgba(255,255,255,0.5); margin-left: 0.15em;
+}
+.est__figure-sub {
+  margin: 0; font-size: 0.75rem; line-height: 1.5;
+  color: rgba(255,255,255,0.48);
+}
+
+.est__first-year {
+  margin: 1.25rem auto 0; max-width: 32rem;
+  padding: 0.625rem 1rem; border-radius: var(--r-pill);
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  font-size: 0.8125rem; color: rgba(255,255,255,0.72);
+}
+.est__first-year strong {
+  color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+.est__approach {
+  display: grid; gap: 0.5rem; padding: 1.25rem;
+  border-radius: var(--r-lg);
+  background: rgba(var(--accent-rgb), 0.05);
+  border: 1px solid rgba(var(--accent-rgb), 0.16);
+}
+.est__approach p:last-child {
+  margin: 0; font-size: 0.9375rem; line-height: 1.65; color: rgba(255,255,255,0.85);
+}
+
+.est__sub {
+  margin: -0.25rem 0 0; font-size: 0.8125rem; line-height: 1.55;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ---- Task and run-cost table detail ---- */
+.est__tag {
+  display: inline-block; margin-left: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.4); vertical-align: 1px;
+}
+.est__note {
+  display: block; margin-top: 0.25rem;
+  font-size: 0.75rem; line-height: 1.5; font-weight: 400;
+  color: rgba(255,255,255,0.5);
+}
+.est__note--alt { color: rgba(var(--accent-rgb), 0.7); }
+.est__meter {
+  display: block; margin-top: 0.2rem;
+  font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 400;
+  color: rgba(255,255,255,0.42); font-variant-numeric: tabular-nums;
+}
+.est__vendor { display: block; }
+.est__vendor span { color: rgba(255,255,255,0.55); font-weight: 400; }
+
+.est__table--run tbody th { max-width: 22rem; }
+.est__table--run td { text-align: right; }
+.est__strong { color: #fff; font-weight: 600; }
+
+/* Category headers inside the run-cost table. `rowgroup` scope means each
+   tbody is one category, so the label needs no visual box to be understood. */
+.est__group th {
+  padding: 1rem 0.5rem 0.35rem;
+  font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  color: rgba(var(--accent-rgb), 0.65);
+  border-bottom: 0;
+}
+.est__table--run tbody:first-of-type .est__group th { padding-top: 0.5rem; }
+.est__table--run tbody { border-bottom: 0; }
+.est__table--run tfoot th,
+.est__table--run tfoot td {
+  padding-top: 0.875rem;
+  border-top: 1px solid rgba(255,255,255,0.16);
+  font-variant-numeric: tabular-nums;
+}
+.est__table--run tfoot th {
+  font-family: var(--font-mono); font-size: 0.625rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.55);
+}
+.est__table--run tfoot td { color: rgba(255,255,255,0.7); }
 
 /* ---- Interactive levers: re-price without re-answering ---- */
 .levers {

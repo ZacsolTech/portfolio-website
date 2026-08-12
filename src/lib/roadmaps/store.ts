@@ -1,3 +1,4 @@
+import { PrototypeSchema, type Prototype } from "@/lib/ai/prototype-schema";
 import { BlueprintSchema, SlotsSchema, type Blueprint, type Slots } from "@/lib/ai/schema";
 import { createToken } from "@/lib/security/tokens";
 import { absoluteUrl } from "@/lib/seo";
@@ -17,6 +18,7 @@ export type RoadmapDocument = {
 	name: string;
 	email: string;
 	blueprint: Blueprint;
+	prototype: Prototype | null;
 	slots: Slots;
 	createdAt: string;
 	views: number;
@@ -40,6 +42,7 @@ export async function createRoadmap(input: {
 	name: string;
 	email: string;
 	blueprint: Blueprint;
+	prototype?: Prototype | null;
 	slots: Slots;
 	leadId?: string | number;
 }): Promise<{ id: string | number; token: string; url: string } | null> {
@@ -56,6 +59,7 @@ export async function createRoadmap(input: {
 				name: input.name,
 				email: input.email,
 				blueprint: input.blueprint,
+				prototype: input.prototype ?? null,
 				slots: input.slots,
 				views: 0,
 				...(input.leadId !== undefined ? { lead: input.leadId } : {}),
@@ -101,12 +105,21 @@ export async function findRoadmapByToken(
 
 		const slots = SlotsSchema.safeParse(doc.slots ?? {});
 
+		// A mock that no longer validates is dropped, never fatal: the document
+		// is the blueprint, and losing a picture beats 404-ing a link someone
+		// forwarded to their board.
+		const prototype = doc.prototype ? PrototypeSchema.safeParse(doc.prototype) : null;
+		if (doc.prototype && !prototype?.success) {
+			console.warn(`[roadmaps] stored prototype failed validation for ${token}`);
+		}
+
 		return {
 			token: doc.token,
 			title: doc.title,
 			name: doc.name,
 			email: doc.email,
 			blueprint: blueprint.data,
+			prototype: prototype?.success ? prototype.data : null,
 			slots: slots.success ? slots.data : {},
 			createdAt: doc.createdAt,
 			views: typeof doc.views === "number" ? doc.views : 0,

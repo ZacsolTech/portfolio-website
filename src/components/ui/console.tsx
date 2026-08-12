@@ -15,16 +15,25 @@ export function Console({ className, children, ...rest }: ConsoleProps) {
 
 export type ConsoleBarProps = HTMLAttributes<HTMLDivElement> & {
   title?: ReactNode;
+  /** Pushed to the far end of the bar. Actions, not chrome. */
+  trailing?: ReactNode;
   children?: ReactNode;
 };
 
-export function ConsoleBar({ title, className, children, ...rest }: ConsoleBarProps) {
+export function ConsoleBar({
+  title,
+  trailing,
+  className,
+  children,
+  ...rest
+}: ConsoleBarProps) {
   return (
     <div className={cn("console__bar", className)} {...rest}>
       {children ?? (
         <>
           <LiveDot />
           {title != null && <span className="console__title">{title}</span>}
+          {trailing != null && <span className="console__bar-end">{trailing}</span>}
         </>
       )}
     </div>

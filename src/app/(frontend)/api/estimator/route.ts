@@ -18,6 +18,7 @@ import {
   requiredComplete,
   streamEstimatorTurn,
 } from "@/lib/estimator/chat";
+import { generateBuildPlan } from "@/lib/estimator/plan";
 import { priceProject, resolveInputs } from "@/lib/estimator/pricing";
 import {
   LeverOverridesSchema,
@@ -42,8 +43,10 @@ export const maxDuration = 60;
  * visitor gets the whole estimate as soon as it exists.
  *
  * Conversation state is server-side; the client sends a session id and a
- * message. Prices come from the deterministic engine in lib/estimator/pricing,
- * never from the model, so no request payload can move the number.
+ * message. The model scopes the work and picks the services — see
+ * lib/estimator/plan — but every figure is computed by lib/estimator/pricing
+ * and lib/estimator/catalog, so no request payload and no model output can
+ * move a number directly.
  *
  * Actions: chat (SSE) · estimate · adjust (levers) · capture · reset
  *
@@ -346,9 +349,18 @@ async function handleEstimate(request: Request, body: z.infer<typeof EstimateBod
     );
   }
 
-  // Pricing is deterministic and instant; the model only writes prose about it.
-  const estimate = priceProject(slots, session.overrides);
   const resolved = resolveInputs(slots, session.overrides);
+
+  // The model scopes the work and picks the services this specific project
+  // needs; pricing turns that into money. A failure here degrades to a
+  // deterministic plan rather than blocking the estimate.
+  const { plan } = await generateBuildPlan({
+    messages: session.messages,
+    summary: slots.summary,
+    resolved,
+  });
+
+  const estimate = priceProject({ slots, overrides: session.overrides, plan });
 
   const prose = await generateNarrative({
     summary: slots.summary,
@@ -364,6 +376,11 @@ async function handleEstimate(request: Request, body: z.infer<typeof EstimateBod
     high: estimate.highUsd,
     durationWeeks: estimate.durationWeeks,
     team: estimate.team,
+    approach: estimate.approach,
+    monthlyUsd: estimate.runCosts?.monthlyMidUsd,
+    runCostLines: estimate.runCosts?.lines
+      .slice(0, 4)
+      .map((line) => `${line.vendor} ${line.plan}`),
   });
 
   const next: EstimatorSession = {
@@ -432,6 +449,11 @@ async function handleCapture(request: Request, body: z.infer<typeof CaptureBody>
       integrations: resolved.integrations,
       regulated: resolved.regulated,
       assumed: resolved.assumed,
+      // Carried onto the lead so a salesperson opening the record sees the
+      // running cost the visitor saw, not just the build price.
+      monthlyRunUsd: session.estimate.runCosts?.monthlyMidUsd ?? null,
+      firstYearUsd: session.estimate.runCosts?.firstYearHighUsd ?? null,
+      stack: session.estimate.runCosts?.lines.map((l) => `${l.vendor} ${l.plan}`) ?? [],
     },
     solution: {
       title: `Estimate — ${resolved.projectType}`,
@@ -466,9 +488,10 @@ async function handleCapture(request: Request, body: z.infer<typeof CaptureBody>
 /**
  * Re-price with new lever positions.
  *
- * Runs through the same `priceProject` call as the initial estimate, so the
- * levers can never drift from the original pricing rules. No model call —
- * this is pure arithmetic and returns immediately.
+ * Runs through the same `priceProject` call as the initial estimate, against
+ * the same stored plan, so the levers can never drift from the original
+ * pricing rules and a lever cannot quietly re-scope the project. No model
+ * call — this is pure arithmetic and returns immediately.
  */
 async function handleAdjust(request: Request, body: z.infer<typeof AdjustBody>) {
   const limit = await guard(request, body.sessionId, "turn");
@@ -479,7 +502,11 @@ async function handleAdjust(request: Request, body: z.infer<typeof AdjustBody>) 
     return json({ error: "No estimate on this session yet." }, 409, limit.headers);
   }
 
-  const estimate = priceProject(session.slots, body.overrides);
+  const estimate = priceProject({
+    slots: session.slots,
+    overrides: body.overrides,
+    plan: session.estimate.plan,
+  });
   const next: EstimatorSession = {
     ...session,
     overrides: body.overrides,

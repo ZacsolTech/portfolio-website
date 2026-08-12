@@ -1,4 +1,5 @@
 import { createSessionStore } from "@/lib/store/session-store";
+import { PrototypeSchema } from "./prototype-schema";
 import {
   BlueprintSchema,
   ChatMessageSchema,
@@ -31,6 +32,13 @@ export const ConsultantSessionSchema = z.object({
   slots: SlotsSchema.default({}),
   stage: z.enum(STAGES).default("gathering"),
   blueprint: BlueprintSchema.nullable().default(null),
+  /**
+   * The visual mock shown behind the gate. Null is a normal outcome, not an
+   * error state: the blueprint is the deliverable and the prototype is the
+   * thing that makes it believable, so a session that could not draw one still
+   * completes.
+   */
+  prototype: PrototypeSchema.nullable().default(null),
   /** Set once the visitor passes the gate, so we never double-email. */
   lead: z
     .object({
@@ -56,6 +64,7 @@ export function emptySession(id: string): ConsultantSession {
     slots: {},
     stage: "gathering",
     blueprint: null,
+    prototype: null,
     lead: null,
     createdAt: now,
     updatedAt: now,

@@ -23,8 +23,8 @@ import { useZac } from "./zac-provider";
  * version of the destination route it replaces. On mobile there is no room for
  * both, so the sheet becomes modal and behaves like one.
  *
- * Once a mode has been opened it stays mounted (hidden, `inert`) for the rest
- * of the visit, so closing the dock costs nothing and reopening is instant.
+ * Chrome mirrors the full-page chat app (compact header + mode pills), and the
+ * widgets inside reuse the same message / composer components.
  */
 
 const ConsultantIntake = dynamic(
@@ -40,7 +40,7 @@ const EstimatorWizard = dynamic(
 function DockSkeleton() {
   return (
     <div className="zac-dock__skeleton" aria-busy="true" aria-label={`Loading ${brand.name}`}>
-      <span className="typing">
+      <span className="chat-typing" aria-hidden>
         <span />
         <span />
         <span />
@@ -64,8 +64,6 @@ function useIsMobile(): boolean {
 
   return isMobile;
 }
-
-/* --------------------------------- icons --------------------------------- */
 
 function SparkIcon() {
   return (
@@ -106,8 +104,8 @@ function ExpandIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="16"
-      height="16"
+      width="15"
+      height="15"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -119,8 +117,6 @@ function ExpandIcon() {
     </svg>
   );
 }
-
-/* -------------------------------- launcher -------------------------------- */
 
 /**
  * Held back until the home hero scrolls away: that hero already renders a live
@@ -134,7 +130,6 @@ function useLauncherVisible(): boolean {
     const anchor = document.querySelector("[data-zac-hero]");
 
     if (!anchor) {
-      // A frame late so the entrance transition has something to animate from.
       const frame = window.requestAnimationFrame(() => setVisible(true));
       return () => window.cancelAnimationFrame(frame);
     }
@@ -149,8 +144,6 @@ function useLauncherVisible(): boolean {
 
   return visible;
 }
-
-/* ---------------------------------- dock ---------------------------------- */
 
 export function ZacDock() {
   const {
@@ -176,8 +169,6 @@ export function ZacDock() {
   const panelRef = useRef<HTMLDivElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
-  /* Streams outlive renders; a ref is the only reading of `open` that is
-     still true by the time a reply lands. */
   const openRef = useRef(open);
 
   const [unread, setUnread] = useState(false);
@@ -186,21 +177,16 @@ export function ZacDock() {
     if (!openRef.current) setUnread(true);
   }, []);
 
-  /* Reading the dot clears it. Adjusted during render rather than in an
-     effect — see the same pattern in the provider and the site header. */
   const [unreadSeenAt, setUnreadSeenAt] = useState(open);
   if (open !== unreadSeenAt) {
     setUnreadSeenAt(open);
     if (open) setUnread(false);
   }
 
-  /* --------------------------- open/close effects --------------------------- */
-
   useEffect(() => {
     openRef.current = open;
   }, [open]);
 
-  /* Escape closes from anywhere inside the panel, and from the page on mobile. */
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -213,18 +199,12 @@ export function ZacDock() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, closeZac]);
 
-  /* Only the mobile sheet is modal, so only the mobile sheet locks the page. */
   useEffect(() => {
     if (!open || !isMobile) return;
     document.body.classList.add("zac-locked");
     return () => document.body.classList.remove("zac-locked");
   }, [open, isMobile]);
 
-  /*
-    Focus goes to the composer on desktop — the visitor opened a chat, they
-    want to type. On mobile that would throw up the keyboard over the greeting
-    they have not read yet, so the panel itself takes focus instead.
-  */
   useEffect(() => {
     if (open && !wasOpen.current) {
       wasOpen.current = true;
@@ -247,7 +227,6 @@ export function ZacDock() {
     }
   }, [open, isMobile]);
 
-  /* Tab must not walk into a closed panel; on mobile it must not leave an open one. */
   useEffect(() => {
     if (!open || !isMobile) return;
     const panel = panelRef.current;
@@ -303,7 +282,6 @@ export function ZacDock() {
       </button>
 
       <div className="zac-dock" data-open={open} data-modal={isMobile}>
-        {/* Mobile only — on desktop the page behind stays live and clickable. */}
         <button
           type="button"
           className="zac-dock__scrim"
@@ -325,19 +303,40 @@ export function ZacDock() {
           <div className="zac-dock__grip" aria-hidden />
 
           <header className="zac-dock__head">
-            <span className="zac-dock__brand">
-              <span className="live" aria-hidden />
-              {brand.name}
-            </span>
-            <span className="zac-dock__eyebrow">{meta.consoleTitle}</span>
-            <span className="zac-dock__actions">
+            <div className="zac-dock__brand">
+              <span className="zac-dock__mark" aria-hidden>
+                ZAC
+              </span>
+              <div className="zac-dock__modes" role="group" aria-label="What do you need?">
+                {ZAC_MODES.map((candidate) => {
+                  const active = candidate === mode;
+                  return (
+                    <button
+                      key={candidate}
+                      type="button"
+                      aria-pressed={active}
+                      className="zac-dock__mode"
+                      data-active={active}
+                      onClick={() => {
+                        if (!active) switchMode(candidate);
+                      }}
+                    >
+                      {ZAC_MODE_META[candidate].tab}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="zac-dock__actions">
               <a
-                className="zac-dock__icon"
+                className="zac-dock__expand"
                 href={ZAC_ROUTES[mode]}
-                aria-label="Open the full view"
-                title="Open the full view"
+                aria-label={`Open ${meta.name} full view`}
+                title="Open full view"
               >
                 <ExpandIcon />
+                <span className="zac-dock__expand-label">Full view</span>
               </a>
               <button
                 type="button"
@@ -347,35 +346,8 @@ export function ZacDock() {
               >
                 <CloseIcon />
               </button>
-            </span>
+            </div>
           </header>
-
-          {/*
-            Toggle buttons, not a tablist. `role="tab"` promises arrow-key
-            navigation and owned tabpanels; two buttons that swap the panel
-            below are honestly described by `aria-pressed`.
-          */}
-          <div className="zac-dock__modes" role="group" aria-label="What do you need?">
-            {ZAC_MODES.map((candidate) => {
-              const active = candidate === mode;
-              return (
-                <button
-                  key={candidate}
-                  type="button"
-                  aria-pressed={active}
-                  className="zac-dock__mode"
-                  data-active={active}
-                  onClick={() => {
-                    if (!active) switchMode(candidate);
-                  }}
-                >
-                  {ZAC_MODE_META[candidate].tab}
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="zac-dock__purpose">{meta.purpose}</p>
 
           <div className="zac-dock__body">
             {mounted.includes("consultant") ? (

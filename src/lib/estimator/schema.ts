@@ -1,13 +1,22 @@
 import { z } from "zod";
+import { RUN_COST_CATEGORIES } from "./catalog";
 
 /**
  * Cost estimator contract.
  *
  * The estimator answers "what will this cost?", where the consultant answers
- * "what should we build?". That difference drives the design: the model runs
- * the conversation, but the number itself comes from a deterministic pricing
- * engine (see pricing.ts). The same answers must always produce the same
- * quote, and every figure has to be explainable to a client who pushes back.
+ * "what should we build?". That difference drives the design.
+ *
+ * Cost has two halves and they are produced differently. The *build* is a plan:
+ * the model reads the conversation and proposes the actual pieces of work this
+ * specific project needs, and the engine turns person-weeks into money at our
+ * rate. The *running* cost is a shopping list: the model picks products and
+ * projects how hard they get used, and `catalog.ts` supplies every price.
+ *
+ * Neither half lets the model emit a dollar figure. It contributes judgement —
+ * how much work, which tools, what volume — and arithmetic stays in code, so
+ * the same plan always prices identically and any line can be defended to a
+ * client who pushes back on it.
  */
 
 /* --------------------------------- inputs -------------------------------- */
@@ -125,6 +134,90 @@ export const LeverOverridesSchema = z.object({
 
 export type LeverOverrides = z.infer<typeof LeverOverridesSchema>;
 
+/* ------------------------------- build plan ------------------------------- */
+
+/**
+ * Disciplines a task can belong to. Kept short and recognisable: this is the
+ * axis the breakdown groups by, and a client scanning it should be able to
+ * tell design work from engineering work without reading the task names.
+ */
+export const DISCIPLINES = [
+  "Discovery & scoping",
+  "Product & UI design",
+  "Engineering",
+  "AI & data",
+  "Integrations",
+  "QA & hardening",
+  "Delivery management",
+  "Launch & handover",
+] as const;
+
+export type Discipline = (typeof DISCIPLINES)[number];
+
+/**
+ * One named piece of work. `weeks` is person-weeks of effort, not calendar
+ * time — two engineers on a 4-week task is 8 person-weeks — because money
+ * tracks effort while the schedule tracks parallelism.
+ */
+export const BuildTaskSchema = z.object({
+  name: z.string().min(3).max(90),
+  discipline: z.enum(DISCIPLINES),
+  weeks: z.number().min(0.2).max(40),
+  /** Why this task is here, in project terms. Shown on expand. */
+  note: z.string().max(220).optional(),
+});
+
+export type BuildTask = z.infer<typeof BuildTaskSchema>;
+
+/** A product the project will pay for monthly. Keys are validated against the catalog. */
+export const RunCostSelectionSchema = z.object({
+  key: z.string().min(2).max(60),
+  /** Seats or instances. Only meaningful for per-seat entries. */
+  qty: z.number().int().min(1).max(500).optional(),
+  usage: z
+    .array(
+      z.object({
+        meter: z.string().min(1).max(40),
+        volume: z.number().min(0).max(1e12),
+      }),
+    )
+    .max(6)
+    .optional(),
+  why: z.string().max(200).optional(),
+});
+
+export type RunCostSelection = z.infer<typeof RunCostSelectionSchema>;
+
+/**
+ * The conditions a plan was authored under.
+ *
+ * Filled by the server from the resolved inputs at plan time, never by the
+ * model. It exists so the result-screen levers can work without a second model
+ * call: the plan already accounts for the scale and design maturity it was
+ * written for, so dragging a lever applies the *ratio* between planned and
+ * current rather than stacking a multiplier the model already priced in.
+ */
+export const PlanBaselineSchema = z.object({
+  scale: ScaleSchema,
+  designState: DesignStateSchema,
+  integrations: z.number().int().min(0).max(20),
+  regulated: z.boolean(),
+});
+
+export type PlanBaseline = z.infer<typeof PlanBaselineSchema>;
+
+/** The model's read on how to build this thing. */
+export const BuildPlanSchema = z.object({
+  /** 1-2 sentences on the architecture chosen and why. */
+  approach: z.string().max(600).default(""),
+  tasks: z.array(BuildTaskSchema).min(1).max(16),
+  runCosts: z.array(RunCostSelectionSchema).max(14).default([]),
+  baseline: PlanBaselineSchema,
+  source: z.enum(["gemini", "rules"]),
+});
+
+export type BuildPlan = z.infer<typeof BuildPlanSchema>;
+
 /* --------------------------------- output -------------------------------- */
 
 export const WORKSTREAMS = [
@@ -137,15 +230,60 @@ export const WORKSTREAMS = [
 ] as const;
 
 export const EstimateLineSchema = z.object({
-  name: z.string().min(2).max(60),
+  name: z.string().min(2).max(90),
   /** Share of total effort, 0–1. */
   share: z.number().min(0).max(1),
   lowUsd: z.number().nonnegative(),
   highUsd: z.number().nonnegative(),
   weeks: z.number().nonnegative(),
+  /** Absent on legacy estimates priced before the plan-driven engine. */
+  discipline: z.string().max(40).optional(),
+  note: z.string().max(220).optional(),
 });
 
 export type EstimateLine = z.infer<typeof EstimateLineSchema>;
+
+/* ------------------------------- run costs ------------------------------- */
+
+export const RunCostLineSchema = z.object({
+  key: z.string(),
+  vendor: z.string().max(60),
+  plan: z.string().max(80),
+  category: z.enum(RUN_COST_CATEGORIES),
+  /** Subscription portion — a number we can state with confidence. */
+  fixedUsd: z.number().nonnegative(),
+  /** Usage portion — a projection, and the part that actually moves. */
+  meteredUsd: z.number().nonnegative(),
+  monthlyUsd: z.number().nonnegative(),
+  meterDetail: z.array(z.string().max(160)).max(6).default([]),
+  why: z.string().max(200).optional(),
+  note: z.string().max(240).optional(),
+  cheaperAlternative: z.string().max(240).optional(),
+});
+
+export type RunCostLine = z.infer<typeof RunCostLineSchema>;
+
+/**
+ * The monthly bill, and what a first year actually costs.
+ *
+ * `firstYearUsd` exists because the build price alone has misled every client
+ * who has ever signed one. A $20k automation that costs $600 a month to run is
+ * a $27k first year, and they should see that before they sign, not in month
+ * three.
+ */
+export const RunCostSummarySchema = z.object({
+  lines: z.array(RunCostLineSchema).max(16),
+  monthlyLowUsd: z.number().nonnegative(),
+  monthlyMidUsd: z.number().nonnegative(),
+  monthlyHighUsd: z.number().nonnegative(),
+  /** Build (mid) plus twelve months of running cost, as a band. */
+  firstYearLowUsd: z.number().nonnegative(),
+  firstYearHighUsd: z.number().nonnegative(),
+  /** Month the catalog prices were last verified. */
+  pricesAsOf: z.string().max(20),
+});
+
+export type RunCostSummary = z.infer<typeof RunCostSummarySchema>;
 
 export const EstimateSchema = z.object({
   lowUsd: z.number().positive(),
@@ -169,6 +307,17 @@ export const EstimateSchema = z.object({
   /** Model-written context. Never the source of any number. */
   narrative: z.string().max(700).optional(),
   risks: z.array(z.string().max(200)).max(5).optional(),
+
+  /** The monthly bill. Absent only when the project genuinely has no run cost. */
+  runCosts: RunCostSummarySchema.optional(),
+  /** The model's one-paragraph read on the architecture it scoped. */
+  approach: z.string().max(600).optional(),
+  /**
+   * The plan this was priced from, carried on the estimate so the result
+   * screen can re-price levers in the browser through the same function the
+   * server used — see the note on `priceProject`.
+   */
+  plan: BuildPlanSchema.optional(),
   source: z.enum(["engine", "engine+ai"]),
 });
 
@@ -202,5 +351,17 @@ export function formatBand(low: number, high: number): string {
   return `${formatUsd(low)} – ${formatUsd(high)}`;
 }
 
+/**
+ * Monthly figures are small and compared against each other, so they keep
+ * their real digits — "$84/mo" and "$91/mo" both collapsing to "$0.1k" would
+ * make the run-cost table useless.
+ */
+export function formatMonthly(value: number): string {
+  if (value === 0) return "$0";
+  if (value < 10) return `$${value.toFixed(2)}`;
+  return `$${Math.round(value).toLocaleString()}`;
+}
+
 export const ESTIMATOR_PROMPT_VERSION = "estimator-chat-v2";
-export const PRICING_VERSION = "estimator-pricing-v1";
+export const ESTIMATOR_PLAN_VERSION = "estimator-plan-v1";
+export const PRICING_VERSION = "estimator-pricing-v2";
