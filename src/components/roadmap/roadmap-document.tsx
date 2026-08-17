@@ -65,10 +65,10 @@ export function RoadmapDocument({
 	const totalWeeks = blueprint.phases.reduce((sum, phase) => sum + phase.weeks, 0);
 
 	const intake = [
-		slots.industry && { term: "Industry", value: slots.industry },
-		slots.current && { term: "How it works today", value: slots.current },
-		slots.scale && { term: "Scale", value: slots.scale },
-		slots.timeline && { term: "Timeline", value: slots.timeline },
+		slots.audience && { term: "Who it's for", value: slots.audience },
+		slots.today && { term: "How you cope now", value: slots.today },
+		slots.v1 && { term: "First release", value: slots.v1 },
+		slots.timing && { term: "Timing", value: slots.timing },
 	].filter((row): row is { term: string; value: string } => Boolean(row));
 
 	return (
@@ -208,12 +208,12 @@ export function RoadmapDocument({
 				</section>
 			) : null}
 
-			{slots.problem ? (
+			{slots.outcome ? (
 				<section className="doc-section">
 					<div className="doc-section__head">
 						<h2>The brief we worked from</h2>
 					</div>
-					<blockquote className="doc-quote">{slots.problem}</blockquote>
+					<blockquote className="doc-quote">{slots.outcome}</blockquote>
 					{intake.length ? (
 						<dl className="doc-dl">
 							{intake.map((row) => (

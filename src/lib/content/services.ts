@@ -20,132 +20,6 @@ const engagementDefaults = {
 
 export const services: Service[] = [
   {
-    slug: "web-development",
-    title: "Web development",
-    shortTitle: "Web development",
-    blurb:
-      "Full-stack web apps, CMS sites and admin portals — MERN, Django, PHP or WordPress, chosen for your product and your team.",
-    icon: "Monitor",
-    tech: ["MERN", "DJANGO", "PHP", "WORDPRESS"],
-    included: [
-      "Stack recommendation with clear tradeoffs (MERN, Django, PHP or WordPress)",
-      "Responsive UI built for conversion, clarity and mobile-first use",
-      "Secure auth, roles, APIs and integrations with tools you already run",
-      "Performance tuning, SEO foundations and Core Web Vitals targets",
-      "Staging, CI and a deployment path your team can repeat safely",
-      "Handover docs, admin training and a recorded walkthrough",
-    ],
-    stackGroups: [
-      { label: "JavaScript", items: ["MongoDB", "Express", "React", "Node.js"] },
-      { label: "Python & PHP", items: ["Django", "PHP", "Laravel-ready patterns"] },
-      { label: "CMS", items: ["WordPress", "custom themes", "headless options"] },
-    ],
-    process: [
-      {
-        title: "Choose the right stack",
-        body: "MERN for rich apps, Django for structured backends, PHP or WordPress when content and speed-to-market win — written before build.",
-      },
-      {
-        title: "Ship a thin vertical",
-        body: "One real user path live on staging within the first two weeks.",
-      },
-      {
-        title: "Harden and grow",
-        body: "Security, SEO, performance and the next surfaces in priority order.",
-      },
-      {
-        title: "Hand over clean",
-        body: "Runbook, hosting access and a team that can extend it without us.",
-      },
-    ],
-    faqs: [
-      {
-        q: "MERN, Django, PHP or WordPress — how do you decide?",
-        a: "By product shape, not preference. Rich dashboards and SPAs lean MERN; data-heavy backends lean Django; marketing and content sites often win on WordPress or PHP. We recommend in writing during discovery.",
-      },
-      {
-        q: "Can you rebuild or extend an existing site?",
-        a: "Yes. Much of our work is stabilising production products — after a short audit that tells you what to keep, rewrite or retire.",
-      },
-      {
-        q: "Will the site be SEO-ready?",
-        a: "Yes. Clean URLs, metadata, sitemap/robots, performance budgets and structured content are part of delivery — not a bolt-on later.",
-      },
-    ],
-    engagement: [
-      engagementDefaults.discovery,
-      engagementDefaults.fixed,
-      engagementDefaults.embedded,
-    ],
-    seo: {
-      description:
-        "Web development with MERN, Django, PHP and WordPress — fast apps, CMS sites and portals with SEO foundations and clean handover.",
-    },
-  },
-  {
-    slug: "mobile-app-development",
-    title: "Mobile app development",
-    shortTitle: "Mobile apps",
-    blurb:
-      "iOS and Android apps that feel native — React Native, Flutter, PWA, Swift or Kotlin, shipped through both stores.",
-    icon: "Smartphone",
-    tech: ["React Native", "Flutter", "PWA", "SWIFT", "KOTLIN"],
-    included: [
-      "Platform choice with honest tradeoffs (React Native, Flutter, PWA, Swift or Kotlin)",
-      "Native-feel navigation, offline support and push notifications where needed",
-      "Shared design language across web and mobile when both exist",
-      "App Store and Google Play listing, review handling and release pipeline",
-      "Crash reporting, analytics and staged rollouts",
-      "Handover docs and a release runbook your team can own",
-    ],
-    stackGroups: [
-      { label: "Cross-platform", items: ["React Native", "Flutter", "Expo", "PWA"] },
-      { label: "Native", items: ["Swift", "Kotlin"] },
-      { label: "Backend", items: ["Node.js", "PostgreSQL", "push services"] },
-    ],
-    process: [
-      {
-        title: "Pick the right shell",
-        body: "Cross-platform reach vs native depth vs PWA speed — documented before UI work starts.",
-      },
-      {
-        title: "Core loops first",
-        body: "The screens users live in, wired to real data on TestFlight and internal Android tracks.",
-      },
-      {
-        title: "Store-ready polish",
-        body: "Permissions, offline, accessibility and the listing assets reviewers expect.",
-      },
-      {
-        title: "Ship and watch",
-        body: "Staged rollout, crash budgets and a clear path for the next release.",
-      },
-    ],
-    faqs: [
-      {
-        q: "React Native, Flutter, PWA or fully native?",
-        a: "Whichever matches your timeline, team and product. We recommend in writing during discovery — not by default. Swift and Kotlin when native APIs or performance demand it.",
-      },
-      {
-        q: "Do you handle App Store and Play review?",
-        a: "Yes. Listings, compliance screenshots, review responses and the first production release are part of the build.",
-      },
-      {
-        q: "Can one codebase serve both stores?",
-        a: "Usually yes with React Native or Flutter. When a feature needs deep native work, we bridge with Swift or Kotlin without rewriting the whole app.",
-      },
-    ],
-    engagement: [
-      engagementDefaults.discovery,
-      engagementDefaults.fixed,
-      engagementDefaults.embedded,
-    ],
-    seo: {
-      description:
-        "Mobile app development with React Native, Flutter, PWA, Swift and Kotlin — store shipping, staged rollouts and team handover.",
-    },
-  },
-  {
     slug: "ai-automation",
     title: "AI automation",
     shortTitle: "AI automation",
@@ -272,6 +146,196 @@ export const services: Service[] = [
     },
   },
   {
+    slug: "business-process-automation",
+    title: "Business process automation",
+    shortTitle: "Process automation",
+    blurb:
+      "Approvals, handoffs and reporting on autopilot — n8n, Zapier, RPA and custom workflows that stop needing someone to chase them.",
+    icon: "Workflow",
+    tech: ["WORKFLOW", "INTEGRATIONS", "RPA", "N8N", "ZAPIER", "CUSTOM WORKFLOWS"],
+    included: [
+      "Process map with owners, SLAs and failure modes",
+      "n8n, Zapier or custom workflows — chosen for fit, not fashion",
+      "API integrations between the tools your team already uses",
+      "RPA only where systems won't talk — with the risk documented",
+      "Exception queues humans can clear without a spreadsheet",
+      "Auditability and playbooks so ops can change rules without a deploy every time",
+    ],
+    stackGroups: [
+      { label: "Automation", items: ["n8n", "Zapier", "custom workflows", "schedulers"] },
+      { label: "Integration", items: ["APIs", "webhooks", "RPA where needed"] },
+      { label: "Ops", items: ["dashboards", "alerts", "audit logs"] },
+    ],
+    process: [
+      {
+        title: "Time the waste",
+        body: "Where hours disappear: chasing, re-keying, waiting on approvals.",
+      },
+      {
+        title: "Automate the spine",
+        body: "Happy path first in n8n or Zapier, with clear ownership when something breaks.",
+      },
+      {
+        title: "Handle exceptions",
+        body: "Queues, retries and human takeover — not silent failure. RPA only as a last resort.",
+      },
+      {
+        title: "Measure the gain",
+        body: "Cycle time and error rate before vs after — written into the handover.",
+      },
+    ],
+    faqs: [
+      {
+        q: "n8n, Zapier or custom?",
+        a: "Zapier for fast SaaS glue. n8n for self-hosted control and complex branching. Custom workflows when volume, latency or compliance outgrow no-code. We recommend in discovery.",
+      },
+      {
+        q: "Is this RPA or proper integration?",
+        a: "Integration when APIs exist. RPA only when the system won't talk — and we document the risk either way.",
+      },
+      {
+        q: "Will this replace our ERP?",
+        a: "Usually no. We connect and orchestrate what you already run, unless replacement is the brief.",
+      },
+    ],
+    engagement: [
+      engagementDefaults.discovery,
+      engagementDefaults.fixed,
+      engagementDefaults.embedded,
+    ],
+    seo: {
+      description:
+        "Business process automation with n8n, Zapier, RPA and custom workflows — measurable cycle-time gains and audit-ready ops.",
+    },
+  },
+  {
+    slug: "web-development",
+    title: "Web development",
+    shortTitle: "Web development",
+    blurb:
+      "Full-stack web apps, CMS sites and admin portals — MERN, Django, PHP or WordPress, chosen for your product and your team.",
+    icon: "Monitor",
+    tech: ["MERN", "DJANGO", "PHP", "WORDPRESS"],
+    included: [
+      "Stack recommendation with clear tradeoffs (MERN, Django, PHP or WordPress)",
+      "Responsive UI built for conversion, clarity and mobile-first use",
+      "Secure auth, roles, APIs and integrations with tools you already run",
+      "Performance tuning, SEO foundations and Core Web Vitals targets",
+      "Staging, CI and a deployment path your team can repeat safely",
+      "Handover docs, admin training and a recorded walkthrough",
+    ],
+    stackGroups: [
+      { label: "JavaScript", items: ["MongoDB", "Express", "React", "Node.js"] },
+      { label: "Python & PHP", items: ["Django", "PHP", "Laravel-ready patterns"] },
+      { label: "CMS", items: ["WordPress", "custom themes", "headless options"] },
+    ],
+    process: [
+      {
+        title: "Choose the right stack",
+        body: "MERN for rich apps, Django for structured backends, PHP or WordPress when content and speed-to-market win — written before build.",
+      },
+      {
+        title: "Ship a thin vertical",
+        body: "One real user path live on staging within the first two weeks.",
+      },
+      {
+        title: "Harden and grow",
+        body: "Security, SEO, performance and the next surfaces in priority order.",
+      },
+      {
+        title: "Hand over clean",
+        body: "Runbook, hosting access and a team that can extend it without us.",
+      },
+    ],
+    faqs: [
+      {
+        q: "MERN, Django, PHP or WordPress — how do you decide?",
+        a: "By product shape, not preference. Rich dashboards and SPAs lean MERN; data-heavy backends lean Django; marketing and content sites often win on WordPress or PHP. We recommend in writing during discovery.",
+      },
+      {
+        q: "Can you rebuild or extend an existing site?",
+        a: "Yes. Much of our work is stabilising production products — after a short audit that tells you what to keep, rewrite or retire.",
+      },
+      {
+        q: "Will the site be SEO-ready?",
+        a: "Yes. Clean URLs, metadata, sitemap/robots, performance budgets and structured content are part of delivery — not a bolt-on later.",
+      },
+    ],
+    engagement: [
+      engagementDefaults.discovery,
+      engagementDefaults.fixed,
+      engagementDefaults.embedded,
+    ],
+    seo: {
+      description:
+        "Web development with MERN, Django, PHP and WordPress — fast apps, CMS sites and portals with SEO foundations and clean handover.",
+    },
+  },
+  {
+    slug: "mobile-app-development",
+    title: "Mobile app development",
+    shortTitle: "Mobile apps",
+    blurb:
+      "iOS and Android apps that feel native — React Native, Flutter, PWA, Swift or Kotlin, shipped through both stores.",
+    icon: "Smartphone",
+    tech: ["React Native", "Flutter", "PWA", "SWIFT", "KOTLIN"],
+    included: [
+      "Platform choice with honest tradeoffs (React Native, Flutter, PWA, Swift or Kotlin)",
+      "Native-feel navigation, offline support and push notifications where needed",
+      "Shared design language across web and mobile when both exist",
+      "App Store and Google Play listing, review handling and release pipeline",
+      "Crash reporting, analytics and staged rollouts",
+      "Handover docs and a release runbook your team can own",
+    ],
+    stackGroups: [
+      { label: "Cross-platform", items: ["React Native", "Flutter", "Expo", "PWA"] },
+      { label: "Native", items: ["Swift", "Kotlin"] },
+      { label: "Backend", items: ["Node.js", "PostgreSQL", "push services"] },
+    ],
+    process: [
+      {
+        title: "Pick the right shell",
+        body: "Cross-platform reach vs native depth vs PWA speed — documented before UI work starts.",
+      },
+      {
+        title: "Core loops first",
+        body: "The screens users live in, wired to real data on TestFlight and internal Android tracks.",
+      },
+      {
+        title: "Store-ready polish",
+        body: "Permissions, offline, accessibility and the listing assets reviewers expect.",
+      },
+      {
+        title: "Ship and watch",
+        body: "Staged rollout, crash budgets and a clear path for the next release.",
+      },
+    ],
+    faqs: [
+      {
+        q: "React Native, Flutter, PWA or fully native?",
+        a: "Whichever matches your timeline, team and product. We recommend in writing during discovery — not by default. Swift and Kotlin when native APIs or performance demand it.",
+      },
+      {
+        q: "Do you handle App Store and Play review?",
+        a: "Yes. Listings, compliance screenshots, review responses and the first production release are part of the build.",
+      },
+      {
+        q: "Can one codebase serve both stores?",
+        a: "Usually yes with React Native or Flutter. When a feature needs deep native work, we bridge with Swift or Kotlin without rewriting the whole app.",
+      },
+    ],
+    engagement: [
+      engagementDefaults.discovery,
+      engagementDefaults.fixed,
+      engagementDefaults.embedded,
+    ],
+    seo: {
+      description:
+        "Mobile app development with React Native, Flutter, PWA, Swift and Kotlin — store shipping, staged rollouts and team handover.",
+    },
+  },
+  
+  {
     slug: "data-science",
     title: "Data science",
     shortTitle: "Data science",
@@ -395,69 +459,6 @@ export const services: Service[] = [
     seo: {
       description:
         "Custom ERP, CRM and internal tools with Node.js, .NET and PostgreSQL — integrations, migration and a clean handover.",
-    },
-  },
-  {
-    slug: "business-process-automation",
-    title: "Business process automation",
-    shortTitle: "Process automation",
-    blurb:
-      "Approvals, handoffs and reporting on autopilot — n8n, Zapier, RPA and custom workflows that stop needing someone to chase them.",
-    icon: "Workflow",
-    tech: ["WORKFLOW", "INTEGRATIONS", "RPA", "N8N", "ZAPIER", "CUSTOM WORKFLOWS"],
-    included: [
-      "Process map with owners, SLAs and failure modes",
-      "n8n, Zapier or custom workflows — chosen for fit, not fashion",
-      "API integrations between the tools your team already uses",
-      "RPA only where systems won't talk — with the risk documented",
-      "Exception queues humans can clear without a spreadsheet",
-      "Auditability and playbooks so ops can change rules without a deploy every time",
-    ],
-    stackGroups: [
-      { label: "Automation", items: ["n8n", "Zapier", "custom workflows", "schedulers"] },
-      { label: "Integration", items: ["APIs", "webhooks", "RPA where needed"] },
-      { label: "Ops", items: ["dashboards", "alerts", "audit logs"] },
-    ],
-    process: [
-      {
-        title: "Time the waste",
-        body: "Where hours disappear: chasing, re-keying, waiting on approvals.",
-      },
-      {
-        title: "Automate the spine",
-        body: "Happy path first in n8n or Zapier, with clear ownership when something breaks.",
-      },
-      {
-        title: "Handle exceptions",
-        body: "Queues, retries and human takeover — not silent failure. RPA only as a last resort.",
-      },
-      {
-        title: "Measure the gain",
-        body: "Cycle time and error rate before vs after — written into the handover.",
-      },
-    ],
-    faqs: [
-      {
-        q: "n8n, Zapier or custom?",
-        a: "Zapier for fast SaaS glue. n8n for self-hosted control and complex branching. Custom workflows when volume, latency or compliance outgrow no-code. We recommend in discovery.",
-      },
-      {
-        q: "Is this RPA or proper integration?",
-        a: "Integration when APIs exist. RPA only when the system won't talk — and we document the risk either way.",
-      },
-      {
-        q: "Will this replace our ERP?",
-        a: "Usually no. We connect and orchestrate what you already run, unless replacement is the brief.",
-      },
-    ],
-    engagement: [
-      engagementDefaults.discovery,
-      engagementDefaults.fixed,
-      engagementDefaults.embedded,
-    ],
-    seo: {
-      description:
-        "Business process automation with n8n, Zapier, RPA and custom workflows — measurable cycle-time gains and audit-ready ops.",
     },
   },
   {

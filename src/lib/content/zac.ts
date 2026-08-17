@@ -29,7 +29,7 @@ export const zac = {
     ariaTyping: "ZAC is typing",
     /** Opening line in chat */
     greeting:
-      "I'm ZAC — ZACSOL's solution consultant. Tell me what's slowing your business down, or the product you're trying to build — plain language is fine. I'll ask a few questions, then put together a solution blueprint with scope, timeline and cost.",
+      "I'm ZAC — ZACSOL's solution consultant. Tell me what you want to achieve, or what's slowing the business down — plain language is fine. I'll ask a few discovery questions, then put together a solution blueprint with a visual prototype, scope, timeline and cost.",
     /**
      * Starter prompts on the empty thread.
      *

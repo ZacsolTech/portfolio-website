@@ -1,6 +1,7 @@
 import {
 	PROTOTYPE_KIND_LABELS,
 	type ProtoChart,
+	type ProtoScreen,
 	type ProtoSection,
 	type ProtoTable,
 	type Prototype,
@@ -31,6 +32,20 @@ function BrowserChrome({ url }: { url?: string }) {
 				<i />
 			</span>
 			{url ? <span className="proto__url">{url}</span> : null}
+		</div>
+	);
+}
+
+function PhoneChrome({ title, index, total }: { title: string; index: number; total: number }) {
+	return (
+		<div className="proto-phone__chrome" aria-hidden>
+			<span className="proto-phone__notch" />
+			<div className="proto-phone__bar">
+				<span className="proto-phone__step">
+					{index + 1} / {total}
+				</span>
+				<span className="proto-phone__title">{title}</span>
+			</div>
 		</div>
 	);
 }
@@ -165,6 +180,23 @@ function Section({ section }: { section: ProtoSection }) {
 		default:
 			return <Features section={section} />;
 	}
+}
+
+function ScreenBody({ screen }: { screen: ProtoScreen }) {
+	if (screen.sections.length === 0 && screen.purpose) {
+		return (
+			<div className="proto-block">
+				<p className="proto-hero__body">{screen.purpose}</p>
+			</div>
+		);
+	}
+	return (
+		<>
+			{screen.sections.map((section, i) => (
+				<Section section={section} key={`${screen.id}-${section.type}-${i}`} />
+			))}
+		</>
+	);
 }
 
 /* -------------------------------- dashboard ------------------------------- */
@@ -379,6 +411,72 @@ function Workflow({ prototype }: { prototype: Prototype }) {
 	);
 }
 
+/* --------------------------- mobile / pages ------------------------------- */
+
+/**
+ * Phone journey: every major screen stacked with connectors so the visitor
+ * can read how the app works without tapping through a prototype.
+ */
+function MobileJourney({ prototype }: { prototype: Prototype }) {
+	const screens = prototype.screens;
+	return (
+		<ol className="proto-journey">
+			{screens.map((screen, i) => (
+				<li className="proto-journey__step" key={screen.id}>
+					<div className="proto-phone">
+						<PhoneChrome title={screen.title} index={i} total={screens.length} />
+						{screen.purpose ? <p className="proto-phone__purpose">{screen.purpose}</p> : null}
+						<div className="proto-phone__screen">
+							<ScreenBody screen={screen} />
+						</div>
+						<span className="proto-phone__home" aria-hidden />
+					</div>
+					{i < screens.length - 1 ? (
+						<span className="proto-journey__link" aria-hidden>
+							↓
+						</span>
+					) : null}
+				</li>
+			))}
+		</ol>
+	);
+}
+
+/**
+ * Full site / app page map. Stacked (not tabbed) so the roadmap PDF and email
+ * capture show every page without client JS.
+ */
+function PageMap({ prototype }: { prototype: Prototype }) {
+	const screens = prototype.screens;
+	return (
+		<div className="proto-sitemap">
+			<nav className="proto-sitemap__tabs" aria-hidden>
+				{screens.map((screen, i) => (
+					<span key={screen.id} className={i === 0 ? "is-active" : undefined}>
+						{screen.title}
+					</span>
+				))}
+			</nav>
+			<ol className="proto-sitemap__pages">
+				{screens.map((screen, i) => (
+					<li className="proto-sitemap__page" key={screen.id}>
+						<header className="proto-sitemap__head">
+							<span className="proto-sitemap__index">
+								{i + 1} / {screens.length}
+							</span>
+							<h4 className="proto-sitemap__title">{screen.title}</h4>
+							{screen.purpose ? <p className="proto-sitemap__purpose">{screen.purpose}</p> : null}
+						</header>
+						<div className="proto-sitemap__body">
+							<ScreenBody screen={screen} />
+						</div>
+					</li>
+				))}
+			</ol>
+		</div>
+	);
+}
+
 /* ---------------------------------- shell --------------------------------- */
 
 export type PrototypeViewProps = {
@@ -388,7 +486,10 @@ export type PrototypeViewProps = {
 };
 
 export function PrototypeView({ prototype, variant = "panel" }: PrototypeViewProps) {
-	const framed = prototype.kind === "landing" || prototype.kind === "dashboard";
+	const framed =
+		prototype.kind === "landing" ||
+		prototype.kind === "dashboard" ||
+		prototype.kind === "pages";
 
 	return (
 		<figure
@@ -409,6 +510,10 @@ export function PrototypeView({ prototype, variant = "panel" }: PrototypeViewPro
 						<Workflow prototype={prototype} />
 					) : prototype.kind === "dashboard" ? (
 						<Dashboard prototype={prototype} />
+					) : prototype.kind === "mobile" ? (
+						<MobileJourney prototype={prototype} />
+					) : prototype.kind === "pages" ? (
+						<PageMap prototype={prototype} />
 					) : (
 						prototype.sections.map((section, i) => (
 							<Section section={section} key={`${section.type}-${i}`} />

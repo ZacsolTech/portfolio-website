@@ -18,10 +18,8 @@ import {
 } from "./prompts";
 import {
   ChatTurnSchema,
-  SCALE_OPTIONS,
-  TIMELINE_OPTIONS,
-  normalizeScale,
-  normalizeTimeline,
+  TIMING_OPTIONS,
+  normalizeTiming,
   type ChatMessage,
   type ChatTurn,
   type SlotKey,
@@ -42,24 +40,23 @@ const chatResponseSchema = {
     slots: {
       type: Type.OBJECT,
       properties: {
-        problem: { type: Type.STRING },
-        industry: { type: Type.STRING },
-        current: { type: Type.STRING },
-        scale: { type: Type.STRING, enum: [...SCALE_OPTIONS] },
-        timeline: { type: Type.STRING, enum: [...TIMELINE_OPTIONS] },
+        outcome: { type: Type.STRING },
+        audience: { type: Type.STRING },
+        today: { type: Type.STRING },
+        v1: { type: Type.STRING },
+        timing: { type: Type.STRING, enum: [...TIMING_OPTIONS] },
       },
     },
     /**
-     * Verbatim quotes backing the two slots that move the price. Checked
-     * against the transcript server-side — an enum field makes a model want to
-     * pick *something*, and asking it to cite the words is the only guard that
+     * Verbatim quotes backing the slot that moves the price. Checked against
+     * the transcript server-side — an enum field makes a model want to pick
+     * *something*, and asking it to cite the words is the only guard that
      * actually holds. See verifyPricedSlots.
      */
     evidence: {
       type: Type.OBJECT,
       properties: {
-        scale: { type: Type.STRING },
-        timeline: { type: Type.STRING },
+        timing: { type: Type.STRING },
       },
     },
     wantsBlueprint: { type: Type.BOOLEAN },
@@ -78,15 +75,15 @@ function loosen(text: string): string {
 }
 
 /**
- * Drop `scale` / `timeline` when the model cannot quote the visitor saying it.
+ * Drop `timing` when the model cannot quote the visitor saying it.
  *
- * These two fields multiply the quoted price, so a hallucinated value doesn't
- * just look sloppy — it quotes a stranger the wrong number. Anything the
- * visitor did not actually say goes back to being an open question.
+ * Timing multiplies the quoted price, so a hallucinated urgency doesn't just
+ * look sloppy — it quotes a stranger the wrong number. Anything the visitor
+ * did not actually say goes back to being an open question.
  */
 function verifyPricedSlots(
   slots: Slots,
-  evidence: { scale?: string; timeline?: string },
+  evidence: { timing?: string },
   messages: ChatMessage[],
   previous: Slots,
 ): Slots {
@@ -99,16 +96,12 @@ function verifyPricedSlots(
 
   const verified: Slots = { ...slots };
 
-  for (const key of ["scale", "timeline"] as const) {
-    // Already established and re-sent — no need to re-cite every turn.
-    if (previous[key] && slots[key] === previous[key]) continue;
-    if (!slots[key]) continue;
-
-    const quote = loosen(evidence[key] ?? "");
-    if (quote.length >= 2 && haystack.includes(quote)) continue;
-
-    console.info(`[consultant] dropped unevidenced ${key}="${slots[key]}"`);
-    delete verified[key];
+  if (slots.timing && !(previous.timing && slots.timing === previous.timing)) {
+    const quote = loosen(evidence.timing ?? "");
+    if (!(quote.length >= 2 && haystack.includes(quote))) {
+      console.info(`[consultant] dropped unevidenced timing="${slots.timing}"`);
+      delete verified.timing;
+    }
   }
 
   return verified;
@@ -149,20 +142,20 @@ function coerceTurn(
   const slotsRaw = (raw.slots ?? {}) as Record<string, unknown>;
 
   const slots: Slots = {};
-  if (typeof slotsRaw.problem === "string" && slotsRaw.problem.trim()) {
-    slots.problem = slotsRaw.problem.trim().slice(0, 1200);
+  if (typeof slotsRaw.outcome === "string" && slotsRaw.outcome.trim()) {
+    slots.outcome = slotsRaw.outcome.trim().slice(0, 1200);
   }
-  if (typeof slotsRaw.industry === "string" && slotsRaw.industry.trim()) {
-    slots.industry = slotsRaw.industry.trim().slice(0, 120);
+  if (typeof slotsRaw.audience === "string" && slotsRaw.audience.trim()) {
+    slots.audience = slotsRaw.audience.trim().slice(0, 160);
   }
-  if (typeof slotsRaw.current === "string" && slotsRaw.current.trim()) {
-    slots.current = slotsRaw.current.trim().slice(0, 240);
+  if (typeof slotsRaw.today === "string" && slotsRaw.today.trim()) {
+    slots.today = slotsRaw.today.trim().slice(0, 280);
   }
-  if (typeof slotsRaw.scale === "string" && slotsRaw.scale.trim()) {
-    slots.scale = normalizeScale(slotsRaw.scale);
+  if (typeof slotsRaw.v1 === "string" && slotsRaw.v1.trim()) {
+    slots.v1 = slotsRaw.v1.trim().slice(0, 400);
   }
-  if (typeof slotsRaw.timeline === "string" && slotsRaw.timeline.trim()) {
-    slots.timeline = normalizeTimeline(slotsRaw.timeline);
+  if (typeof slotsRaw.timing === "string" && slotsRaw.timing.trim()) {
+    slots.timing = normalizeTiming(slotsRaw.timing);
   }
 
   const suggestions = (Array.isArray(raw.suggestions) ? raw.suggestions : [])
@@ -177,30 +170,27 @@ function coerceTurn(
     : verifyPricedSlots(
         slots,
         {
-          scale: typeof evidenceRaw.scale === "string" ? evidenceRaw.scale : undefined,
-          timeline:
-            typeof evidenceRaw.timeline === "string" ? evidenceRaw.timeline : undefined,
+          timing: typeof evidenceRaw.timing === "string" ? evidenceRaw.timing : undefined,
         },
         context.messages,
         context.previous,
       );
 
-  // The visitor's opening message is the problem statement, whether or not the
-  // model bothered to echo it into a slot. Their own words also make a better
+  // The visitor's opening message is the goal, whether or not the model
+  // bothered to echo it into a slot. Their own words also make a better
   // blueprint seed than the model's paraphrase.
-  if (!verified.problem && !context.previous.problem) {
+  if (!verified.outcome && !context.previous.outcome) {
     const opener = context.messages.find(
       (m) => m.role === "user" && m.content.trim().length >= 16,
     );
-    if (opener) verified.problem = opener.content.trim().slice(0, 1200);
+    if (opener) verified.outcome = opener.content.trim().slice(0, 1200);
   }
 
-  // Backfill the descriptive slots by keyword when the model acknowledges an
+  // Backfill descriptive slots by keyword when the model acknowledges an
   // answer in prose but forgets to record it — otherwise it re-asks the same
-  // question every turn and intake never completes. Only industry and current,
-  // never scale or timeline: these two don't multiply the quoted price, so a
-  // rough match costs far less than an endless loop.
-  if (!verified.industry || !verified.current) {
+  // question every turn and intake never completes. Never timing: that
+  // multiplies the quoted price, so a rough match is not worth a wrong quote.
+  if (!verified.audience || !verified.today || !verified.v1) {
     const userText = context.messages
       .filter((m) => m.role === "user")
       .map((m) => m.content)
@@ -209,8 +199,9 @@ function coerceTurn(
       ...context.previous,
       ...verified,
     });
-    if (!verified.industry && guessed.industry) verified.industry = guessed.industry;
-    if (!verified.current && guessed.current) verified.current = guessed.current;
+    if (!verified.audience && guessed.audience) verified.audience = guessed.audience;
+    if (!verified.today && guessed.today) verified.today = guessed.today;
+    if (!verified.v1 && guessed.v1) verified.v1 = guessed.v1;
   }
 
   const lastUser = [...context.messages].reverse().find((m) => m.role === "user");
@@ -229,26 +220,26 @@ function coerceTurn(
 /* --------------------------- deterministic fallback --------------------------- */
 
 const FALLBACK_QUESTIONS: Record<SlotKey, { reply: string; suggestions: string[] }> = {
-  problem: {
+  outcome: {
     reply:
-      "Tell me what's actually going wrong — a sentence or two about the bottleneck is plenty to start.",
+      "What should get better if we fix this — more sales, fewer mistakes, faster handoffs, or a product you can sell?",
     suggestions: [],
   },
-  industry: {
-    reply: "Got it. What kind of business is this for?",
-    suggestions: ["Retail", "Logistics"],
+  audience: {
+    reply: "Who is this mainly for — your customers, your team, or both?",
+    suggestions: ["Customers", "Our team"],
   },
-  current: {
-    reply: "How does that work today — manually, spreadsheets, or some tool you've outgrown?",
-    suggestions: ["Manual / paper", "Spreadsheets"],
+  today: {
+    reply: "How do you cope today — WhatsApp, spreadsheets, calls, or a tool that half-fits?",
+    suggestions: ["WhatsApp / calls", "Spreadsheets"],
   },
-  scale: {
-    reply: "Roughly how many people would end up using this?",
-    suggestions: [...SCALE_OPTIONS.slice(0, 2)],
+  v1: {
+    reply: "For a first release, what must work — name the three things that matter most.",
+    suggestions: ["Capture + track", "Core screens only"],
   },
-  timeline: {
+  timing: {
     reply: "And how soon do you need it live?",
-    suggestions: [...TIMELINE_OPTIONS.slice(0, 2)],
+    suggestions: [...TIMING_OPTIONS.slice(0, 2)],
   },
 };
 
@@ -257,50 +248,42 @@ function inferSlotsFromText(text: string, current: Slots): Slots {
   const patch: Slots = {};
   const t = text.toLowerCase();
 
-  if (!current.industry) {
-    const industries: [RegExp, string][] = [
-      [/restaurant|cafe|catering|food|hospitality|kitchen/, "Restaurant / hospitality"],
-      [/retail|e-?commerce|shop|store|merchandis/, "Retail / e-commerce"],
-      [/health|clinic|patient|medical|dental|pharma/, "Healthcare"],
-      [/fintech|bank|lending|insurance|payment/, "Fintech"],
-      [/logistic|delivery|fleet|courier|freight|dispatch|warehouse/, "Logistics"],
-      [/school|educat|student|course|training/, "Education"],
-      [/manufactur|factory|production line|assembly/, "Manufacturing"],
-      [/real estate|property|letting|tenant/, "Real estate"],
-      [/agency|consult|law firm|account(ing|ant)/, "Professional services"],
-    ];
-    for (const [re, label] of industries) {
-      if (re.test(t)) {
-        patch.industry = label;
-        break;
-      }
+  if (!current.audience) {
+    if (/\b(customer|client|patient|guest|buyer|shopper)s?\b/.test(t) && /\b(staff|team|employee|internal|ops)\b/.test(t)) {
+      patch.audience = "Customers and the internal team";
+    } else if (/\b(customer|client|patient|guest|buyer|shopper|public|visitor)s?\b/.test(t)) {
+      patch.audience = "Customers / end users";
+    } else if (/\b(staff|team|employee|internal|ops|field engineer|dispatch)/.test(t)) {
+      patch.audience = "Internal team / staff";
+    } else if (/\bboth\b/.test(t)) {
+      patch.audience = "Customers and the internal team";
     }
   }
 
-  if (!current.current) {
-    if (/spreadsheet|excel|google sheet/.test(t)) patch.current = "Spreadsheets";
-    else if (/whatsapp|phone call|paper|notebook|by hand|manual/.test(t)) {
-      patch.current = "Entirely manual / paper";
+  if (!current.today) {
+    if (/spreadsheet|excel|google sheet/.test(t)) patch.today = "Spreadsheets";
+    else if (/whatsapp|phone call|paper|notebook|by hand|manual|diary/.test(t)) {
+      patch.today = "WhatsApp, calls, or paper";
     } else if (/\berp\b|\bcrm\b|legacy|existing system|custom (built|software)/.test(t)) {
-      patch.current = "Custom software that needs replacing";
+      patch.today = "Custom software that needs replacing";
     } else if (/shopify|wordpress|wix|squarespace|saas|off.?the.?shelf|subscription tool/.test(t)) {
-      patch.current = "An off-the-shelf tool that half-fits";
+      patch.today = "An off-the-shelf tool that half-fits";
     }
   }
 
-  if (!current.scale && /\b\d[\d,]*\b\s*(people|users|staff|employees|team|seats)?/.test(t)) {
-    const num = Number(t.match(/\b(\d[\d,]*)\b/)?.[1]?.replace(/,/g, ""));
-    if (Number.isFinite(num) && num > 0 && num < 1_000_000) {
-      patch.scale = normalizeScale(String(num));
+  if (!current.v1) {
+    if (/first (version|release|mvp)|must (have|ship|work)|v1\b|minimum|core (path|loop|flow)/.test(t)) {
+      const clip = text.trim().slice(0, 400);
+      if (clip.length >= 8) patch.v1 = clip;
     }
   }
 
-  if (!current.timeline && /asap|urgent|month|quarter|week|explor|no rush|soon/.test(t)) {
-    patch.timeline = normalizeTimeline(t);
+  if (!current.timing && /asap|urgent|month|quarter|week|explor|no rush|soon/.test(t)) {
+    patch.timing = normalizeTiming(t);
   }
 
-  if (!current.problem && text.trim().length >= 16) {
-    patch.problem = text.trim().slice(0, 1200);
+  if (!current.outcome && text.trim().length >= 16) {
+    patch.outcome = text.trim().slice(0, 1200);
   }
 
   return patch;
@@ -502,12 +485,12 @@ function fillRemaining(messages: ChatMessage[], slots: Slots): Slots {
 
   let next = mergeSlots(slots, inferSlotsFromText(userText, slots));
 
-  if (!next.problem) {
+  if (!next.outcome) {
     const firstSubstantial = messages.find(
       (m) => m.role === "user" && m.content.trim().length >= 16,
     );
     next = mergeSlots(next, {
-      problem:
+      outcome:
         firstSubstantial?.content.trim() ??
         userText.trim().slice(0, 1200) ??
         "Operational bottleneck that needs custom software",
@@ -515,10 +498,10 @@ function fillRemaining(messages: ChatMessage[], slots: Slots): Slots {
   }
 
   return mergeSlots(next, {
-    industry: next.industry ?? "Other",
-    current: next.current ?? "An off-the-shelf tool that half-fits",
-    scale: next.scale ?? "10–50 users",
-    timeline: next.timeline ?? "Within 3 months",
+    audience: next.audience ?? "Not specified yet",
+    today: next.today ?? "An off-the-shelf tool that half-fits",
+    v1: next.v1 ?? "Core path only",
+    timing: next.timing ?? "Within 3 months",
   });
 }
 

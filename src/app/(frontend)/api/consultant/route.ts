@@ -363,7 +363,7 @@ async function handleChat(request: Request, body: z.infer<typeof ChatBody>) {
           // An explicit ask is honoured before every slot is filled: the
           // blueprint step infers the remainder rather than stonewalling
           // someone who just told us what they want.
-          wantsBlueprint: wantsBlueprint && Boolean(slots.problem),
+          wantsBlueprint: wantsBlueprint && Boolean(slots.outcome),
           ...publicState(session),
         });
       } catch (err) {
@@ -422,10 +422,10 @@ async function handleBlueprint(request: Request, body: z.infer<typeof BlueprintB
   });
 
   const answers = slotsToAnswers(slots);
-  const seed = slots.problem?.trim();
+  const seed = slots.outcome?.trim();
   if (!seed || seed.length < 8) {
     return json(
-      { error: "Tell me a bit more about the problem first.", ...publicState(session) },
+      { error: "Tell me a bit more about the goal first.", ...publicState(session) },
       400,
       limit.headers,
     );
@@ -470,10 +470,15 @@ async function handleBlueprint(request: Request, body: z.infer<typeof BlueprintB
 /* ----------------------------------- gate ---------------------------------- */
 
 async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
-  // Silent discard for bots. Field must stay obscure — autofill on `company`
-  // was rejecting real visitors with a no-op unlock.
+  // Honeypot used to short-circuit with `{ ok: true }` and no unlock flags.
+  // Browser autofill (and password managers) routinely fill hidden text inputs,
+  // which made real visitors see "Could not unlock your roadmap" after a 20ms
+  // round-trip. Log the trip for bot telemetry; Turnstile + rate limits own
+  // the real bot gate.
   if (body.hp?.trim()) {
-    return json({ ok: true });
+    console.warn("[consultant] gate honeypot filled — continuing (autofill-safe)", {
+      sessionId: body.sessionId,
+    });
   }
 
   const human = await verifyTurnstile({
@@ -520,12 +525,12 @@ async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
   // and we must not lose the lead if delivery fails.
   const saved = await captureLead({
     source: "consultant",
-    seed: session.slots.problem,
+    seed: session.slots.outcome,
     answers: {
-      industry: session.slots.industry ?? null,
-      current: session.slots.current ?? null,
-      scale: session.slots.scale ?? null,
-      timeline: session.slots.timeline ?? null,
+      audience: session.slots.audience ?? null,
+      today: session.slots.today ?? null,
+      v1: session.slots.v1 ?? null,
+      timing: session.slots.timing ?? null,
     },
     solution: {
       title: blueprint.title,
@@ -611,7 +616,7 @@ async function handleGate(request: Request, body: z.infer<typeof GateBody>) {
             name: body.name,
             email: body.email,
             message: [
-              session.slots.problem ?? "(no problem statement captured)",
+              session.slots.outcome ?? "(no goal statement captured)",
               "",
               `Recommended: ${blueprint.title}`,
               `Band: $${Math.round(blueprint.costBandUsd[0])}–$${Math.round(blueprint.costBandUsd[1])} over ${blueprint.durationWeeks[0]}–${blueprint.durationWeeks[1]} weeks`,

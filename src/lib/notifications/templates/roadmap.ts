@@ -54,10 +54,10 @@ export function renderRoadmapEmail(input: {
 	const { name, blueprint, slots, roadmapUrl } = input;
 
 	const intake = [
-		slots.industry && { term: "Industry", value: slots.industry },
-		slots.current && { term: "Today", value: slots.current },
-		slots.scale && { term: "Scale", value: slots.scale },
-		slots.timeline && { term: "Timeline", value: slots.timeline },
+		slots.audience && { term: "Who it's for", value: slots.audience },
+		slots.today && { term: "Today", value: slots.today },
+		slots.v1 && { term: "First release", value: slots.v1 },
+		slots.timing && { term: "Timing", value: slots.timing },
 	].filter((row): row is { term: string; value: string } => Boolean(row));
 
 	const body = [
@@ -95,10 +95,10 @@ export function renderRoadmapEmail(input: {
 		blueprint.risks?.length
 			? section("What could derail this", bullets(blueprint.risks))
 			: "",
-		slots.problem
+		slots.outcome
 			? card(
 					`${label("Based on what you told us")}
-           <p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:${palette.body};">${esc(slots.problem)}</p>
+           <p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:${palette.body};">${esc(slots.outcome)}</p>
            ${intake.length ? definitionRows(intake) : ""}`,
 				)
 			: "",

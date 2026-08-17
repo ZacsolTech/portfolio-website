@@ -1,7 +1,7 @@
 import {
-  normalizeTimeline,
+  normalizeTiming,
   SlotsSchema,
-  TIMELINE_OPTIONS,
+  TIMING_OPTIONS,
   type Slots,
 } from "@/lib/ai/schema";
 import type { EstimatorSlots } from "@/lib/estimator/schema";
@@ -13,20 +13,16 @@ import type { EstimatorSlots } from "@/lib/estimator/schema";
  * again to get a roadmap. This maps what the estimator established onto the
  * consultant's slots and writes the opening message on the visitor's behalf.
  *
- * It maps *conservatively*. Two fields look transferable and are not:
+ * It maps *conservatively*:
  *
- * - **scale** — the estimator counts end users ("10k–100k users"); the
- *   consultant counts people inside the business ("50–250 users"). They are
- *   different axes, and a wrong value here moves the quoted price. Left empty
- *   so the consultant asks.
- * - **industry / current process** — the estimator never asks. Inventing them
+ * - **audience / today / v1** — the estimator never asks these. Inventing them
  *   from a project type would put a fabricated fact in front of the model.
- *
- * Timeline is the one clean 1:1, so it carries.
+ * - **timing** — clean map from estimator timeline vocabulary.
+ * - **outcome** — the project summary carries as the goal seed.
  */
 
-/** Estimator timeline vocabulary → consultant timeline vocabulary. */
-const TIMELINE_MAP: Record<string, (typeof TIMELINE_OPTIONS)[number]> = {
+/** Estimator timeline vocabulary → consultant timing vocabulary. */
+const TIMING_MAP: Record<string, (typeof TIMING_OPTIONS)[number]> = {
   "As soon as possible": "As soon as possible",
   "This quarter": "Within 3 months",
   "Next 6 months": "3–6 months",
@@ -50,12 +46,12 @@ export function estimatorToConsultant(
   if (!summary || summary.length < 8) return null;
 
   const carried: string[] = ["What you're building"];
-  const slots: Slots = { problem: summary.slice(0, 1200) };
+  const slots: Slots = { outcome: summary.slice(0, 1200) };
 
-  const timeline = estimator.timeline ? TIMELINE_MAP[estimator.timeline] : undefined;
-  if (timeline) {
-    slots.timeline = normalizeTimeline(timeline);
-    carried.push("Timeline");
+  const timing = estimator.timeline ? TIMING_MAP[estimator.timeline] : undefined;
+  if (timing) {
+    slots.timing = normalizeTiming(timing);
+    carried.push("Timing");
   }
 
   /* The opening message. Written in the visitor's voice because that is whose
@@ -64,7 +60,7 @@ export function estimatorToConsultant(
     estimator.projectType,
     estimator.platform ? `${estimator.platform.toLowerCase()} platform` : null,
     estimator.scope,
-    estimator.timeline ? `timeline: ${estimator.timeline.toLowerCase()}` : null,
+    estimator.timeline ? `timing: ${estimator.timeline.toLowerCase()}` : null,
     estimator.integrations
       ? `${estimator.integrations} system${estimator.integrations === 1 ? "" : "s"} to integrate`
       : null,
@@ -86,5 +82,5 @@ export function estimatorToConsultant(
     .trim()
     .slice(0, 3800);
 
-  return { slots: SlotsSchema.parse(slots), prefill, carried };
+  return { slots: SlotsSchema.parse(slots) as Slots, prefill, carried };
 }

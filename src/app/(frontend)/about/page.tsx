@@ -4,6 +4,7 @@ import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { ProjectCardGrid } from "@/components/shared/project-cards";
+import { ReviewsSlider } from "@/components/shared/reviews-slider";
 import { Stat } from "@/components/ui";
 import { aboutMission, aboutStats, portfolio, team } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
@@ -118,6 +119,8 @@ export default async function AboutPage() {
           </div>
         </div>
       </section>
+
+      <ReviewsSlider surface="ink" />
 
       {featured.length > 0 ? (
         <section className="section section--paper-alt">

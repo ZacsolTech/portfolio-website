@@ -18,62 +18,74 @@ export type ServiceSlug = z.infer<typeof ServiceSlugSchema>;
 /* ------------------------------------------------------------------ *
  * Intake slots
  *
- * The consultant fills these conversationally. Readiness is "every
- * required slot has a value" — never a regex over what the visitor typed.
+ * Production discovery shape — outcome → who → today → v1 → timing —
+ * the same spine a senior SE uses on a first call. Readiness is "every
+ * required slot has a value", never a regex over what the visitor typed.
  * ------------------------------------------------------------------ */
 
-export const SCALE_OPTIONS = [
-  "Under 10 users",
-  "10–50 users",
-  "50–250 users",
-  "250+ users",
-] as const;
-
-export const TIMELINE_OPTIONS = [
+export const TIMING_OPTIONS = [
   "As soon as possible",
   "Within 3 months",
   "3–6 months",
   "Still exploring",
 ] as const;
 
-export const ScaleSchema = z.enum(SCALE_OPTIONS);
-export const TimelineSchema = z.enum(TIMELINE_OPTIONS);
+export const TimingSchema = z.enum(TIMING_OPTIONS);
+
+/** @deprecated Prefer TIMING_OPTIONS — kept for estimator handoff maps. */
+export const TIMELINE_OPTIONS = TIMING_OPTIONS;
+/** @deprecated Prefer TimingSchema */
+export const TimelineSchema = TimingSchema;
 
 /** Order is the order we prefer to ask in when nudging the model. */
-export const SLOT_KEYS = [
-  "problem",
-  "industry",
-  "current",
-  "scale",
-  "timeline",
-] as const;
+export const SLOT_KEYS = ["outcome", "audience", "today", "v1", "timing"] as const;
 
 export type SlotKey = (typeof SLOT_KEYS)[number];
 
 export const SLOT_LABELS: Record<SlotKey, string> = {
-  problem: "The problem",
-  industry: "Industry",
-  current: "How it works today",
-  scale: "Scale",
-  timeline: "Timeline",
+  outcome: "Goal",
+  audience: "Who it's for",
+  today: "How you cope now",
+  v1: "First release",
+  timing: "Timing",
 };
 
-export const SlotsSchema = z.object({
-  problem: z.string().min(1).max(1200).optional(),
-  industry: z.string().min(1).max(120).optional(),
-  current: z.string().min(1).max(240).optional(),
-  scale: ScaleSchema.optional(),
-  timeline: TimelineSchema.optional(),
+const SlotsObjectSchema = z.object({
+  outcome: z.string().min(1).max(1200).optional(),
+  audience: z.string().min(1).max(160).optional(),
+  today: z.string().min(1).max(280).optional(),
+  v1: z.string().min(1).max(400).optional(),
+  timing: TimingSchema.optional(),
 });
 
-export type Slots = z.infer<typeof SlotsSchema>;
+/**
+ * Accept in-flight sessions that still carry the old slot names
+ * (problem/industry/current/scale/timeline) and map them forward once.
+ */
+export const SlotsSchema = z.preprocess((raw) => {
+  if (!raw || typeof raw !== "object") return raw;
+  const o = { ...(raw as Record<string, unknown>) };
+  if (o.problem && !o.outcome) o.outcome = o.problem;
+  if (o.industry && !o.audience) o.audience = o.industry;
+  if (o.current && !o.today) o.today = o.current;
+  if (o.scale && !o.v1) o.v1 = `Rough scale mentioned: ${String(o.scale)}`;
+  if (o.timeline && !o.timing) o.timing = o.timeline;
+  delete o.problem;
+  delete o.industry;
+  delete o.current;
+  delete o.scale;
+  delete o.timeline;
+  return o;
+}, SlotsObjectSchema);
 
-/** Legacy four-field shape the blueprint generator and rules engine consume. */
+export type Slots = z.infer<typeof SlotsObjectSchema>;
+
+/** Shape the blueprint generator and rules engine consume. */
 export const ConsultantAnswersSchema = z.object({
-  industry: z.string().min(1).max(120),
-  current: z.string().min(1).max(240),
-  scale: z.string().min(1),
-  timeline: z.string().min(1),
+  audience: z.string().min(1).max(160),
+  today: z.string().min(1).max(280),
+  v1: z.string().min(1).max(400),
+  timing: z.string().min(1),
 });
 
 export type ConsultantAnswers = z.infer<typeof ConsultantAnswersSchema>;
@@ -99,7 +111,7 @@ export type Stage = (typeof STAGES)[number];
 /** What one model turn returns. `reply` streams; the rest arrives at the end. */
 export const ChatTurnSchema = z.object({
   reply: z.string().min(1).max(1500),
-  slots: SlotsSchema.default({}),
+  slots: SlotsObjectSchema.default({}),
   /** Model's own read on whether the visitor just asked to see the blueprint. */
   wantsBlueprint: z.boolean().default(false),
   /** Optional tappable suggestions for the next answer. */
@@ -129,7 +141,7 @@ export const BlueprintSchema = z.object({
   team: z.string().min(4).max(120),
   /** Inclusive USD band before display formatting */
   costBandUsd: z.tuple([z.number().positive(), z.number().positive()]),
-  /** Inclusive week band after scale/urgency multipliers */
+  /** Inclusive week band after urgency multipliers */
   durationWeeks: z.tuple([z.number().int().positive(), z.number().int().positive()]),
   assumptions: z.array(z.string().min(4).max(200)).min(2).max(8).optional(),
   /** Concrete next actions shown behind the gate. */
@@ -145,13 +157,6 @@ export type BlueprintPhase = z.infer<typeof BlueprintPhaseSchema>;
  * Sizing multipliers
  * ------------------------------------------------------------------ */
 
-export const SCALE_MULT: Record<string, number> = {
-  "Under 10 users": 0.8,
-  "10–50 users": 1,
-  "50–250 users": 1.3,
-  "250+ users": 1.7,
-};
-
 export const URGENCY_MULT: Record<string, number> = {
   "As soon as possible": 1.2,
   "Within 3 months": 1.05,
@@ -159,32 +164,32 @@ export const URGENCY_MULT: Record<string, number> = {
   "Still exploring": 0.95,
 };
 
-export function normalizeScale(value: string | undefined): (typeof SCALE_OPTIONS)[number] {
-  if (!value) return "10–50 users";
-  const exact = SCALE_OPTIONS.find((o) => o === value);
-  if (exact) return exact;
-
-  const v = value.toLowerCase();
-  // A bare number is the most common free-text answer ("about 30 staff").
+/**
+ * Soft size signal from "who it's for" — only when they volunteer headcount.
+ * Neutral (1) when they don't; we no longer force a fake user-count band.
+ */
+export function inferSizeMult(audience: string | undefined): number {
+  if (!audience) return 1;
+  const v = audience.toLowerCase();
   const num = Number(v.match(/\b(\d[\d,]*)\b/)?.[1]?.replace(/,/g, ""));
   if (Number.isFinite(num) && num > 0) {
-    if (num >= 250) return "250+ users";
-    if (num >= 50) return "50–250 users";
-    if (num >= 10) return "10–50 users";
-    return "Under 10 users";
+    if (num >= 250) return 1.7;
+    if (num >= 50) return 1.3;
+    if (num >= 10) return 1;
+    return 0.85;
   }
-  if (/enterprise|nationwide|thousands|hundreds/.test(v)) return "250+ users";
-  if (/mid|medium|department/.test(v)) return "50–250 users";
-  if (/solo|just me|myself|handful|tiny|couple/.test(v)) return "Under 10 users";
-  if (/small team|dozen|small/.test(v)) return "10–50 users";
-  return "10–50 users";
+  if (/enterprise|nationwide|thousands|hundreds of/.test(v)) return 1.7;
+  if (/department|whole company|all staff/.test(v)) return 1.3;
+  if (/solo|just me|myself|only me|one person/.test(v)) return 0.85;
+  if (/small team|handful|few people|couple of/.test(v)) return 0.95;
+  return 1;
 }
 
-export function normalizeTimeline(
+export function normalizeTiming(
   value: string | undefined,
-): (typeof TIMELINE_OPTIONS)[number] {
+): (typeof TIMING_OPTIONS)[number] {
   if (!value) return "Within 3 months";
-  const exact = TIMELINE_OPTIONS.find((o) => o === value);
+  const exact = TIMING_OPTIONS.find((o) => o === value);
   if (exact) return exact;
 
   const v = value.toLowerCase();
@@ -199,13 +204,16 @@ export function normalizeTimeline(
   return "Within 3 months";
 }
 
+/** @deprecated Prefer normalizeTiming */
+export const normalizeTimeline = normalizeTiming;
+
 /** Coerce partial/free-text slots into the canonical answer shape. */
 export function slotsToAnswers(slots: Slots): ConsultantAnswers {
   return {
-    industry: slots.industry?.trim().slice(0, 120) || "Other",
-    current: slots.current?.trim().slice(0, 240) || "Entirely manual / paper",
-    scale: normalizeScale(slots.scale),
-    timeline: normalizeTimeline(slots.timeline),
+    audience: slots.audience?.trim().slice(0, 160) || "Not specified yet",
+    today: slots.today?.trim().slice(0, 280) || "Not described yet",
+    v1: slots.v1?.trim().slice(0, 400) || "Core path only",
+    timing: normalizeTiming(slots.timing),
   };
 }
 
@@ -221,9 +229,9 @@ export function formatMoneyBand(lo: number, hi: number): string {
 export function applyMultipliers(
   base: [number, number],
   phaseWeeks: number,
-  answers: Pick<ConsultantAnswers, "scale" | "timeline">,
+  answers: Pick<ConsultantAnswers, "audience" | "timing">,
 ): { costBandUsd: [number, number]; durationWeeks: [number, number] } {
-  const mult = (SCALE_MULT[answers.scale] ?? 1) * (URGENCY_MULT[answers.timeline] ?? 1);
+  const mult = inferSizeMult(answers.audience) * (URGENCY_MULT[answers.timing] ?? 1);
   const costLo = base[0] * mult;
   const costHi = base[1] * mult;
   const wLo = Math.max(1, Math.round(phaseWeeks * (mult < 1 ? mult : 1)));
@@ -231,4 +239,4 @@ export function applyMultipliers(
   return { costBandUsd: [costLo, costHi], durationWeeks: [wLo, wHi] };
 }
 
-export const PROMPT_VERSION = "consultant-blueprint-v2";
+export const PROMPT_VERSION = "consultant-blueprint-v3";

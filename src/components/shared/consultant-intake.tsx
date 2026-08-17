@@ -197,17 +197,10 @@ function BlueprintTeaser({ blueprint }: { blueprint: Blueprint }) {
 /**
  * Gated half: the numbers and detail worth an email address.
  *
- * The prototype leads it. Everything else here is a claim about what we would
- * do; the mock is the only part that demonstrates we understood the problem,
- * and it is what makes the address worth giving up.
+ * The visual prototype stays sharp above the gate — that is the trust proof.
+ * What sits behind the email is cost, features, stack and phases.
  */
-function BlueprintDetail({
-  blueprint,
-  prototype,
-}: {
-  blueprint: Blueprint;
-  prototype: Prototype | null;
-}) {
+function BlueprintDetail({ blueprint }: { blueprint: Blueprint }) {
   // Cumulative week offsets, derived rather than accumulated — the React
   // compiler rejects mutation that outlives the render.
   const timeline = blueprint.phases.map((phase, i) => {
@@ -217,11 +210,6 @@ function BlueprintDetail({
 
   return (
     <div className="blueprint">
-      {prototype ? (
-        <Row label="A first look" className="bp-row--proto">
-          <PrototypeView prototype={prototype} />
-        </Row>
-      ) : null}
       <Row label="Investment band">
         <div className="bp-row__v">
           {formatMoneyBand(blueprint.costBandUsd[0], blueprint.costBandUsd[1])}
@@ -783,10 +771,13 @@ export function ConsultantIntake({
       };
       if (!res.ok) throw new Error(data.error || "Could not send your roadmap.");
 
+      // Prefer explicit unlock signals. `ok: true` alone is not enough — an
+      // older honeypot path returned bare ok and left the panel locked.
       const unlockedNow = Boolean(data.queued || data.alreadySent || data.roadmapUrl);
       if (!unlockedNow) {
         throw new Error(
-          "Could not unlock your roadmap. Please try again — if this keeps happening, refresh the page.",
+          data.error ||
+            "Could not unlock your roadmap. Please try again — if this keeps happening, refresh the page.",
         );
       }
 
@@ -895,7 +886,7 @@ export function ConsultantIntake({
             changes the estimate.
           </p>
           <dl className="consultant-cta__recap">
-            {SLOT_KEYS.filter((key) => key !== "problem").map((key) => (
+            {SLOT_KEYS.filter((key) => key !== "outcome").map((key) => (
               <div key={key}>
                 <dt>{SLOT_LABELS[key]}</dt>
                 <dd>{slots[key]}</dd>
@@ -1028,7 +1019,7 @@ export function ConsultantIntake({
             disabled={busy || restoring}
             canSend={canSend}
             placeholder={
-              isFresh ? "Describe the problem in your own words…" : "Reply to ZAC…"
+              isFresh ? "Describe the goal in your own words…" : "Reply to ZAC…"
             }
             inputRef={inputRef}
             hint={isPage ? undefined : ""}
@@ -1053,10 +1044,23 @@ export function ConsultantIntake({
 
               <BlueprintTeaser blueprint={blueprint} />
 
+              {/*
+                The prototype is the conversion proof — show it sharp before
+                asking for email. Cost and phases stay behind the gate.
+              */}
+              {prototype ? (
+                <div className="bp-row bp-row--proto bp-row--proto-open">
+                  <div className="bp-row__k">A first look at what we would build</div>
+                  <div className="bp-row__body">
+                    <PrototypeView prototype={prototype} />
+                  </div>
+                </div>
+              ) : null}
+
               <div className={`gate__locked${unlocked ? " is-unlocked" : ""}`}>
                 {/* inert keeps the blurred detail out of tab order and a11y tree */}
                 <div className={unlocked ? undefined : "gate__veiled"} inert={!unlocked}>
-                  <BlueprintDetail blueprint={blueprint} prototype={prototype} />
+                  <BlueprintDetail blueprint={blueprint} />
                 </div>
 
                 {!unlocked && gateOpen ? (
@@ -1068,8 +1072,9 @@ export function ConsultantIntake({
                       Costs, phases and the full feature list
                     </h3>
                     <p className="body-sm gate__copy">
-                      Enter your details to reveal the rest here and get the complete
-                      document by email. No call required.
+                      You’ve seen the concept above. Enter your details to reveal
+                      investment, phases and stack — and get the complete document by
+                      email. No call required.
                     </p>
                     <form onSubmit={onGateSubmit} className="gate__form">
                       <label className="sr-only" htmlFor="gate-name">
@@ -1103,16 +1108,16 @@ export function ConsultantIntake({
                         onChange={(event) => setEmail(event.target.value)}
                       />
                       {/*
-                        Honeypot: nonsense name so autofill never fills it.
-                        Never name this company/name/email — that silently
-                        discarded real unlocks.
+                        Honeypot: nonsense name + new-password autocomplete so
+                        managers/autofill leave it alone. Server logs fills but
+                        no longer blocks unlock on them alone.
                       */}
                       <input
                         ref={honeypotRef}
                         type="text"
-                        name="zac_hp"
+                        name="zac_website_url"
                         tabIndex={-1}
-                        autoComplete="off"
+                        autoComplete="new-password"
                         aria-hidden
                         className="sr-only"
                         defaultValue=""

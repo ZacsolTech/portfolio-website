@@ -1,8 +1,7 @@
 import {
   SLOT_KEYS,
   SlotsSchema,
-  normalizeScale,
-  normalizeTimeline,
+  normalizeTiming,
   type SlotKey,
   type Slots,
 } from "./schema";
@@ -16,7 +15,7 @@ import {
  * expressing the newer value.
  */
 
-const MIN_PROBLEM_CHARS = 16;
+const MIN_OUTCOME_CHARS = 16;
 
 function cleanText(value: unknown, max: number): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -33,26 +32,26 @@ function cleanText(value: unknown, max: number): string | undefined {
 export function mergeSlots(current: Slots, patch: Slots | undefined): Slots {
   if (!patch) return current;
 
-  const problem = cleanText(patch.problem, 1200);
-  const industry = cleanText(patch.industry, 120);
-  const currentProcess = cleanText(patch.current, 240);
-  const scale = cleanText(patch.scale, 60);
-  const timeline = cleanText(patch.timeline, 60);
+  const outcome = cleanText(patch.outcome, 1200);
+  const audience = cleanText(patch.audience, 160);
+  const today = cleanText(patch.today, 280);
+  const v1 = cleanText(patch.v1, 400);
+  const timing = cleanText(patch.timing, 60);
 
   const next: Slots = {
-    // Keep the richer problem statement — the model tends to compress on later
-    // turns, and the blueprint is only as good as this field.
-    problem:
-      problem && problem.length >= (current.problem?.length ?? 0)
-        ? problem
-        : (current.problem ?? problem),
-    industry: industry ?? current.industry,
-    current: currentProcess ?? current.current,
-    scale: scale ? normalizeScale(scale) : current.scale,
-    timeline: timeline ? normalizeTimeline(timeline) : current.timeline,
+    // Keep the richer outcome — the model tends to compress on later turns,
+    // and the blueprint is only as good as this field.
+    outcome:
+      outcome && outcome.length >= (current.outcome?.length ?? 0)
+        ? outcome
+        : (current.outcome ?? outcome),
+    audience: audience ?? current.audience,
+    today: today ?? current.today,
+    v1: v1 ?? current.v1,
+    timing: timing ? normalizeTiming(timing) : current.timing,
   };
 
-  return SlotsSchema.parse(stripUndefined(next));
+  return SlotsSchema.parse(stripUndefined(next)) as Slots;
 }
 
 function stripUndefined(slots: Slots): Slots {
@@ -64,7 +63,7 @@ function stripUndefined(slots: Slots): Slots {
 export function isSlotFilled(slots: Slots, key: SlotKey): boolean {
   const value = slots[key];
   if (!value) return false;
-  if (key === "problem") return value.trim().length >= MIN_PROBLEM_CHARS;
+  if (key === "outcome") return value.trim().length >= MIN_OUTCOME_CHARS;
   return value.trim().length > 0;
 }
 

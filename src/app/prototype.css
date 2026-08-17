@@ -108,11 +108,13 @@
 
 .proto__screen { display: grid; }
 
-/* A phone is a phone because of its width, not because of a drawn bezel. */
+/* Mobile journey: the outer frame is a board; each phone is its own bezel. */
 .proto[data-kind="mobile"] .proto__frame {
-  max-width: 20rem; margin-inline: auto;
-  border-radius: var(--r-lg);
-  border-width: 6px; border-color: #1c1c1f;
+  background: var(--p-alt);
+  padding: 1rem 0.75rem 1.25rem;
+}
+.proto[data-kind="pages"] .proto__frame {
+  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -432,12 +434,144 @@
 }
 
 /* ==========================================================================
+   Mobile journey — stacked phone screens so the visitor reads the app flow
+   ========================================================================== */
+
+.proto-journey {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 0; justify-items: center;
+}
+.proto-journey__step {
+  display: grid; justify-items: center; width: 100%;
+}
+.proto-journey__link {
+  display: grid; place-items: center;
+  width: 100%; height: 1.75rem;
+  color: var(--p-muted); font-size: 0.875rem; line-height: 1;
+}
+
+.proto-phone {
+  width: min(100%, 18.5rem);
+  background: var(--p-bg);
+  border: 6px solid #1c1c1f;
+  border-radius: 1.35rem;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(24, 24, 27, 0.12);
+}
+.proto-phone__chrome {
+  position: relative;
+  padding: 0.55rem 0.75rem 0.4rem;
+  background: var(--p-bg);
+  border-bottom: 1px solid var(--p-line);
+}
+.proto-phone__notch {
+  display: block; width: 4.5rem; height: 0.35rem; margin: 0 auto 0.45rem;
+  border-radius: var(--r-pill); background: #1c1c1f;
+}
+.proto-phone__bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+}
+.proto-phone__step {
+  font-family: var(--font-mono); font-size: 0.5rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--p-muted);
+  flex-shrink: 0;
+}
+.proto-phone__title {
+  font-size: 0.75rem; font-weight: 600; color: var(--p-ink);
+  text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.proto-phone__purpose {
+  margin: 0; padding: 0.45rem 0.75rem;
+  font-size: 0.625rem; line-height: 1.4; color: var(--p-muted);
+  background: var(--p-alt); border-bottom: 1px solid var(--p-line);
+}
+.proto-phone__screen {
+  display: grid;
+  /* Compact section padding inside the handset so 4–6 screens stay readable. */
+}
+.proto-phone .proto-hero {
+  padding: 1rem 0.875rem 1.125rem;
+}
+.proto-phone .proto-hero__title {
+  font-size: 1.125rem;
+}
+.proto-phone .proto-block,
+.proto-phone .proto-cta,
+.proto-phone .proto-quote {
+  padding-inline: 0.875rem;
+}
+.proto-phone .proto-grid { grid-template-columns: 1fr; }
+.proto-phone__home {
+  display: block; width: 5.5rem; height: 0.28rem; margin: 0.55rem auto 0.45rem;
+  border-radius: var(--r-pill); background: #d4d4d8;
+}
+
+/* ==========================================================================
+   Page map — full website / UI surfaces stacked for roadmap + PDF
+   ========================================================================== */
+
+.proto-sitemap { display: grid; gap: 0; }
+.proto-sitemap__tabs {
+  display: flex; flex-wrap: wrap; gap: 0.25rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--p-alt); border-bottom: 1px solid var(--p-line);
+}
+.proto-sitemap__tabs span {
+  padding: 0.3rem 0.65rem; border-radius: var(--r-pill);
+  font-size: 0.6875rem; font-weight: 500; color: var(--p-muted);
+  border: 1px solid transparent;
+}
+.proto-sitemap__tabs span.is-active {
+  color: var(--p-ink); background: var(--p-bg);
+  border-color: var(--p-line);
+}
+.proto-sitemap__pages {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 0;
+}
+.proto-sitemap__page {
+  border-top: 1px solid var(--p-line);
+  break-inside: avoid;
+}
+.proto-sitemap__page:first-child { border-top: 0; }
+.proto-sitemap__head {
+  display: grid; gap: 0.2rem;
+  padding: 0.75rem 1rem 0.5rem;
+  background: linear-gradient(180deg, var(--p-soft), var(--p-bg));
+  border-bottom: 1px solid var(--p-line);
+}
+.proto-sitemap__index {
+  font-family: var(--font-mono); font-size: 0.5rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--p-accent);
+}
+.proto-sitemap__title {
+  margin: 0; font-family: var(--font-display); font-weight: 600;
+  font-size: 1rem; line-height: 1.25; color: var(--p-ink);
+}
+.proto-sitemap__purpose {
+  margin: 0; font-size: 0.75rem; line-height: 1.45; color: var(--p-body);
+}
+.proto-sitemap__body { display: grid; }
+
+/* ==========================================================================
    Host containers
    ========================================================================== */
 
 /* Inside the consultant panel the mock is the widest thing in the column, so
    it drops the row's usual inline padding and takes the full measure. */
 .bp-row--proto { display: grid; gap: 0.625rem; }
+
+/* Prototype shown sharp above the email gate — the trust proof. */
+.bp-row--proto-open {
+  margin: 1rem 0 1.25rem;
+  padding: 0;
+}
+.bp-row--proto-open .bp-row__k {
+  margin-bottom: 0.5rem;
+}
+.bp-row--proto-open .proto {
+  margin-top: 0.25rem;
+}
 
 .doc-section--proto { break-inside: avoid; }
 .doc-section--proto .proto { margin-top: 0.75rem; }
@@ -449,7 +583,9 @@
 @media print {
   .proto { break-inside: avoid; }
   .proto__frame { box-shadow: none; border-color: #d4d4d8; }
-  .proto-node, .proto-card, .proto-kpi { break-inside: avoid; }
+  .proto-node, .proto-card, .proto-kpi, .proto-phone, .proto-sitemap__page {
+    break-inside: avoid;
+  }
   .proto-cta { background: #f4f4f5; }
   .proto-cta__title { color: #18181b; }
 }

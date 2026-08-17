@@ -44,26 +44,15 @@ export const site: SiteInfo = {
 };
 
 /*
-  heroStats and resultsStats appear on the same scroll and used to share two
-  entries verbatim ("50+ Projects delivered", "12 Industries served"), so the
-  page repeated the same two numbers to the same reader.
-
-  The hero band now answers "what happens if I engage?" — it sits directly
-  under a CTA, so every figure is about the buyer's next few minutes. The
-  results band keeps the track record.
+  Hero stats answer "what happens if I engage?" — they sit under a CTA, so
+  every figure is about the buyer's next few minutes. Track-record numbers
+  live on About (`aboutStats`), not on the homepage proof band.
 */
 export const heroStats: SiteStat[] = [
   { value: "~3 min", label: "To a costed roadmap" },
   { value: "$0", label: "To find out" },
   { value: "<1 day", label: "Human reply" },
   { value: "8", label: "Service lines" },
-];
-
-export const resultsStats: SiteStat[] = [
-  { value: "50+", label: "Projects delivered" },
-  { value: "12", label: "Industries served" },
-  { value: "10+", label: "Years experience" },
-  { value: "99.9%", label: "Uptime maintained" },
 ];
 
 export const clientLogos: ClientLogo[] = [
@@ -136,13 +125,13 @@ export const leakBaseline = {
 export const consultantSteps: ConsultantStep[] = [
   {
     number: "01",
-    title: "You describe the problem",
+    title: "You describe the goal",
     body: 'Plain language. "Orders come in on chat and we lose half of them" is a perfect brief.',
   },
   {
     number: "02",
     title: "It asks a few simple questions",
-    body: "Industry, current process, rough scale, timeline. Four or five, not a form.",
+    body: "Who it's for, how you cope now, what must ship first, and when. Four or five, not a form.",
   },
   {
     number: "03",
@@ -151,8 +140,8 @@ export const consultantSteps: ConsultantStep[] = [
   },
   {
     number: "04",
-    title: "It shows features, timeline and project type",
-    body: "A feature list, phased delivery plan and an honest cost band — on screen, immediately.",
+    title: "It shows a prototype, timeline and project type",
+    body: "A visual mock of the solution — site pages, app screens or an automation flow — plus phased delivery and an honest cost band.",
   },
   {
     number: "05",

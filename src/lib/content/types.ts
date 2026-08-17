@@ -113,12 +113,11 @@ export type TeamMember = {
 
 export type Testimonial = {
   quote: string;
-  metric: string;
-  metricLabel: string;
   name: string;
   role: string;
   company: string;
   initials: string;
+  category: string;
 };
 
 export type SiteFaq = FaqItem;

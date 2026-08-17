@@ -32,19 +32,19 @@ visitor typed.
 
 | Slot | Meaning |
 |------|---------|
-| `problem` | What is broken or what they want built |
-| `industry` | Business or sector |
-| `current` | How the work happens today |
-| `scale` | Roughly how many users |
-| `timeline` | How soon they need it live |
+| `outcome` | What should get better / what they want built |
+| `audience` | Who uses it — customers, staff, or both |
+| `today` | How they cope now and where it breaks |
+| `v1` | Must-haves for the first release |
+| `timing` | How soon they need it live |
 
-`scale` and `timeline` multiply the quoted price, so they are guarded: the model
+`timing` multiplies the quoted price (urgency), so it is guarded: the model
 must return a **verbatim quote** from the visitor in `evidence` alongside the
 value, and `verifyPricedSlots` drops the slot when the quote is not found in the
-transcript. Without this, `gemini-3.1-flash-lite` reliably invents both from a
-bare "yes" — an enum field makes a model want to pick *something*.
+transcript. Soft size multipliers may be inferred from audience headcount when
+volunteered — we no longer force a fake user-count band.
 
-`problem` falls back to the visitor's first substantial message, since their own
+`outcome` falls back to the visitor's first substantial message, since their own
 words are a better blueprint seed than the model's paraphrase.
 
 ### Reaching the blueprint
@@ -110,8 +110,12 @@ testing, and the stack list goes straight to a prospective client.
 
 `BlueprintTeaser` stays sharp — title, rationale, project type, duration, team —
 so the visitor can see the recommendation is real and specific to them.
+The **visual prototype** also stays sharp above the gate: that mock is the
+trust proof (site pages, app screens, or automation flow).
+
 `BlueprintDetail` is veiled: investment band, features, stack, phased timeline,
-assumptions, risks. Blurring the whole document gives them nothing to want.
+assumptions, risks. Blurring the whole document — including the prototype —
+gives them nothing to want.
 
 The veiled block is capped at `34rem` so the gate panel is on screen without
 scrolling past a wall of blur, and is `inert` so its content stays out of tab
@@ -161,4 +165,15 @@ pnpm eval:consultant
 blueprint intent (including the "yes" regression), slot normalization and merge
 semantics, the completeness gate, the streaming decoder, and the rules fallback.
 
-Prompt versions: `consultant-chat-v3`, `consultant-blueprint-v2`.
+Prompt versions: `consultant-chat-v5`, `consultant-blueprint-v3`,
+`consultant-prototype-v2`.
+
+### Prototype kinds (forced by service)
+
+| Service | Kind | Visitor sees |
+|---------|------|--------------|
+| Web development, UI/UX | `pages` | Full site / page map (landing first + requirement pages) |
+| Mobile app development | `mobile` | Phone-framed multi-screen journey |
+| AI / content / business automation | `workflow` | Node graph of the process |
+| Data science | `landing` | Insight / product website |
+| Custom software | `pages` or `workflow` | App pages by default; workflow when the brief is process-heavy |

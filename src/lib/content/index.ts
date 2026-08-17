@@ -38,7 +38,6 @@ export {
   leakBaseline,
   leakFixes,
   leaks,
-  resultsStats,
   site,
 } from "./site";
 export { zac } from "./zac";

@@ -4,8 +4,8 @@ import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { PortfolioFilterGrid } from "@/components/shared/portfolio-filter";
-import { Stat } from "@/components/ui";
-import { heroStats, portfolio } from "@/lib/content";
+import { ReviewsSlider } from "@/components/shared/reviews-slider";
+import { portfolio } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -103,15 +103,7 @@ export default async function PortfolioPage({
         </div>
       </section>
 
-      <section className="section section--ink on-dark">
-        <div className="container">
-          <div className="grid-4">
-            {heroStats.map((stat) => (
-              <Stat key={stat.label} value={stat.value} label={stat.label} />
-            ))}
-          </div>
-        </div>
-      </section>
+      <ReviewsSlider surface="ink" />
 
       <FinalCta />
     </div>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ServiceSlug } from "./schema";
 
 /**
  * Prototype contract.
@@ -14,9 +15,8 @@ import { z } from "zod";
  * cannot inject anything into the page, it cannot come back looking broken,
  * and it is legible in both themes without the model knowing either exists.
  *
- * The trade is variety, and the shape of this file is where that trade is
- * made. Every block type here is one the renderer draws well; adding a block
- * is a deliberate act, not something a model can do at runtime.
+ * Kind is forced from the recommended service line (see resolvePrototypeKind),
+ * not left to the model — the mock has to match what we said we would build.
  */
 
 /* --------------------------------- palette -------------------------------- */
@@ -47,18 +47,25 @@ export const AccentSchema = z.enum(ACCENTS);
 /* ---------------------------------- kinds --------------------------------- */
 
 /**
- * What is being mocked. Chosen by the model from the problem described, since
- * "we lose orders on WhatsApp" wants a workflow diagram and "we need a site
- * for the restaurant" wants a homepage.
+ * What is being mocked. Resolved from the blueprint's serviceSlug so a mobile
+ * engagement always shows a phone journey and an automation engagement always
+ * shows a flow — never a generic homepage for every problem.
  */
-export const PROTOTYPE_KINDS = ["landing", "dashboard", "workflow", "mobile"] as const;
+export const PROTOTYPE_KINDS = [
+  "landing",
+  "dashboard",
+  "workflow",
+  "mobile",
+  "pages",
+] as const;
 export type PrototypeKind = (typeof PROTOTYPE_KINDS)[number];
 
 export const PROTOTYPE_KIND_LABELS: Record<PrototypeKind, string> = {
   landing: "Homepage concept",
   dashboard: "Dashboard concept",
   workflow: "Automation flow",
-  mobile: "App screen concept",
+  mobile: "App screen flow",
+  pages: "Website / page map",
 };
 
 /* --------------------------------- sections ------------------------------- */
@@ -109,6 +116,26 @@ export const ProtoSectionSchema = z.object({
 });
 
 export type ProtoSection = z.infer<typeof ProtoSectionSchema>;
+
+/* -------------------------- screens / pages ------------------------------- */
+
+/**
+ * One phone screen or website page in a multi-surface mock.
+ *
+ * Mobile journeys and full site maps both use this shape so the model only
+ * has to learn one nested object, and the renderer decides chrome (phone vs
+ * browser) from the parent kind.
+ */
+export const ProtoScreenSchema = z.object({
+  id: z.string().min(1).max(24),
+  /** Short label: "Login", "Home", "Book a table". */
+  title: z.string().min(1).max(40),
+  /** One line on why this surface exists in their product. */
+  purpose: z.string().max(120).optional(),
+  sections: z.array(ProtoSectionSchema).max(5).default([]),
+});
+
+export type ProtoScreen = z.infer<typeof ProtoScreenSchema>;
 
 /* -------------------------------- dashboard ------------------------------- */
 
@@ -185,10 +212,13 @@ export const PrototypeSchema = z.object({
   caption: z.string().min(8).max(200),
   accent: AccentSchema.default("lime"),
 
-  /** landing · mobile */
-  sections: z.array(ProtoSectionSchema).max(6).default([]),
+  /** landing (single long page) */
+  sections: z.array(ProtoSectionSchema).max(8).default([]),
   /** Fake browser address, e.g. "bellavista.com". Presentation only. */
   url: z.string().max(60).optional(),
+
+  /** mobile · pages — ordered journey or full site map */
+  screens: z.array(ProtoScreenSchema).max(6).default([]),
 
   /** dashboard */
   nav: z.array(z.string().min(1).max(24)).max(6).default([]),
@@ -206,7 +236,41 @@ export const PrototypeSchema = z.object({
 
 export type Prototype = z.infer<typeof PrototypeSchema>;
 
-export const PROTOTYPE_PROMPT_VERSION = "consultant-prototype-v1";
+export const PROTOTYPE_PROMPT_VERSION = "consultant-prototype-v2";
+
+/* ------------------------- service → kind policy -------------------------- */
+
+const PROCESS_HINT =
+  /\b(automat|workflow|integrat|whatsapp|email.?pipeline|hand.?off|approval|process|zapier|n8n|orchestrat|routing|ticket.?flow)\b/i;
+
+/**
+ * Pick the mock kind from the recommended service — and for custom software,
+ * from whether the problem is really a process vs a product surface.
+ */
+export function resolvePrototypeKind(
+  serviceSlug: ServiceSlug,
+  hints?: { seed?: string; current?: string },
+): PrototypeKind {
+  switch (serviceSlug) {
+    case "web-development":
+    case "ui-ux-design":
+      return "pages";
+    case "data-science":
+      return "landing";
+    case "mobile-app-development":
+      return "mobile";
+    case "ai-automation":
+    case "content-automation":
+    case "business-process-automation":
+      return "workflow";
+    case "custom-software": {
+      const text = `${hints?.seed ?? ""} ${hints?.current ?? ""}`;
+      return PROCESS_HINT.test(text) ? "workflow" : "pages";
+    }
+    default:
+      return "landing";
+  }
+}
 
 /**
  * Whether a spec has enough in it to be worth showing.
@@ -222,6 +286,9 @@ export function isRenderable(prototype: Prototype | null | undefined): prototype
       return prototype.nodes.length >= 2;
     case "dashboard":
       return prototype.kpis.length >= 2 || Boolean(prototype.chart) || Boolean(prototype.table);
+    case "mobile":
+    case "pages":
+      return prototype.screens.length >= 3;
     default:
       return prototype.sections.length >= 2;
   }

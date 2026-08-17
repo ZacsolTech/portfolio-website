@@ -1,4 +1,4 @@
-import { site } from "@/lib/content";
+import { site, testimonials } from "@/lib/content";
 import type { FaqItem } from "@/lib/content";
 import { absoluteUrl, jsonLdScript } from "@/lib/seo";
 
@@ -35,6 +35,20 @@ export function SiteJsonLd() {
         knowsAbout: site.keywords,
         areaServed: "Worldwide",
         sameAs: [site.social?.linkedin, site.social?.github].filter(Boolean),
+        review: testimonials.map((t) => ({
+          "@type": "Review",
+          reviewBody: t.quote,
+          author: {
+            "@type": "Person",
+            name: t.name,
+            jobTitle: t.role,
+            worksFor: {
+              "@type": "Organization",
+              name: t.company,
+            },
+          },
+          itemReviewed: { "@id": orgId },
+        })),
         contactPoint: [
           {
             "@type": "ContactPoint",

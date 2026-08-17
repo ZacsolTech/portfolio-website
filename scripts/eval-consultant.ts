@@ -12,12 +12,12 @@ import { CONSULTANT_EVAL_CASES } from "@/lib/ai/eval-cases";
 import { isExplicitBlueprintRequest, rulesChatTurn } from "@/lib/ai/chat";
 import { extractPartialString, parseJsonLoose } from "@/lib/ai/partial-json";
 import { buildRulesPrototype, normalizePrototype } from "@/lib/ai/prototype";
-import { isRenderable } from "@/lib/ai/prototype-schema";
+import { isRenderable, resolvePrototypeKind } from "@/lib/ai/prototype-schema";
 import { buildRulesBlueprint, classifySeed } from "@/lib/ai/rules-engine";
 import {
   BlueprintSchema,
-  normalizeScale,
-  normalizeTimeline,
+  inferSizeMult,
+  normalizeTiming,
   type Slots,
 } from "@/lib/ai/schema";
 import { mergeSlots, missingSlots, slotProgress, slotsComplete } from "@/lib/ai/slots";
@@ -111,40 +111,40 @@ for (const ask of [
 /* ---------------------------- 3. slot normalization --------------------------- */
 
 section("Slot normalization");
-eq("scale: 25 staff", normalizeScale("about 25 staff use it"), "10–50 users");
-eq("scale: 8 people", normalizeScale("8 people"), "Under 10 users");
-eq("scale: 400", normalizeScale("around 400 employees"), "250+ users");
-eq("scale: 60", normalizeScale("60 users"), "50–250 users");
-eq("scale: solo", normalizeScale("just me"), "Under 10 users");
-eq("scale: passthrough", normalizeScale("250+ users"), "250+ users");
-eq("timeline: asap", normalizeTimeline("we need it live as soon as possible"), "As soon as possible");
-eq("timeline: exploring", normalizeTimeline("just exploring for now"), "Still exploring");
-eq("timeline: 3-6", normalizeTimeline("3–6 months"), "3–6 months");
-eq("timeline: quarter", normalizeTimeline("next quarter"), "Within 3 months");
+eq("size mult: 25 staff", inferSizeMult("about 25 staff use it"), 1);
+eq("size mult: 8 people", inferSizeMult("8 people on the team"), 0.85);
+eq("size mult: 400", inferSizeMult("around 400 employees"), 1.7);
+eq("size mult: 60", inferSizeMult("60 users"), 1.3);
+eq("size mult: solo", inferSizeMult("just me"), 0.85);
+eq("size mult: neutral when silent", inferSizeMult("Customers and staff"), 1);
+eq("timing: asap", normalizeTiming("we need it live as soon as possible"), "As soon as possible");
+eq("timing: exploring", normalizeTiming("just exploring for now"), "Still exploring");
+eq("timing: 3-6", normalizeTiming("3–6 months"), "3–6 months");
+eq("timing: quarter", normalizeTiming("next quarter"), "Within 3 months");
 
 /* ------------------------------ 4. slot merging ------------------------------- */
 
 section("Slot merge semantics");
 const base: Slots = {
-  problem: "Orders lost on WhatsApp during the dinner rush",
-  industry: "Restaurant",
-  scale: "10–50 users",
+  outcome: "Orders lost on WhatsApp during the dinner rush",
+  audience: "Kitchen staff and the owner",
+  v1: "Capture and confirm orders",
 };
 
 const afterEmpty = mergeSlots(base, {});
-eq("empty patch keeps industry", afterEmpty.industry, "Restaurant");
-eq("empty patch keeps scale", afterEmpty.scale, "10–50 users");
+eq("empty patch keeps audience", afterEmpty.audience, "Kitchen staff and the owner");
+eq("empty patch keeps v1", afterEmpty.v1, "Capture and confirm orders");
 
-const afterCorrection = mergeSlots(base, { scale: "250+ users" });
-eq("correction overwrites scale", afterCorrection.scale, "250+ users");
+const afterCorrection = mergeSlots(base, { v1: "Capture, confirm, and kitchen board" });
+eq("correction overwrites v1", afterCorrection.v1, "Capture, confirm, and kitchen board");
 
-const afterNoise = mergeSlots(base, { industry: "unknown" });
-eq('"unknown" does not overwrite', afterNoise.industry, "Restaurant");
+const afterNoise = mergeSlots(base, { audience: "unknown" });
+eq('"unknown" does not overwrite', afterNoise.audience, "Kitchen staff and the owner");
 
-const afterShorter = mergeSlots(base, { problem: "orders" });
+const afterShorter = mergeSlots(base, { outcome: "orders" });
 eq(
-  "shorter problem does not replace richer one",
-  afterShorter.problem,
+  "shorter outcome does not replace richer one",
+  afterShorter.outcome,
   "Orders lost on WhatsApp during the dinner rush",
 );
 
@@ -152,13 +152,13 @@ eq(
 
 section("Completeness");
 eq("incomplete slots", slotsComplete(base), false);
-check("problem too short is missing", missingSlots({ problem: "hi" }).includes("problem"));
+check("outcome too short is missing", missingSlots({ outcome: "hi" }).includes("outcome"));
 const full: Slots = {
-  problem: "Orders lost on WhatsApp during the dinner rush",
-  industry: "Restaurant",
-  current: "Manual re-typing into the POS",
-  scale: "10–50 users",
-  timeline: "As soon as possible",
+  outcome: "Orders lost on WhatsApp during the dinner rush",
+  audience: "Kitchen staff and the owner",
+  today: "WhatsApp and paper notebooks",
+  v1: "Capture and confirm orders",
+  timing: "As soon as possible",
 };
 eq("complete slots", slotsComplete(full), true);
 eq("progress 100", slotProgress(full), 100);
@@ -191,7 +191,7 @@ eq("parses prose-wrapped JSON", parseJsonLoose('Here you go: {"a":2}').a, 2);
 
 section("Rules fallback chat");
 const cold = rulesChatTurn([{ role: "user", content: "hi" }], {});
-eq("asks for the problem first", cold.reply.length > 0, true);
+eq("asks for the goal first", cold.reply.length > 0, true);
 eq("does not claim readiness", cold.wantsBlueprint, false);
 
 const warm = rulesChatTurn(
@@ -199,18 +199,22 @@ const warm = rulesChatTurn(
     {
       role: "user",
       content:
-        "We run a restaurant and lose WhatsApp orders. About 25 staff. Need it live asap.",
+        "We run a restaurant and lose WhatsApp orders for our kitchen staff. Need it live asap. First release should capture and confirm orders.",
     },
   ],
   {},
 );
 check(
-  "infers industry from keywords",
-  warm.slots.industry === "Restaurant / hospitality",
-  `got ${warm.slots.industry}`,
+  "infers audience from keywords",
+  Boolean(warm.slots.audience && /staff|kitchen|customer/i.test(warm.slots.audience)),
+  `got ${warm.slots.audience}`,
 );
-eq("infers scale from a number", warm.slots.scale, "10–50 users");
-eq("infers urgency", warm.slots.timeline, "As soon as possible");
+check(
+  "infers today from WhatsApp",
+  Boolean(warm.slots.today && /whatsapp|paper|call/i.test(warm.slots.today)),
+  `got ${warm.slots.today}`,
+);
+eq("infers urgency", warm.slots.timing, "As soon as possible");
 
 /* ============================== COST ESTIMATOR ============================== */
 
@@ -595,20 +599,118 @@ section("Prototype normalisation");
   check("an out-of-range status column is discarded", ragged.table?.statusColumn === undefined);
   check("a dashboard with kpis and a table renders", isRenderable(ragged));
 
-  const fallback = buildRulesPrototype({
-    answers: { industry: "Logistics", current: "Spreadsheets", scale: "10–50 users", timeline: "Within 3 months" },
+  // Service map wins over a model that emitted the wrong kind.
+  const forced = normalizePrototype(
+    {
+      kind: "landing",
+      productName: "FieldKit",
+      caption: "Major screens for the field app.",
+      accent: "emerald",
+      screens: [
+        {
+          id: "login",
+          title: "Login",
+          purpose: "Sign in",
+          sections: [{ type: "hero", title: "Welcome back", ctaPrimary: "Sign in" }],
+        },
+        {
+          id: "home",
+          title: "Jobs",
+          sections: [{ type: "list", title: "Today", items: [{ title: "Site A", body: "09:00" }] }],
+        },
+        {
+          id: "detail",
+          title: "Job detail",
+          sections: [{ type: "features", title: "Checklist", items: [{ title: "Photo", body: "Required" }] }],
+        },
+      ],
+    },
+    "mobile",
+  );
+  eq("forced kind overrides the model", forced.kind, "mobile");
+  eq("mobile keeps screens", forced.screens.length, 3);
+  check("a three-screen mobile journey renders", isRenderable(forced));
+
+  const thinMobile = normalizePrototype(
+    {
+      kind: "mobile",
+      productName: "App",
+      caption: "Too thin",
+      accent: "lime",
+      screens: [
+        { id: "a", title: "One", sections: [{ type: "cta", title: "Go", ctaPrimary: "Go" }] },
+        { id: "b", title: "Two", sections: [{ type: "cta", title: "Next", ctaPrimary: "Next" }] },
+      ],
+    },
+    "mobile",
+  );
+  check("fewer than three mobile screens do not render", !isRenderable(thinMobile));
+
+  eq("web-development maps to pages", resolvePrototypeKind("web-development"), "pages");
+  eq("mobile-app-development maps to mobile", resolvePrototypeKind("mobile-app-development"), "mobile");
+  eq("ai-automation maps to workflow", resolvePrototypeKind("ai-automation"), "workflow");
+  eq("content-automation maps to workflow", resolvePrototypeKind("content-automation"), "workflow");
+  eq(
+    "business-process-automation maps to workflow",
+    resolvePrototypeKind("business-process-automation"),
+    "workflow",
+  );
+  eq("data-science maps to landing", resolvePrototypeKind("data-science"), "landing");
+  eq("ui-ux-design maps to pages", resolvePrototypeKind("ui-ux-design"), "pages");
+  eq(
+    "custom-software defaults to pages",
+    resolvePrototypeKind("custom-software", { seed: "We need a portal for clients", current: "Email" }),
+    "pages",
+  );
+  eq(
+    "custom-software process problems map to workflow",
+    resolvePrototypeKind("custom-software", {
+      seed: "Automate approvals between sales and ops",
+      current: "WhatsApp handoffs",
+    }),
+    "workflow",
+  );
+
+  const fallbackFlow = buildRulesPrototype({
+    answers: {
+      audience: "Dispatchers and drivers",
+      today: "Manual WhatsApp routing",
+      v1: "Ingest, assign, track",
+      timing: "Within 3 months",
+    },
     blueprint: {
-      title: "Dispatch board that replaces the spreadsheet",
-      serviceTitle: "Custom software",
+      title: "Order intake automation",
+      serviceTitle: "Business process automation",
+      serviceSlug: "business-process-automation",
       features: ["Ingest jobs", "Assign drivers", "Track delivery"],
     },
+    seed: "Automate dispatch from chat",
   });
-  check("the offline prototype still renders", isRenderable(fallback));
-  eq("the offline prototype is a flow", fallback.kind, "workflow");
+  check("the offline automation prototype still renders", isRenderable(fallbackFlow));
+  eq("the offline automation prototype is a flow", fallbackFlow.kind, "workflow");
   check(
     "the offline prototype chains every node",
-    fallback.edges.length === fallback.nodes.length - 1,
+    fallbackFlow.edges.length === fallbackFlow.nodes.length - 1,
   );
+
+  const fallbackPages = buildRulesPrototype({
+    answers: {
+      audience: "Restaurant guests",
+      today: "Paper menus",
+      v1: "Homepage, menu, reservations",
+      timing: "Within 3 months",
+    },
+    blueprint: {
+      title: "Restaurant website with booking",
+      serviceTitle: "Web development",
+      serviceSlug: "web-development",
+      features: ["Homepage", "Menu", "Reservations", "Contact"],
+    },
+    seed: "We need a website for our restaurant",
+  });
+  check("the offline web prototype still renders", isRenderable(fallbackPages));
+  eq("the offline web prototype is a page map", fallbackPages.kind, "pages");
+  check("the offline web prototype has at least three pages", fallbackPages.screens.length >= 3);
 }
 
 section("Catalog integrity");

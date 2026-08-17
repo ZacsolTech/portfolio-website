@@ -7,6 +7,5 @@ export { Leaks } from "./leaks";
 export { Fixes } from "./fixes";
 export { Portfolio } from "./portfolio";
 export { Industries } from "./industries";
-export { Results } from "./results";
 export { Faq } from "./faq";
 export { Icon } from "./icon";
