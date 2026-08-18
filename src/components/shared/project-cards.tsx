@@ -112,7 +112,7 @@ export function ProjectCardGrid({
                   <div className="work-card__meta">
                     <Badge>{item.sector}</Badge>
                     <span className="body-sm">
-                      {item.timeline ?? categoryLabel(item.category)}
+                      {item.duration ?? item.deployment ?? categoryLabel(item.category)}
                     </span>
                   </div>
                   <h3 className="d4 work-card__title">{item.title}</h3>
@@ -149,6 +149,9 @@ export function ProjectCardGrid({
                 <CardBody>
                   <div className="project-card-meta">
                     <Badge>{item.sector}</Badge>
+                    {item.journey ? (
+                      <Badge variant="gold">Full walkthrough</Badge>
+                    ) : null}
                   </div>
                   <h2 className="d4" style={{ marginTop: "0.75rem" }}>
                     {item.title}

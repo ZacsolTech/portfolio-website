@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FinalCta } from "@/components/layout/final-cta";
@@ -41,8 +42,19 @@ export default async function ServiceDetailPage({ params }: Props) {
   const service = getService(slug);
   if (!service) notFound();
 
+  // Explicit opt-in only. A journeyed project is related to several services,
+  // so falling back to `relatedServices` would repeat one walkthrough across
+  // pages it was never written for.
+  const flagship =
+    portfolio.find((p) => p.flagshipFor?.includes(service.slug) && p.journey) ??
+    null;
+
   const related = portfolio
     .filter((p) => p.relatedServices.includes(service.slug))
+    .sort(
+      (a, b) =>
+        Number(b.slug === flagship?.slug) - Number(a.slug === flagship?.slug),
+    )
     .slice(0, 2);
 
   return (
@@ -135,6 +147,69 @@ export default async function ServiceDetailPage({ params }: Props) {
               ))}
             </ol>
           </Reveal>
+          {flagship?.journey ? (
+            <Reveal index={2} className="journey-block">
+              <div className="journey-block__head">
+                <span className="overline">Start to submission</span>
+                <h3 className="d4 journey-block__title">
+                  What that looked like on{" "}
+                  <span className="em-serif">{flagship.title}</span>
+                </h3>
+                <p className="body-sm journey-block__meta">
+                  {[flagship.client, flagship.sector, flagship.duration]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              </div>
+
+              <ol className="journey">
+                {flagship.journey.map((stage, i) => {
+                  const shot =
+                    stage.image === undefined
+                      ? undefined
+                      : flagship.images[stage.image];
+                  return (
+                    <li key={stage.title} className="journey__i">
+                      <span className="journey__n" aria-hidden>
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div className="journey__body">
+                        <span className="overline journey__when">{stage.when}</span>
+                        <h4 className="journey__t">{stage.title}</h4>
+                        <p className="body-sm journey__d">{stage.body}</p>
+                        <p className="journey__out">
+                          <span className="overline">Delivered</span>
+                          {stage.deliverable}
+                        </p>
+                      </div>
+                      {shot?.src ? (
+                        <figure className="journey__shot">
+                          <Image
+                            src={shot.src}
+                            alt={shot.alt}
+                            width={520}
+                            height={330}
+                            className="journey__img"
+                            sizes="(max-width: 900px) 100vw, 20rem"
+                          />
+                          <figcaption className="body-sm journey__cap">
+                            {shot.caption}
+                          </figcaption>
+                        </figure>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ol>
+
+              <Link
+                href={`/portfolio?project=${flagship.slug}`}
+                className="link-u journey-block__more"
+              >
+                See the full project →
+              </Link>
+            </Reveal>
+          ) : null}
         </div>
       </section>
 

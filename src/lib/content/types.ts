@@ -69,6 +69,19 @@ export type PortfolioImage = {
   src?: string;
 };
 
+/** One stage of a project's start-to-handover walkthrough. */
+export type ProjectStage = {
+  /** Real elapsed time — "Week 1–2", "Day 3". Not a tool name. */
+  when: string;
+  title: string;
+  /** One or two sentences: what actually happened, specifically. */
+  body: string;
+  /** What the client received at this gate. */
+  deliverable: string;
+  /** Index into the project's `images` — reuses shipped assets. */
+  image?: number;
+};
+
 /** A shipped project shown in the portfolio and related sections. */
 export type PortfolioItem = {
   slug: string;
@@ -88,7 +101,15 @@ export type PortfolioItem = {
   metric: string;
   client: string;
   relatedServices: string[];
-  timeline?: string;
+  /** Real elapsed delivery time, e.g. "10 weeks". Shown on cards. */
+  duration?: string;
+  /** Where it runs, e.g. "Vercel + Render". Never mixed with duration. */
+  deployment?: string;
+  /** Start-to-submission walkthrough, 4–6 stages. Optional — pages fall
+      back to the generic process when absent. */
+  journey?: ProjectStage[];
+  /** Service slugs where this project is THE featured walkthrough. */
+  flagshipFor?: string[];
 };
 
 export type Insight = {

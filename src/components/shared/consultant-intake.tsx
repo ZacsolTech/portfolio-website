@@ -1176,7 +1176,7 @@ export function ConsultantIntake({
                     {roadmapUrl ? (
                       <p className="body-sm gate__copy" style={{ marginTop: "0.5rem" }}>
                         Your document also lives at{" "}
-                        <a href={roadmapUrl} className="link-u">
+                        <a href={roadmapUrl} className="link-u" target="_blank" rel="noreferrer">
                           a shareable link
                         </a>{" "}
                         — forward it, or print it to PDF.

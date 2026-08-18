@@ -53,7 +53,7 @@ export function SiteFooter() {
         </div>
 
         <div className="footer__grid">
-          <div>
+          <div className="footer__brand">
             <Logo onDark />
             <p
               className="body-sm"
@@ -95,49 +95,51 @@ export function SiteFooter() {
             </div>
           </div>
 
-          <div>
-            <div className="footer__title">Services</div>
-            <ul>
-              {serviceLinks.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href}>{link.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <nav className="footer__nav" aria-label="Footer">
+            <div className="footer__col footer__col--services">
+              <div className="footer__title">Services</div>
+              <ul>
+                {serviceLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href}>{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <div className="footer__title">ZAC tools</div>
-            <ul>
-              {aiToolLinks.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href}>{link.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="footer__col footer__col--tools">
+              <div className="footer__title">ZAC tools</div>
+              <ul>
+                {aiToolLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href}>{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <div className="footer__title">Company</div>
-            <ul>
-              {companyLinks.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href}>{link.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="footer__col footer__col--company">
+              <div className="footer__title">Company</div>
+              <ul>
+                {companyLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href}>{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <div className="footer__title">Legal</div>
-            <ul>
-              {legalLinks.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href}>{link.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="footer__col footer__col--legal">
+              <div className="footer__title">Legal</div>
+              <ul>
+                {legalLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href}>{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
         </div>
 
         {/* "All systems operational" was hardcoded — a status light that can

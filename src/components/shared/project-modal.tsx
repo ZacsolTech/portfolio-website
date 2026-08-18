@@ -35,6 +35,7 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -49,6 +50,13 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
   const goNext = useCallback(() => {
     setActiveImage((prev) => (prev + 1) % imageCount);
   }, [imageCount]);
+
+  /** Drive the carousel from a journey stage — and scroll it back into
+      view, since the stage list sits well below the stage image. */
+  const jumpToImage = useCallback((i: number) => {
+    setActiveImage(i);
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -138,7 +146,7 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
           </button>
         </header>
 
-        <div className="project-modal__scroll">
+        <div className="project-modal__scroll" ref={scrollRef}>
           {/* Main stage + parallel thumbnail column */}
           <section className="project-modal__carousel" aria-label="Project images">
             <div className="project-modal__showcase">
@@ -272,6 +280,44 @@ export function ProjectDetailModal({ item, index = 0, onClose }: Props) {
                 ))}
               </div>
             </section>
+
+            {item.journey ? (
+              <section className="project-modal__journey">
+                <span className="overline">Start to submission</span>
+                <ol className="journey journey--modal">
+                  {item.journey.map((stage, i) => {
+                    const shotIndex = stage.image;
+                    const canJump =
+                      shotIndex !== undefined && Boolean(item.images[shotIndex]?.src);
+                    return (
+                      <li key={stage.title} className="journey__i">
+                        <span className="journey__n" aria-hidden>
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <div className="journey__body">
+                          <span className="overline journey__when">{stage.when}</span>
+                          <h3 className="journey__t">{stage.title}</h3>
+                          <p className="body-sm journey__d">{stage.body}</p>
+                          <p className="journey__out">
+                            <span className="overline">Delivered</span>
+                            {stage.deliverable}
+                          </p>
+                          {canJump ? (
+                            <button
+                              type="button"
+                              className="journey__jump"
+                              onClick={() => jumpToImage(shotIndex)}
+                            >
+                              See this step ↑
+                            </button>
+                          ) : null}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </section>
+            ) : null}
           </div>
         </div>
 
