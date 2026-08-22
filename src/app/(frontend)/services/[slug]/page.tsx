@@ -70,6 +70,11 @@ export default async function ServiceDetailPage({ params }: Props) {
         name={service.title}
         description={service.seo.description}
         path={`/services/${service.slug}`}
+        serviceOutput={service.included}
+        offers={service.engagement.map((shape) => ({
+          name: shape.title,
+          description: shape.body,
+        }))}
       />
       <FaqJsonLd items={service.faqs} />
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { Reveal } from "@/components/motion/reveal";
 import { ServiceIcon } from "@/components/shared/service-icon";
 import { IconTile } from "@/components/ui";
@@ -25,8 +26,25 @@ export const metadata: Metadata = pageMetadata({
 export default async function IndustriesPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Industries", path: "/industries" },
+        ]}
+      />
+      <ItemListJsonLd
+        name="Industries we build software for"
+        description="Retail, healthcare, fintech, logistics, real estate, education, manufacturing and professional services."
+        path="/industries"
+        items={industries.map((industry) => ({
+          name: industry.name,
+          path: `/industries/${industry.slug}`,
+          description: industry.problemOneLiner,
+        }))}
+      />
       <PageHero
         overline="Industries"
+        breadcrumbs={[{ href: "/", label: "Home" }, { label: "Industries" }]}
         title={
           <>
             Domain problems, <span className="em-serif">not generic apps</span>.

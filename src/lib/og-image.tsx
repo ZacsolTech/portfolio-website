@@ -5,8 +5,31 @@ export const alt = `${site.name} — ${site.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** Shared brand canvas for Open Graph + Twitter images. */
-export function brandShareImage() {
+type ShareImageInput = {
+  /** Small gold label above the headline — the page's category. */
+  eyebrow?: string;
+  /** Headline. Keep under ~60 characters or it wraps past three lines. */
+  title?: string;
+  /** One supporting sentence. */
+  subtitle?: string;
+  /** Bottom-right proof line. */
+  footnote?: string;
+};
+
+/**
+ * Shared brand canvas for Open Graph + Twitter images.
+ *
+ * Per-route `opengraph-image.tsx` files pass their own copy so a shared link
+ * previews the page rather than the site. Social previews are a real ranking
+ * input in 2026 — they drive the click-through and the shares that earn links —
+ * so pages we want to rank get their own card instead of the generic one.
+ */
+export function brandShareImage({
+  eyebrow,
+  title = site.tagline,
+  subtitle = "Web, mobile, AI automation and custom systems that ship on time.",
+  footnote = "Senior engineers · Weekly deployables",
+}: ShareImageInput = {}) {
   return new ImageResponse(
     (
       <div
@@ -52,6 +75,19 @@ export function brandShareImage() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 920 }}>
+          {eyebrow ? (
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 600,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "#bbfd6a",
+              }}
+            >
+              {eyebrow}
+            </div>
+          ) : null}
           <div
             style={{
               fontSize: 64,
@@ -60,7 +96,7 @@ export function brandShareImage() {
               letterSpacing: "-0.03em",
             }}
           >
-            {site.tagline}
+            {title}
           </div>
           <div
             style={{
@@ -70,7 +106,7 @@ export function brandShareImage() {
               maxWidth: 860,
             }}
           >
-            Web, mobile, AI automation and custom systems that ship on time.
+            {subtitle}
           </div>
         </div>
 
@@ -84,7 +120,7 @@ export function brandShareImage() {
           }}
         >
           <span style={{ color: "#bbfd6a" }}>{site.domain}</span>
-          <span>Senior engineers · Weekly deployables</span>
+          <span>{footnote}</span>
         </div>
       </div>
     ),

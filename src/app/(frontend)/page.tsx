@@ -11,8 +11,9 @@ import {
   Industries,
   Faq,
 } from "@/components/home";
+import { FaqJsonLd, WebPageJsonLd } from "@/components/seo/json-ld";
 import { ReviewsSlider } from "@/components/shared/reviews-slider";
-import { site } from "@/lib/content";
+import { faqs, site } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -34,6 +35,13 @@ export const metadata = pageMetadata({
 export default function HomePage() {
   return (
     <>
+      <WebPageJsonLd
+        name={`${site.name} — ${site.tagline}`}
+        description={site.description}
+        path="/"
+      />
+      <FaqJsonLd items={faqs} />
+
       {/* dark */}
       <Hero />
       <LogoMarquee surface="paper" />

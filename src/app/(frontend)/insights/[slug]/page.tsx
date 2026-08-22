@@ -54,6 +54,9 @@ export default async function InsightArticlePage({ params }: Props) {
   if (!article) notFound();
 
   const author = team.find((t) => t.name === article.author);
+  /* Counted from the rendered body rather than declared in content, so it can
+     never claim a length the page does not have. */
+  const wordCount = article.body.join(" ").split(/\s+/).filter(Boolean).length;
   const related = (
     await Promise.all(article.related.map((s) => getInsight(s)))
   ).filter((a): a is NonNullable<typeof a> => Boolean(a));
@@ -74,6 +77,8 @@ export default async function InsightArticlePage({ params }: Props) {
         datePublished={article.date}
         author={article.author}
         category={article.category}
+        wordCount={wordCount}
+        keywords={[article.category, "software delivery", "AI automation"]}
       />
       <article>
         <header className="page-hero on-dark section--persist">
@@ -107,7 +112,8 @@ export default async function InsightArticlePage({ params }: Props) {
                 letterSpacing: "0.12em",
               }}
             >
-              {article.date} · {article.readingTime} · {article.author}
+              <time dateTime={article.date}>{article.date}</time> ·{" "}
+              {article.readingTime} · {article.author}
             </p>
           </div>
         </header>

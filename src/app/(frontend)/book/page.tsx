@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/seo/json-ld";
 import { pageMetadata } from "@/lib/seo";
 
 const panelSkeleton = (
@@ -35,6 +36,17 @@ export const metadata: Metadata = pageMetadata({
 export default function BookPage() {
   return (
     <section className="section section--paper section--after-nav">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Book a consultation", path: "/book" },
+        ]}
+      />
+      <WebPageJsonLd
+        name="Book a consultation with a senior engineer"
+        description="Book thirty minutes with a ZACSOL senior engineer — an honest look at the bottleneck, not a sales call."
+        path="/book"
+      />
       <div className="container">
         {/* The panel reads `?reschedule=` with useSearchParams, which needs a
             boundary here or the whole route opts out of static rendering. */}

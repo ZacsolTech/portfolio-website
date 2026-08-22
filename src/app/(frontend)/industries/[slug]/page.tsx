@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ServiceJsonLd } from "@/components/seo/json-ld";
 import { ProjectCardGrid } from "@/components/shared/project-cards";
 import { ServiceIcon } from "@/components/shared/service-icon";
 import { getIndustry, getService, industries, portfolio } from "@/lib/content";
@@ -58,6 +58,12 @@ export default async function IndustryDetailPage({ params }: Props) {
           { name: "Industries", path: "/industries" },
           { name: industry.name, path: `/industries/${industry.slug}` },
         ]}
+      />
+      <ServiceJsonLd
+        name={`${industry.name} software development`}
+        description={industry.seo.description}
+        path={`/industries/${industry.slug}`}
+        serviceOutput={[...industry.problems]}
       />
 
       <PageHero

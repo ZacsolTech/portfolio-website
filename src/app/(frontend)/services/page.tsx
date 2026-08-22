@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { ZacLink } from "@/components/zac/zac-link";
 import { Reveal } from "@/components/motion/reveal";
 import { ServiceIcon } from "@/components/shared/service-icon";
@@ -27,8 +28,25 @@ export const metadata: Metadata = pageMetadata({
 export default function ServicesPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Services", path: "/services" },
+        ]}
+      />
+      <ItemListJsonLd
+        name="Software development services"
+        description="Eight service lines delivered by one senior team — web, mobile, AI automation, data, custom software, UI/UX, process automation and content pipelines."
+        path="/services"
+        items={services.map((service) => ({
+          name: service.title,
+          path: `/services/${service.slug}`,
+          description: service.seo.description,
+        }))}
+      />
       <PageHero
         overline="Services"
+        breadcrumbs={[{ href: "/", label: "Home" }, { label: "Services" }]}
         title={
           <>
             Eight ways we build, <span className="em-serif">one team</span>.

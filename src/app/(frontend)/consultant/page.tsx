@@ -17,10 +17,20 @@ const ConsultantIntake = dynamic(
   },
 );
 
+/*
+  `noIndexFollow`, not `index`.
+
+  This route is a full-viewport chat app: the conversation owns the screen and
+  the only text in the HTML is the heading below. There is nothing here to rank
+  and a blank result in the SERP helps nobody, so the indexable counterpart is
+  `/ai-consultant` — which explains the tool properly and links straight back
+  here. `follow` is deliberate: the app's own links still pass authority on.
+*/
 export const metadata: Metadata = pageMetadata({
   title: zac.consultant.pageTitle,
   description: zac.consultant.pageDescription,
   path: "/consultant",
+  noIndexFollow: true,
   keywords: [
     "ZAC Consultant",
     "AI solution consultant",

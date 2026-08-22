@@ -2,16 +2,23 @@ import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
 import { NewsletterForm } from "@/components/shared/newsletter-form";
 import { services, site } from "@/lib/content";
-import { zac } from "@/lib/content/zac";
 
 const serviceLinks = services.map((s) => ({
   href: `/services/${s.slug}`,
   label: s.shortTitle,
 }));
 
+/*
+  These point at the landing pages, not the chat apps.
+
+  A footer is a browsing aid, and the two people-readable pages are also the two
+  indexable ones — so the sitewide link that every page gives them lands where
+  it does some good. The apps are one prominent button away on each, and the
+  header nav still opens the consultant directly for anyone who came to use it.
+*/
 const aiToolLinks = [
-  { href: "/consultant", label: zac.consultant.name },
-  { href: "/tools/estimator", label: zac.estimator.name },
+  { href: "/ai-consultant", label: "AI consultant" },
+  { href: "/software-cost-calculator", label: "Software cost calculator" },
 ] as const;
 
 const companyLinks = [

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { Reveal } from "@/components/motion/reveal";
 import { PortfolioFilterGrid } from "@/components/shared/portfolio-filter";
 import { ReviewsSlider } from "@/components/shared/reviews-slider";
@@ -50,8 +51,25 @@ export default async function PortfolioPage({
 
   return (
     <div className="portfolio-page">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Projects", path: "/portfolio" },
+        ]}
+      />
+      <ItemListJsonLd
+        name="Software projects shipped by ZACSOL"
+        description="Selected AI automation, ops platform, commerce and content pipeline projects, each with a measurable production outcome."
+        path="/portfolio"
+        items={portfolio.map((project) => ({
+          name: project.title,
+          path: `/portfolio?project=${project.slug}`,
+          description: project.summary,
+        }))}
+      />
       <PageHero
         overline="Projects"
+        breadcrumbs={[{ href: "/", label: "Home" }, { label: "Projects" }]}
         title={
           <>
             Work shipped to <span className="em-serif">production</span>.

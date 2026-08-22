@@ -74,6 +74,32 @@ const SCOPE_MULT: Record<string, number> = {
   "Add to an existing system": 0.55,
 };
 
+/** Project types the estimator prices, in the order they are published. */
+export const PROJECT_TYPES = Object.keys(BASE_EFFORT_WEEKS);
+
+/**
+ * Indicative build-cost band for a project type — MVP scope at the low end,
+ * full product at the high end, both at the blended rate.
+ *
+ * Exists so the public estimator landing page can publish real numbers that
+ * are derived from this engine rather than typed into a marketing file. If the
+ * rate or the effort baselines move, the published bands move with them, and
+ * the page can never quote a figure the tool itself would contradict.
+ */
+export function indicativeCostBand(
+  projectType: string,
+): { weeks: number; low: number; high: number } | null {
+  const base = BASE_EFFORT_WEEKS[projectType];
+  if (!base) return null;
+  const rate = weeklyRateUsd();
+  const round = (n: number) => Math.round(n / 1000) * 1000;
+  return {
+    weeks: base,
+    low: round(base * SCOPE_MULT["MVP — smallest thing that works"] * rate),
+    high: round(base * rate),
+  };
+}
+
 const PLATFORM_MULT: Record<string, number> = {
   Web: 1,
   Mobile: 1,

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Reveal, RevealGroup } from "@/components/motion/reveal";
 import { Card, IconTile, LinkArrow } from "@/components/ui";
@@ -20,6 +21,10 @@ const tools = [
     meta: "≈2 min · no email",
     /** Opens the dock in place rather than sending them to the tool page. */
     seed: "pricing",
+    learnMore: {
+      href: "/software-cost-calculator",
+      label: "How the software cost calculator works →",
+    },
   },
   {
     icon: "Sparkles",
@@ -29,6 +34,7 @@ const tools = [
     cta: "Browse projects",
     meta: "Outcomes · no signup",
     seed: null,
+    learnMore: null,
   },
 ] as const;
 
@@ -64,6 +70,16 @@ export function Toolkit({ surface = "paper" }: { surface?: Surface }) {
                   )}
                   <span className="tool-card__meta">{tool.meta}</span>
                 </div>
+                {/* The secondary link is the homepage's descriptive-anchor
+                    handoff to the tool's indexable page — the primary CTA above
+                    opens the app, which carries no readable content. */}
+                {tool.learnMore ? (
+                  <p className="body-sm tool-card__learn">
+                    <Link href={tool.learnMore.href} className="link-u">
+                      {tool.learnMore.label}
+                    </Link>
+                  </p>
+                ) : null}
               </Card>
             </Reveal>
           ))}

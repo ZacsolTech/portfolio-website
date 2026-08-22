@@ -12,10 +12,13 @@ const EstimatorWizard = dynamic(
   },
 );
 
+/* Same contract as `/consultant`: the app is the page, so the crawlable
+   counterpart is `/software-cost-calculator`. See that route's comment. */
 export const metadata: Metadata = pageMetadata({
   title: zac.estimator.pageTitle,
   description: zac.estimator.pageDescription,
   path: "/tools/estimator",
+  noIndexFollow: true,
   keywords: [
     "ZAC Estimator",
     "software project cost estimator",

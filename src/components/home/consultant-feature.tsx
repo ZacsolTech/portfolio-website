@@ -34,6 +34,14 @@ export function ConsultantFeature({ surface = "ink" }: { surface?: Surface }) {
                 Talk to a human instead
               </Link>
             </div>
+            {/* Descriptive-anchor handoff to the consultant's indexable page.
+                The button above opens the chat app, which has nothing in it for
+                a crawler to read. */}
+            <p className="body-sm tone-soft" style={{ marginTop: "1.25rem" }}>
+              <Link href="/ai-consultant" className="link-u">
+                What the AI consultant does, and what it cannot do →
+              </Link>
+            </p>
           </Reveal>
 
           <Reveal index={1}>

@@ -33,6 +33,21 @@ type PageMetaInput = {
   modifiedTime?: string;
   authors?: string[];
   images?: { url: string; width?: number; height?: number; alt?: string }[];
+  /**
+   * Let this route's own `opengraph-image.tsx` supply the share card.
+   *
+   * The file convention only wins if nothing here sets `openGraph.images`, so a
+   * page with a bespoke card has to opt out of the site default explicitly.
+   */
+  useRouteImage?: boolean;
+  /**
+   * Keep the page out of the index but let the crawler follow its links.
+   *
+   * Used for the immersive chat routes: they are a genuine destination with no
+   * readable content, so indexing them would put a blank page in the results
+   * while their links still need to pass authority to the pages that rank.
+   */
+  noIndexFollow?: boolean;
 };
 
 /** Build consistent title, canonical, keywords, Open Graph and Twitter metadata. */
@@ -48,10 +63,12 @@ export function pageMetadata({
   modifiedTime,
   authors,
   images,
+  useRouteImage = false,
+  noIndexFollow = false,
 }: PageMetaInput): Metadata {
   const url = absoluteUrl(path);
   const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}`;
-  const ogImages = images?.length ? images : [defaultOgImage];
+  const ogImages = useRouteImage ? [] : images?.length ? images : [defaultOgImage];
 
   return {
     title: absolute ? { absolute: fullTitle } : title,
@@ -69,6 +86,14 @@ export function pageMetadata({
     },
     ...(noIndex
       ? { robots: { index: false, follow: false, nocache: true } }
+      : noIndexFollow
+      ? {
+          robots: {
+            index: false,
+            follow: true,
+            googleBot: { index: false, follow: true },
+          },
+        }
       : {
           robots: {
             index: true,
@@ -89,12 +114,16 @@ export function pageMetadata({
       siteName: site.name,
       locale: "en_US",
       type,
-      images: ogImages.map((img) => ({
-        url: img.url,
-        width: img.width ?? 1200,
-        height: img.height ?? 630,
-        alt: img.alt ?? fullTitle,
-      })),
+      ...(ogImages.length
+        ? {
+            images: ogImages.map((img) => ({
+              url: img.url,
+              width: img.width ?? 1200,
+              height: img.height ?? 630,
+              alt: img.alt ?? fullTitle,
+            })),
+          }
+        : {}),
       ...(type === "article"
         ? {
             publishedTime,
@@ -107,7 +136,7 @@ export function pageMetadata({
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: ogImages.map((img) => img.url),
+      ...(ogImages.length ? { images: ogImages.map((img) => img.url) } : {}),
       creator: site.social?.twitterHandle || undefined,
     },
   };

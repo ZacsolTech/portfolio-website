@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FinalCta } from "@/components/layout/final-cta";
 import { PageHero } from "@/components/layout/page-hero";
 import { Reveal } from "@/components/motion/reveal";
+import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/seo/json-ld";
 import { ProjectCardGrid } from "@/components/shared/project-cards";
 import { ReviewsSlider } from "@/components/shared/reviews-slider";
 import { Stat } from "@/components/ui";
@@ -28,6 +29,21 @@ export default async function AboutPage() {
 
   return (
     <div className="about-page">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ]}
+      />
+      {/* AboutPage is what ties the named leadership on this page to the
+          Organization node — the single strongest E-E-A-T signal we can emit
+          without a physical address. */}
+      <WebPageJsonLd
+        type="AboutPage"
+        name="About ZACSOL"
+        description="ZACSOL is a software company that designs and delivers production systems with clear scope, staged releases and full client ownership."
+        path="/about"
+      />
       <PageHero
         overline="About"
         breadcrumbs={[

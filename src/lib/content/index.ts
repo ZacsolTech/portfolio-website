@@ -43,3 +43,9 @@ export {
 } from "./site";
 export { zac } from "./zac";
 export type { ZacBrand } from "./zac";
+export {
+  consultantLanding,
+  estimatorLanding,
+  toolComparison,
+} from "./tools";
+export type { ToolBenefit, ToolComparisonRow } from "./tools";
