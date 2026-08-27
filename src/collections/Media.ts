@@ -12,7 +12,8 @@ export const Media: CollectionConfig = {
     group: "Content",
     useAsTitle: "filename",
     defaultColumns: ["filename", "alt", "updatedAt"],
-    description: "Upload photos here, like WordPress. Then pick one on a post, or drop it into the article.",
+    description:
+      "Upload photos here. On the live site they are stored in Vercel Blob — add BLOB_READ_WRITE_TOKEN in Vercel or photos will not appear after deploy.",
   },
   access: {
     read: () => true,
@@ -22,7 +23,19 @@ export const Media: CollectionConfig = {
   },
   upload: {
     staticDir: path.resolve(dirname, "../../public/media"),
+    disableLocalStorage: process.env.VERCEL === "1",
     mimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"],
+  },
+  hooks: {
+    beforeValidate: [
+      () => {
+        if (process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN) {
+          throw new Error(
+            "Add BLOB_READ_WRITE_TOKEN in Vercel (Storage → Blob) so photos are saved. Local disk is not kept on deploy.",
+          );
+        }
+      },
+    ],
   },
   fields: [
     {

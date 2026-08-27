@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { CmsImage } from "@/components/blog/cms-image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AdSlot } from "@/components/ads/ad-slot";
@@ -56,11 +56,10 @@ export function BlogBrowser({ items }: Props) {
             <Card variant="media">
               <CardMedia>
                 {item.cover ? (
-                  <Image
+                  <CmsImage
                     src={item.cover.src}
                     alt={item.cover.alt}
                     fill
-                    sizes="(min-width: 1024px) 360px, 50vw"
                     className="blog-card-img"
                     priority={i === 0}
                   />

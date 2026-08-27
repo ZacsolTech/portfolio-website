@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from "next/font/google";
 import { AdsenseScript } from "@/components/ads/adsense-script";
@@ -141,6 +142,7 @@ export default function FrontendLayout({
               away from the URL that carried it. */}
           <AttributionTracker />
           <SiteShell>{children}</SiteShell>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
