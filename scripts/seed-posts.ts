@@ -10,7 +10,18 @@ loadEnv({ path: ".env.local" });
 const require = createRequire(__filename);
 const { Pool } = require(
   require.resolve("pg", { paths: [require.resolve("@payloadcms/db-postgres")] }),
-) as typeof import("pg");
+) as {
+  Pool: new (opts: { connectionString?: string }) => {
+    connect: () => Promise<{
+      query: (
+        sql: string,
+        params?: unknown[],
+      ) => Promise<{ rowCount: number | null; rows: { id: number }[] }>;
+      release: () => void;
+    }>;
+    end: () => Promise<void>;
+  };
+};
 
 function rid(): string {
   return randomBytes(8).toString("hex");
