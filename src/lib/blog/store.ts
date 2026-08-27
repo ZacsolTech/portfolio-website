@@ -43,12 +43,13 @@ function isoDay(value: unknown): string {
 }
 
 function coverFrom(doc: PostRow): Insight["cover"] {
-  const uploaded = mediaUrl(doc.image);
-  if (uploaded && typeof doc.image === "object") {
+  const image = doc.image;
+  const uploaded = mediaUrl(image);
+  if (uploaded && image && typeof image === "object") {
     return {
       src: uploaded,
-      alt: doc.image.alt?.trim() || doc.title,
-      caption: doc.image.caption?.trim() || undefined,
+      alt: image.alt?.trim() || doc.title,
+      caption: image.caption?.trim() || undefined,
     };
   }
   const legacy = doc.cover?.src?.trim();
@@ -109,7 +110,7 @@ export async function getPublishedPosts(): Promise<Insight[]> {
     pagination: false,
     depth: 1,
   } as never);
-  return result.docs.map((doc) => toInsight(doc as PostRow));
+  return result.docs.map((doc) => toInsight(doc as unknown as PostRow));
 }
 
 export async function getPublishedPost(slug: string): Promise<Insight | null> {
@@ -123,5 +124,5 @@ export async function getPublishedPost(slug: string): Promise<Insight | null> {
     depth: 1,
   } as never);
   const doc = result.docs[0];
-  return doc ? toInsight(doc as PostRow) : null;
+  return doc ? toInsight(doc as unknown as PostRow) : null;
 }
