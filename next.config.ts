@@ -34,9 +34,38 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     localPatterns: [
       { pathname: "/brand/**" },
-      { pathname: "/media/**" },
       { pathname: "/projects/**" },
-      { pathname: "/api/media/file/**" },
+      { pathname: "/blog/**" },
+      { pathname: "/media/**" },
+      { pathname: "/api/media/**" },
+    ],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3000",
+        pathname: "/api/media/**",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "3000",
+        pathname: "/api/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "zacsol.tech",
+        pathname: "/api/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.zacsol.tech",
+        pathname: "/api/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
     ],
   },
   async redirects() {
@@ -78,8 +107,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       { source: "/ai-consultant-free", destination: "/ai-consultant", permanent: true },
-      { source: "/blog", destination: "/insights", permanent: true },
-      { source: "/blog/:slug", destination: "/insights/:slug", permanent: true },
+      { source: "/insights", destination: "/blog", permanent: true },
+      { source: "/insights/:slug", destination: "/blog/:slug", permanent: true },
+      { source: "/blog/value-before-the-ask", destination: "/blog", permanent: true },
+      { source: "/blog/scope-you-can-hold", destination: "/blog", permanent: true },
+      { source: "/blog/handover-from-day-one", destination: "/blog", permanent: true },
       { source: "/work", destination: "/portfolio", permanent: true },
       { source: "/case-studies", destination: "/portfolio", permanent: true },
       { source: "/pricing", destination: "/software-cost-calculator", permanent: true },
@@ -130,6 +162,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/ads.txt",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
         source: "/llms.txt",
         headers: [
           {
@@ -140,6 +181,8 @@ const nextConfig: NextConfig = {
       },
       { source: "/roadmap/:path*", headers: noIndexHeaders },
       { source: "/book/manage/:path*", headers: noIndexHeaders },
+      { source: "/admin/:path*", headers: noIndexHeaders },
+      { source: "/admin", headers: noIndexHeaders },
     ];
   },
 };

@@ -1,4 +1,6 @@
-import { industries, insights, services, site, zac } from "@/lib/content";
+import { industries, services, site, zac } from "@/lib/content";
+import { BLOG_PATH, blogPath } from "@/lib/blog";
+import { getPublishedPosts } from "@/lib/blog/store";
 import { absoluteUrl } from "@/lib/seo";
 
 /**
@@ -14,13 +16,14 @@ import { absoluteUrl } from "@/lib/seo";
  * modules the pages themselves render from.
  */
 
-export const dynamic = "force-static";
+export const revalidate = 3600;
 
 function line(label: string, url: string, note: string): string {
   return `- [${label}](${url}): ${note}`;
 }
 
-function build(): string {
+async function build(): Promise<string> {
+  const articles = await getPublishedPosts();
   return `# ${site.name}
 
 > ${site.description}
@@ -53,7 +56,7 @@ ${line("Contact", absoluteUrl("/contact"), `send a brief; a senior engineer repl
 
 ## Writing
 
-${insights.map((a) => line(a.title, absoluteUrl(`/insights/${a.slug}`), `${a.category} · ${a.date} · ${a.excerpt}`)).join("\n")}
+${articles.map((a) => line(a.title, absoluteUrl(blogPath(a.slug)), `${a.category} · ${a.date} · ${a.excerpt}`)).join("\n")}
 
 ## How we price
 
@@ -65,15 +68,15 @@ Published ranges are planning figures, not quotes.
 
 ## Optional
 
-${line("Insights index", absoluteUrl("/insights"), "all articles.")}
+${line("Blog index", absoluteUrl(BLOG_PATH), "all articles.")}
 ${line("RSS feed", absoluteUrl("/feed.xml"), "machine-readable article feed.")}
 ${line("Privacy", absoluteUrl("/privacy"), "what we store from tool sessions and enquiries, and how to have it deleted.")}
 ${line("Terms", absoluteUrl("/terms"), "terms of use.")}
 `;
 }
 
-export function GET() {
-  return new Response(build(), {
+export async function GET() {
+  return new Response(await build(), {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",

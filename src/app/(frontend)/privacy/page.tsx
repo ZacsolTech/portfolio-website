@@ -9,7 +9,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/privacy",
 });
 
-const UPDATED = "2 August 2026";
+const UPDATED = "27 August 2026";
 
 export default function PrivacyPage() {
   return (
@@ -61,6 +61,10 @@ export default function PrivacyPage() {
             <li>To improve our products, prompts and site performance (aggregated where possible).</li>
             <li>To prevent abuse, enforce rate limits and keep systems secure.</li>
             <li>To send newsletter content only if you subscribe — you can unsubscribe any time.</li>
+            <li>
+              To show advertising on blog pages via Google AdSense when that programme is enabled —
+              see Advertising below.
+            </li>
           </ul>
 
           <h2>Legal bases</h2>
@@ -96,6 +100,26 @@ export default function PrivacyPage() {
           <p>
             Our team and providers may process data in countries other than yours. Where required, we
             use appropriate safeguards (e.g. standard contractual clauses).
+          </p>
+
+          <h2>Advertising</h2>
+          <p>
+            Blog pages may show third-party ads served by Google AdSense. Google may use cookies or
+            similar identifiers to show ads, measure how they perform, and (where allowed) personalise
+            them. You can opt out of personalised Google ads at{" "}
+            <a href="https://adssettings.google.com/" rel="noopener noreferrer" target="_blank">
+              adssettings.google.com
+            </a>
+            . Google&apos;s own policy is at{" "}
+            <a
+              href="https://policies.google.com/technologies/ads"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              policies.google.com/technologies/ads
+            </a>
+            . Ads are a secondary revenue channel; they do not change how we handle enquiry or tool
+            data, and we do not sell your personal information.
           </p>
 
           <h2>Children</h2>

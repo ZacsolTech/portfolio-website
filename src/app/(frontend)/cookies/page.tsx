@@ -9,7 +9,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/cookies",
 });
 
-const UPDATED = "2 August 2026";
+const UPDATED = "27 August 2026";
 
 export default function CookiesPage() {
   return (
@@ -58,10 +58,22 @@ export default function CookiesPage() {
             or use cookieless / aggregated modes where available.
           </p>
 
+          <h2>Advertising</h2>
+          <p>
+            When Google AdSense is enabled on this site, Google may set advertising cookies on blog
+            pages to serve, measure and (where permitted) personalise ads. These are not essential.
+            You can block them in your browser, use Google&apos;s ad settings at{" "}
+            <a href="https://adssettings.google.com/" rel="noopener noreferrer" target="_blank">
+              adssettings.google.com
+            </a>
+            , or use a content blocker. Blocking ads does not affect the consultant, estimator or
+            contact forms.
+          </p>
+
           <h2>Marketing</h2>
           <p>
-            We do not currently run third-party advertising cookies on this site. If that changes, we
-            will update this notice and request consent where required.
+            We do not run separate marketing pixels for retargeting beyond AdSense where that is
+            enabled. If that changes, we will update this notice and request consent where required.
           </p>
 
           <h2>Managing cookies</h2>

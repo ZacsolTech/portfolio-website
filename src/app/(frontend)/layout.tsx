@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from "next/font/google";
+import { AdsenseScript } from "@/components/ads/adsense-script";
 import { SiteShell } from "@/components/layout/site-shell";
 import { AttributionTracker } from "@/components/shared/attribution-tracker";
 import { SiteJsonLd } from "@/components/seo/json-ld";
@@ -131,7 +132,8 @@ export default function FrontendLayout({
       <head>
         <ThemeScript />
         <SiteJsonLd />
-        <link rel="alternate" type="application/rss+xml" title={`${site.name} Insights`} href="/feed.xml" />
+        <AdsenseScript />
+        <link rel="alternate" type="application/rss+xml" title={`${site.name} Blog`} href="/feed.xml" />
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>

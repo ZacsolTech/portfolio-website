@@ -1,5 +1,5 @@
 /**
- * Vendor price catalog — the running cost of a project, in code.
+ * Vendor price    — the running cost of a project, in code.
  *
  * The division of labour here is the whole point. A visitor asking "what does
  * an n8n automation cost?" wants three numbers: the n8n subscription, the model

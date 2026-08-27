@@ -40,7 +40,7 @@ build — see `.env.example` for what each one unlocks.
 src/
   app/
     (frontend)/          Public site — pages and this app's API routes
-      api/               Route handlers: forms, AI, booking, cron, preview
+      api/               Route handlers: forms, AI, booking, cron
     (payload)/           Payload admin + its generated API/GraphQL routes
     globals.css          Tailwind entry + component layer
     tokens.css           Design tokens (the single source of visual truth)
@@ -53,7 +53,7 @@ src/
     ui/                  Design-system primitives (Button, Card, Section, …)
     zac/                 AI assistant dock, provider and launcher
     theme/               Theme provider, no-flash script, toggle
-    motion/ preview/ roadmap/ seo/
+    motion/ roadmap/ seo/
   lib/
     ai/                  Consultant: prompts, slots, streaming, rules engine
     estimator/           Cost estimator: pricing, prompts, session
@@ -84,8 +84,8 @@ import { services } from "@/lib/content";
   `@/components/ui` primitives.
 - **New form or lead source?** Add it to `src/lib/leads/schema.ts` and call
   `captureLead` — every surface lands in one table. See `docs/LEADS.md`.
-- **Content edit?** `src/lib/content/*` for code-only content; `/admin` for
-  Insights. See `docs/CMS.md`.
+- **Content edit?** `src/lib/content/*`. `/admin` is for leads, bookings and
+  other operational collections, not page copy.
 
 ## Environment
 
@@ -124,7 +124,6 @@ pnpm dev               # dev server
 pnpm build             # production build (runs typecheck)
 pnpm start             # serve the production build
 pnpm lint              # ESLint
-pnpm seed              # seed Insights from src/lib/content (dev server must be running)
 pnpm generate:types    # regenerate src/payload-types.ts from collections
 pnpm eval:consultant   # offline AI regression checks — no API key, no network
 pnpm migrate --list    # Payload migrations (see docs/CMS.md for why not `payload migrate`)
@@ -134,7 +133,7 @@ pnpm migrate --list    # Payload migrations (see docs/CMS.md for why not `payloa
 
 | Doc | Covers |
 |-----|--------|
-| [`docs/CMS.md`](docs/CMS.md) | Payload collections, seeding, migrations |
+| [`docs/CMS.md`](docs/CMS.md) | Payload collections and migrations |
 | [`docs/CONSULTANT.md`](docs/CONSULTANT.md) | AI consultant architecture and prompts |
 | [`docs/ESTIMATOR.md`](docs/ESTIMATOR.md) | Pricing engine and estimator flow |
 | [`docs/LEADS.md`](docs/LEADS.md) | Lead schema, notifications, nurture, booking |

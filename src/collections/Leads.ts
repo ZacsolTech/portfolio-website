@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminField, canDeleteSales, isLoggedIn, neverField, nobody } from '@/lib/access'
 
 /**
  * Every lead the site produces, from any surface.
@@ -29,10 +30,10 @@ export const Leads: CollectionConfig = {
     pagination: { defaultLimit: 50 },
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
-    create: () => false,
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
+    read: isLoggedIn,
+    create: nobody,
+    update: isLoggedIn,
+    delete: canDeleteSales,
   },
   hooks: {
     afterChange: [
@@ -271,6 +272,7 @@ export const Leads: CollectionConfig = {
           name: 'unsubscribeToken',
           type: 'text',
           index: true,
+          access: { read: adminField, create: neverField, update: neverField },
           admin: {
             readOnly: true,
             description: 'Single-purpose token in the unsubscribe link. Not a login.',

@@ -112,17 +112,36 @@ export type PortfolioItem = {
   flagshipFor?: string[];
 };
 
+/** In-house tools a post should point at after the answer. */
+export type BlogTool = "consultant" | "estimator";
+
+/**
+ * A public blog post.
+ */
 export type Insight = {
   slug: string;
   title: string;
   excerpt: string;
   category: string;
   date: string;
+  /** ISO date the facts (prices, models) were last checked. */
+  lastReviewed?: string;
   author: string;
   readingTime: string;
-  /** Markdown-ish paragraphs. */
+  /** Direct answer, rendered before the body. */
+  answer: string;
+  /** Markdown-ish paragraphs, tables and headings. */
   body: string[];
+  faqs: FaqItem[];
   related: string[];
+  tools: BlogTool[];
+  keywords: string[];
+  /** Optional hero / listing image. */
+  cover?: {
+    src: string;
+    alt: string;
+    caption?: string;
+  };
 };
 
 export type TeamMember = {

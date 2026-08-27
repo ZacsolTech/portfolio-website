@@ -1,4 +1,5 @@
 export type {
+  BlogTool,
   ClientLogo,
   ConsultantStep,
   EngagementShape,
@@ -25,7 +26,7 @@ export type {
 export { services, getService } from "./services";
 export { industries, getIndustry } from "./industries";
 export { portfolio } from "./portfolio";
-export { insights, getInsight } from "./insights";
+export { insights, getInsight, posts, getPost } from "./insights";
 export { team } from "./team";
 export { testimonials } from "./testimonials";
 export { faqs } from "./faqs";

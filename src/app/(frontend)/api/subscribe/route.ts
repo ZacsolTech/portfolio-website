@@ -5,7 +5,7 @@ import { verifyTurnstile } from "@/lib/security/turnstile";
 export const runtime = "nodejs";
 
 /**
- * Insights list sign-up.
+ * Blog list sign-up.
  *
  * Deliberately small: validate, rate limit, persist. Re-submitting an address
  * that already exists is a success, not an error — telling an anonymous caller

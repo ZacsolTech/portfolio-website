@@ -1,6 +1,6 @@
 export { Users } from './Users'
 export { Media } from './Media'
-export { Insights } from './Insights'
+export { Posts } from './Posts'
 export { Leads } from './Leads'
 export { Roadmaps } from './Roadmaps'
 export { Bookings } from './Bookings'

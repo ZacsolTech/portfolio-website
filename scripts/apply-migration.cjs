@@ -14,6 +14,7 @@
  *   node scripts/apply-migration.cjs --list
  */
 require('dotenv').config({ path: '.env', quiet: true })
+require('dotenv').config({ path: '.env.local', quiet: true, override: true })
 
 const { Pool } = require(
   require.resolve('pg', {
@@ -107,6 +108,157 @@ const MIGRATIONS = {
   '20260810_090000_roadmap_prototype': {
     // Additive and nullable, so it is safe to re-run and needs no preflight.
     sql: 'ALTER TABLE "roadmaps" ADD COLUMN IF NOT EXISTS "prototype" jsonb;',
+  },
+  '20260827_125100_drop_insights_and_media': {
+    sql: `
+      DELETE FROM "payload_locked_documents_rels" WHERE "insights_id" IS NOT NULL;
+      DELETE FROM "payload_locked_documents_rels" WHERE "media_id" IS NOT NULL;
+      ALTER TABLE "payload_locked_documents_rels" DROP COLUMN IF EXISTS "insights_id";
+      ALTER TABLE "payload_locked_documents_rels" DROP COLUMN IF EXISTS "media_id";
+      DROP TABLE IF EXISTS "_insights_v_version_body" CASCADE;
+      DROP TABLE IF EXISTS "_insights_v_version_related" CASCADE;
+      DROP TABLE IF EXISTS "_insights_v" CASCADE;
+      DROP TABLE IF EXISTS "insights_body" CASCADE;
+      DROP TABLE IF EXISTS "insights_related" CASCADE;
+      DROP TABLE IF EXISTS "insights" CASCADE;
+      DROP TABLE IF EXISTS "media" CASCADE;
+    `.replace(/\s+/g, ' ').trim(),
+    preflight: {
+      sql: 'select (select count(*) from insights)::int + (select count(*) from media)::int as n',
+      label: 'insights + media rows that will be removed',
+      refuseIfPositive: false,
+    },
+  },
+  '20260827_140000_users_role': {
+    sql: `
+      ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "role" varchar;
+      UPDATE "users" SET "role" = 'owner' WHERE "role" IS NULL OR "role" = '';
+      ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'staff';
+      ALTER TABLE "users" ALTER COLUMN "role" SET NOT NULL;
+      CREATE INDEX IF NOT EXISTS "users_role_idx" ON "users" USING btree ("role");
+    `.replace(/\s+/g, ' ').trim(),
+  },
+  '20260827_150000_posts': {
+    sql: `
+      DO $$ BEGIN CREATE TYPE "public"."enum_posts_status" AS ENUM('draft', 'published'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+      DO $$ BEGIN CREATE TYPE "public"."enum_posts_tools" AS ENUM('consultant', 'estimator'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+      CREATE TABLE IF NOT EXISTS "posts" (
+        "id" serial PRIMARY KEY NOT NULL,
+        "title" varchar NOT NULL,
+        "slug" varchar NOT NULL,
+        "status" "enum_posts_status" DEFAULT 'draft' NOT NULL,
+        "category" varchar NOT NULL,
+        "date" timestamp(3) with time zone NOT NULL,
+        "last_reviewed" timestamp(3) with time zone,
+        "author" varchar NOT NULL,
+        "reading_time" varchar,
+        "excerpt" varchar NOT NULL,
+        "answer" varchar NOT NULL,
+        "cover_src" varchar,
+        "cover_alt" varchar,
+        "cover_caption" varchar,
+        "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+        "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS "posts_slug_idx" ON "posts" USING btree ("slug");
+      CREATE INDEX IF NOT EXISTS "posts_status_idx" ON "posts" USING btree ("status");
+      CREATE INDEX IF NOT EXISTS "posts_date_idx" ON "posts" USING btree ("date");
+      CREATE INDEX IF NOT EXISTS "posts_updated_at_idx" ON "posts" USING btree ("updated_at");
+      CREATE INDEX IF NOT EXISTS "posts_created_at_idx" ON "posts" USING btree ("created_at");
+      CREATE TABLE IF NOT EXISTS "posts_body" (
+        "_order" integer NOT NULL, "_parent_id" integer NOT NULL, "id" varchar PRIMARY KEY NOT NULL, "paragraph" varchar NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS "posts_body_order_idx" ON "posts_body" USING btree ("_order");
+      CREATE INDEX IF NOT EXISTS "posts_body_parent_id_idx" ON "posts_body" USING btree ("_parent_id");
+      ALTER TABLE "posts_body" DROP CONSTRAINT IF EXISTS "posts_body_parent_id_fk";
+      ALTER TABLE "posts_body" ADD CONSTRAINT "posts_body_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;
+      CREATE TABLE IF NOT EXISTS "posts_faqs" (
+        "_order" integer NOT NULL, "_parent_id" integer NOT NULL, "id" varchar PRIMARY KEY NOT NULL, "q" varchar NOT NULL, "a" varchar NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS "posts_faqs_order_idx" ON "posts_faqs" USING btree ("_order");
+      CREATE INDEX IF NOT EXISTS "posts_faqs_parent_id_idx" ON "posts_faqs" USING btree ("_parent_id");
+      ALTER TABLE "posts_faqs" DROP CONSTRAINT IF EXISTS "posts_faqs_parent_id_fk";
+      ALTER TABLE "posts_faqs" ADD CONSTRAINT "posts_faqs_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;
+      CREATE TABLE IF NOT EXISTS "posts_keywords" (
+        "_order" integer NOT NULL, "_parent_id" integer NOT NULL, "id" varchar PRIMARY KEY NOT NULL, "value" varchar NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS "posts_keywords_order_idx" ON "posts_keywords" USING btree ("_order");
+      CREATE INDEX IF NOT EXISTS "posts_keywords_parent_id_idx" ON "posts_keywords" USING btree ("_parent_id");
+      ALTER TABLE "posts_keywords" DROP CONSTRAINT IF EXISTS "posts_keywords_parent_id_fk";
+      ALTER TABLE "posts_keywords" ADD CONSTRAINT "posts_keywords_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;
+      CREATE TABLE IF NOT EXISTS "posts_related" (
+        "_order" integer NOT NULL, "_parent_id" integer NOT NULL, "id" varchar PRIMARY KEY NOT NULL, "value" varchar NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS "posts_related_order_idx" ON "posts_related" USING btree ("_order");
+      CREATE INDEX IF NOT EXISTS "posts_related_parent_id_idx" ON "posts_related" USING btree ("_parent_id");
+      ALTER TABLE "posts_related" DROP CONSTRAINT IF EXISTS "posts_related_parent_id_fk";
+      ALTER TABLE "posts_related" ADD CONSTRAINT "posts_related_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;
+      CREATE TABLE IF NOT EXISTS "posts_tools" (
+        "order" integer NOT NULL, "parent_id" integer NOT NULL, "value" "enum_posts_tools", "id" serial PRIMARY KEY NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS "posts_tools_order_idx" ON "posts_tools" USING btree ("order");
+      CREATE INDEX IF NOT EXISTS "posts_tools_parent_idx" ON "posts_tools" USING btree ("parent_id");
+      ALTER TABLE "posts_tools" DROP CONSTRAINT IF EXISTS "posts_tools_parent_fk";
+      ALTER TABLE "posts_tools" ADD CONSTRAINT "posts_tools_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;
+      ALTER TABLE "payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "posts_id" integer;
+      ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT IF EXISTS "payload_locked_documents_rels_posts_fk";
+      ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_posts_fk" FOREIGN KEY ("posts_id") REFERENCES "public"."posts"("id") ON DELETE cascade;
+      CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_posts_id_idx" ON "payload_locked_documents_rels" USING btree ("posts_id");
+    `.replace(/\s+/g, ' ').trim(),
+  },
+  '20260827_180000_posts_editor': {
+    sql: `
+      ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "body" varchar;
+      UPDATE "posts" AS p SET "body" = COALESCE((SELECT string_agg("paragraph", chr(10)||chr(10) ORDER BY "_order") FROM "posts_body" AS b WHERE b."_parent_id" = p."id"), '');
+      UPDATE "posts" SET "body" = '' WHERE "body" IS NULL;
+      ALTER TABLE "posts" ALTER COLUMN "excerpt" DROP NOT NULL;
+      ALTER TABLE "posts" ALTER COLUMN "answer" DROP NOT NULL;
+      ALTER TABLE "posts" ALTER COLUMN "category" DROP NOT NULL;
+      DROP TABLE IF EXISTS "posts_body" CASCADE;
+    `.replace(/\s+/g, ' ').trim(),
+  },
+  '20260827_190000_media': {
+    sql: `
+      CREATE TABLE IF NOT EXISTS "media" (
+        "id" serial PRIMARY KEY NOT NULL,
+        "alt" varchar,
+        "caption" varchar,
+        "prefix" varchar,
+        "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+        "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+        "url" varchar,
+        "thumbnail_u_r_l" varchar,
+        "filename" varchar,
+        "mime_type" varchar,
+        "filesize" numeric,
+        "width" numeric,
+        "height" numeric,
+        "focal_x" numeric,
+        "focal_y" numeric
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS "media_filename_idx" ON "media" USING btree ("filename");
+      CREATE INDEX IF NOT EXISTS "media_updated_at_idx" ON "media" USING btree ("updated_at");
+      CREATE INDEX IF NOT EXISTS "media_created_at_idx" ON "media" USING btree ("created_at");
+      ALTER TABLE "payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "media_id" integer;
+      ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT IF EXISTS "payload_locked_documents_rels_media_fk";
+      ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_media_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade;
+      CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_media_id_idx" ON "payload_locked_documents_rels" USING btree ("media_id");
+      ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "image_id" integer;
+      ALTER TABLE "posts" DROP CONSTRAINT IF EXISTS "posts_image_id_media_id_fk";
+      ALTER TABLE "posts" ADD CONSTRAINT "posts_image_id_media_id_fk" FOREIGN KEY ("image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+      CREATE INDEX IF NOT EXISTS "posts_image_idx" ON "posts" USING btree ("image_id");
+    `.replace(/\s+/g, ' ').trim(),
+  },
+  '20260827_200000_post_tags': {
+    sql: `
+      ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "tags" varchar;
+      UPDATE "posts" AS p SET "tags" = COALESCE((
+        SELECT string_agg("value", ', ' ORDER BY "_order")
+        FROM "posts_keywords" AS k
+        WHERE k."_parent_id" = p."id"
+      ), p."tags")
+      WHERE p."tags" IS NULL OR p."tags" = '';
+    `.replace(/\s+/g, ' ').trim(),
   },
 }
 

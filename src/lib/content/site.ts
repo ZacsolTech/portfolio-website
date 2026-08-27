@@ -34,7 +34,7 @@ export const site: SiteInfo = {
     "software agency remote",
     "LLM automation",
     "RAG systems",
-    "product engineering agency",
+    "software agency blog",
   ],
   social: {
     linkedin: "https://www.linkedin.com/company/zacsol",

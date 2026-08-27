@@ -1,0 +1,245 @@
+/**
+ * Payload admin theme — zinc + lime, matching the public site.
+ *
+ * Payload 3 does not take a `css` path in config anymore; this file is imported
+ * from `app/(payload)/layout.tsx` so it lands on login and the dashboard.
+ */
+
+:root {
+  --font-body: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html[data-theme="dark"],
+html[data-theme="light"] {
+  --theme-success-500: #bbfd6a;
+  --theme-success-400: #c9ff85;
+  --theme-success-250: rgba(187, 253, 106, 0.22);
+  --theme-success-50: rgba(187, 253, 106, 0.08);
+}
+
+html[data-theme="dark"] {
+  --theme-bg: #09090b;
+  --theme-input-bg: #18181b;
+  --theme-elevation-0: #09090b;
+  --theme-elevation-50: #111114;
+  --theme-elevation-100: #18181b;
+  --theme-elevation-150: #1f1f23;
+  --theme-elevation-200: #27272a;
+  --theme-elevation-250: #303036;
+  --theme-elevation-300: #3f3f46;
+  --theme-elevation-400: #52525b;
+  --theme-elevation-500: #71717a;
+  --theme-elevation-600: #a1a1aa;
+  --theme-elevation-700: #d4d4d8;
+  --theme-elevation-800: #e4e4e7;
+  --theme-elevation-900: #fafafa;
+  --theme-text: #fafafa;
+  --theme-border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="light"] {
+  --theme-bg: #f4f4f5;
+  --theme-input-bg: #ffffff;
+  --theme-elevation-0: #f4f4f5;
+  --theme-elevation-50: #ffffff;
+  --theme-elevation-100: #fafafa;
+  --theme-elevation-150: #f4f4f5;
+  --theme-elevation-200: #e4e4e7;
+  --theme-success-500: #4d7c0f;
+  --theme-success-400: #65a30d;
+}
+
+.zacsol-admin-logo {
+  display: block;
+  height: 2.5rem;
+  width: auto;
+  max-width: 11rem;
+  object-fit: contain;
+}
+
+html[data-theme="light"] .zacsol-admin-logo--dark {
+  display: none;
+}
+
+html[data-theme="dark"] .zacsol-admin-logo--light,
+html:not([data-theme="light"]) .zacsol-admin-logo--light {
+  display: none;
+}
+
+html[data-theme="light"] .zacsol-admin-logo--light {
+  display: block;
+}
+
+.zacsol-admin-icon {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.4rem;
+  object-fit: cover;
+}
+
+.zacsol-login-intro {
+  margin: 0 0 1.25rem;
+  max-width: 22rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--theme-elevation-600, #a1a1aa);
+}
+
+.zacsol-dash {
+  margin: 0 0 2rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--theme-elevation-200, #27272a);
+  background: var(--theme-elevation-50, #111114);
+}
+
+.zacsol-dash__kicker {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #bbfd6a;
+}
+
+.zacsol-dash__title {
+  margin: 0.5rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--theme-text, #fafafa);
+}
+
+.zacsol-dash__lede {
+  margin: 0.75rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--theme-elevation-600, #a1a1aa);
+}
+
+.zacsol-dash__role {
+  display: inline-block;
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(187, 253, 106, 0.35);
+  background: rgba(187, 253, 106, 0.1);
+  color: #bbfd6a;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.zacsol-dash__note {
+  margin: 1rem 0 0;
+  max-width: 40rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--theme-elevation-500, #71717a);
+}
+
+.zacsol-nav-extra {
+  padding: 0.75rem 0 0.25rem;
+}
+
+.zacsol-nav-extra__link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--theme-elevation-600, #a1a1aa);
+  text-decoration: none;
+}
+
+.zacsol-nav-extra__link:hover {
+  color: #bbfd6a;
+}
+
+html[data-theme="dark"] .template-default__wrap,
+html[data-theme="dark"] .app-header,
+html[data-theme="dark"] .nav {
+  background: #09090b;
+}
+
+/* WordPress-style post editor */
+#field-title input,
+input#field-title {
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  padding: 0.65rem 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#field-body textarea,
+textarea#field-body {
+  min-height: 32rem;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.zacsol-tips {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.15rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--theme-elevation-200, #27272a);
+  background: var(--theme-elevation-50, #111114);
+}
+
+.zacsol-tips__title {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #bbfd6a;
+}
+
+.zacsol-tips__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.zacsol-tips__list li {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) auto;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.8125rem;
+  color: var(--theme-elevation-600, #a1a1aa);
+}
+
+.zacsol-tips__list code {
+  font-size: 0.75rem;
+  color: var(--theme-text, #fafafa);
+}
+
+.zacsol-tips__note {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--theme-elevation-500, #71717a);
+}
+
+.zacsol-featured__img {
+  display: block;
+  width: 100%;
+  max-height: 10rem;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  margin: 0 0 0.75rem;
+  border: 1px solid var(--theme-elevation-200, #27272a);
+}
+
+.zacsol-featured__empty {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--theme-elevation-500, #71717a);
+}

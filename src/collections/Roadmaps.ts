@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminField, canDeleteSales, isLoggedIn, neverField, nobody } from '@/lib/access'
 
 /**
  * Shareable roadmaps — the consultant's blueprint as a forwardable document.
@@ -21,10 +22,10 @@ export const Roadmaps: CollectionConfig = {
     description: 'Documents minted by the consultant and shared by link.',
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
-    create: () => false,
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
+    read: isLoggedIn,
+    create: nobody,
+    update: isLoggedIn,
+    delete: canDeleteSales,
   },
   fields: [
     {
@@ -33,6 +34,7 @@ export const Roadmaps: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
+      access: { read: adminField, create: neverField, update: neverField },
       admin: { readOnly: true, description: 'The /roadmap/[id] segment.' },
     },
     { name: 'title', type: 'text', required: true },

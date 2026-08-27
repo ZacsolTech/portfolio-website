@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canDeleteSales, isLoggedIn, nobody } from '@/lib/access'
 
 /**
  * Newsletter subscribers captured by the footer form.
@@ -14,13 +15,13 @@ export const Subscribers: CollectionConfig = {
     useAsTitle: 'email',
     defaultColumns: ['email', 'status', 'source', 'createdAt'],
     group: 'Sales',
-    description: 'Insights list sign-ups.',
+    description: 'Blog list sign-ups.',
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
-    create: () => false,
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
+    read: isLoggedIn,
+    create: nobody,
+    update: isLoggedIn,
+    delete: canDeleteSales,
   },
   fields: [
     { name: 'email', type: 'email', required: true, unique: true, index: true },

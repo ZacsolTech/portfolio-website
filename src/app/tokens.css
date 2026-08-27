@@ -1053,9 +1053,9 @@ h1, h2, h3, h4 {
   box-shadow: none;
 }
 
-/* Media card (portfolio / insights) */
+/* Media card (portfolio / blog) */
 .card--media { padding: 0; overflow: hidden; border-radius: var(--r-2xl); }
-.card--media .card__img { height: 14rem; background: var(--paper-alt); border-bottom: 1px solid var(--line-soft); overflow: hidden; }
+.card--media .card__img { position: relative; height: 14rem; background: var(--paper-alt); border-bottom: 1px solid var(--line-soft); overflow: hidden; }
 .card--media .card__img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s var(--ease); }
 .card--media:hover .card__img img { transform: scale(1.05); }
 .card--media .card__body { padding: 1.25rem; display: flex; flex-direction: column; flex: 1; min-width: 0; }

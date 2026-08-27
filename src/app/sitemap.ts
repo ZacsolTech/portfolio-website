@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
-import { industries, insights, portfolio, services } from "@/lib/content";
+import { industries, portfolio, services } from "@/lib/content";
+import { BLOG_PATH, blogPath } from "@/lib/blog";
+import { getPublishedPosts } from "@/lib/blog/store";
 import { absoluteUrl } from "@/lib/seo";
 
 /**
@@ -11,7 +13,7 @@ import { absoluteUrl } from "@/lib/seo";
  * Their indexable counterparts — `/ai-consultant` and
  * `/software-cost-calculator` — carry the priority instead.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -25,7 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/services", priority: 0.9, changeFrequency: "weekly" as const },
     { path: "/portfolio", priority: 0.85, changeFrequency: "weekly" as const },
     { path: "/industries", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: "/insights", priority: 0.8, changeFrequency: "weekly" as const },
+    { path: BLOG_PATH, priority: 0.8, changeFrequency: "weekly" as const },
     { path: "/book", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/contact", priority: 0.75, changeFrequency: "monthly" as const },
     { path: "/about", priority: 0.7, changeFrequency: "monthly" as const },
@@ -62,9 +64,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const insightRoutes = insights.map((i) => ({
-    url: absoluteUrl(`/insights/${i.slug}`),
-    lastModified: new Date(i.date),
+  const articles = await getPublishedPosts();
+  const insightRoutes = articles.map((article) => ({
+    url: absoluteUrl(blogPath(article.slug)),
+    lastModified: new Date(article.date),
     changeFrequency: "monthly" as const,
     priority: 0.65,
   }));

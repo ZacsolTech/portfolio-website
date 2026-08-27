@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { PreviewBanner } from "@/components/preview/preview-banner";
 import { ZacDock, ZacProvider } from "@/components/zac";
 
 /**
@@ -12,13 +11,11 @@ import { ZacDock, ZacProvider } from "@/components/zac";
  *
  * Immersive chat routes (`/consultant`, `/tools/estimator`) keep this tree
  * mounted for session continuity, but hide the marketing chrome via CSS
- * keyed off `.consultant-page--shell` — so this file stays a Server Component
- * and can still render `PreviewBanner` (`next/headers`).
+ * keyed off `.consultant-page--shell`.
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <ZacProvider>
-      <PreviewBanner />
       <SiteHeader />
       <main className="flex-1 chat-shell-main">{children}</main>
       <SiteFooter />

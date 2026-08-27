@@ -193,7 +193,7 @@ export function WebPageJsonLd({
 }
 
 /**
- * A list page — services, industries, portfolio, insights.
+ * A list page — services, industries, portfolio, blog.
  *
  * Gives the crawler the set of URLs and their order without making it infer
  * them from markup, which is what surfaces sitelinks and carousel treatments.
@@ -384,6 +384,7 @@ export function ArticleJsonLd({
   category,
   wordCount,
   keywords,
+  image,
 }: {
   title: string;
   description: string;
@@ -394,6 +395,8 @@ export function ArticleJsonLd({
   category?: string;
   wordCount?: number;
   keywords?: string[];
+  /** Cover or first figure. Falls back to the site share card. */
+  image?: string;
 }) {
   const url = absoluteUrl(path);
   const data = {
@@ -420,7 +423,11 @@ export function ArticleJsonLd({
     ...(category ? { articleSection: category } : {}),
     ...(wordCount ? { wordCount } : {}),
     ...(keywords?.length ? { keywords } : {}),
-    image: [absoluteUrl("/opengraph-image")],
+    image: [absoluteUrl(image ?? "/opengraph-image")],
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: [".article-body p", ".article-body h2"],
+    },
   };
   return <JsonLd data={data} />;
 }

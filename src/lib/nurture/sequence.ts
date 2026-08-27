@@ -62,8 +62,8 @@ export const NURTURE_STEPS: NurtureStep[] = [
 			"Two thirds of software projects overrun on budget or schedule. Most of the causes are structural and visible from the outside — scope that moves without being re-priced, progress reported as decks rather than deployments, releases that are events instead of routine.",
 			"This is the last email in this sequence. If the timing isn't right, that's genuinely fine — the consultant and the estimator stay free and available whenever it is.",
 		],
-		ctaLabel: "Read the insights",
-		ctaPath: "/insights",
+		ctaLabel: "Read the blog",
+		ctaPath: "/blog",
 	},
 ];
 

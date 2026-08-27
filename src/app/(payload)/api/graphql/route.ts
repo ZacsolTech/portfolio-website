@@ -1,4 +1,10 @@
-import { GRAPHQL_POST } from '@payloadcms/next/routes'
-import configPromise from '@payload-config'
+import { NextResponse } from 'next/server'
 
-export const POST = GRAPHQL_POST(configPromise)
+/** GraphQL is disabled in payload.config. Keep the route as a hard 404. */
+export function GET() {
+  return new NextResponse(null, { status: 404 })
+}
+
+export function POST() {
+  return new NextResponse(null, { status: 404 })
+}

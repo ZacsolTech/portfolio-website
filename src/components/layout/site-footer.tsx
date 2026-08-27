@@ -25,7 +25,7 @@ const companyLinks = [
   { href: "/about", label: "About us" },
   { href: "/industries", label: "Industries" },
   { href: "/portfolio", label: "Projects" },
-  { href: "/insights", label: "Insights" },
+  { href: "/blog", label: "Blog" },
   { href: "/book", label: "Book a consultation" },
   { href: "/contact", label: "Contact" },
 ] as const;

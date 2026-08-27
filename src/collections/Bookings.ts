@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminField, canDeleteSales, isLoggedIn, neverField, nobody } from '@/lib/access'
 
 /**
  * Consultation bookings.
@@ -27,10 +28,10 @@ export const Bookings: CollectionConfig = {
   },
   defaultSort: '-startsAt',
   access: {
-    read: ({ req }) => Boolean(req.user),
-    create: () => false,
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
+    read: isLoggedIn,
+    create: nobody,
+    update: isLoggedIn,
+    delete: canDeleteSales,
   },
   fields: [
     {
@@ -141,6 +142,7 @@ export const Bookings: CollectionConfig = {
           name: 'manageToken',
           type: 'text',
           index: true,
+          access: { read: adminField, create: neverField, update: neverField },
           admin: {
             readOnly: true,
             description: 'Single-purpose token in the reschedule/cancel link.',
