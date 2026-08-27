@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "payload generate:types",
     "migrate": "node scripts/apply-migration.cjs",
     "seed:posts": "tsx scripts/seed-posts.ts",
