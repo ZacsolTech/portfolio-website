@@ -76,7 +76,7 @@ export function BlogBrowser({ items }: Props) {
                   {item.excerpt}
                 </p>
                 <p className="overline" style={{ marginTop: "auto", paddingTop: "1rem" }}>
-                  {formatBlogDate(item.date)} · {item.readingTime}
+                  {formatBlogDate(item.date)}
                 </p>
               </CardBody>
             </Card>

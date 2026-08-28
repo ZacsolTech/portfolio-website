@@ -1674,8 +1674,8 @@ a.ind__c,
   border: 1px solid var(--line-soft);
   white-space: pre-wrap;
 }
-.blog-card-img {
-  object-fit: cover;
+.card--media .card__img img.blog-card-img {
+  object-fit: contain;
 }
 .article-body p {
   font-size: 1.0625rem;
