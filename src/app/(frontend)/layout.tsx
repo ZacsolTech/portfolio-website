@@ -1,6 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Instrument_Serif, Space_Grotesk } from "next/font/google";
 import { AdsenseScript } from "@/components/ads/adsense-script";
 import { SiteShell } from "@/components/layout/site-shell";
 import { AttributionTracker } from "@/components/shared/attribution-tracker";
@@ -8,39 +7,9 @@ import { SiteJsonLd } from "@/components/seo/json-ld";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { site } from "@/lib/content";
+import { ibmPlexMono, instrumentSerif, spaceGrotesk } from "@/lib/fonts";
 import { absoluteUrl, defaultKeywords, defaultOgImage, siteUrl } from "@/lib/seo";
 import "../globals.css";
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-  preload: true,
-});
-
-/*
-  JetBrains Mono via next/font/google is currently broken on Turbopack builds:
-  Google returns 404 for the woff2 URLs Next embeds, which fails Vercel deploys.
-  IBM Plex Mono is the same job (code/UI mono) with working font files.
-*/
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-jetbrains-mono",
-  display: "swap",
-  preload: true,
-});
-
-/* The single contrast voice — accented phrases inside headlines only. */
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["italic", "normal"],
-  variable: "--font-instrument-serif",
-  display: "swap",
-  preload: true,
-});
 
 export const viewport: Viewport = {
   themeColor: [
