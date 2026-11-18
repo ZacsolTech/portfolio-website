@@ -10,8 +10,10 @@ import { ServiceIcon } from "@/components/shared/service-icon";
 import { Chip, IconTile, Panel, PanelRow } from "@/components/ui";
 import { services } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "Services",
   description:
     "Eight ways we build — web, mobile, AI automation, data, custom software, UI/UX, process automation and content pipelines. One senior team.",
@@ -25,9 +27,14 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/services", baseMetadata);
+}
+
 export default function ServicesPage() {
   return (
     <>
+      <SeoJsonLd page="/services" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

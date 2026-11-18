@@ -13,6 +13,8 @@ import { Chip } from "@/components/ui";
 import { ZacLink } from "@/components/zac/zac-link";
 import { getService, portfolio, services } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -24,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const service = getService(slug);
   if (!service) return {};
-  return pageMetadata({
+  return withSeo(`/services/${slug}`, pageMetadata({
     title: service.title,
     description: service.seo.description,
     path: `/services/${slug}`,
@@ -34,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ...service.tech.map((t) => t.toLowerCase()),
       "custom software development",
     ],
-  });
+  }));
 }
 
 export default async function ServiceDetailPage({ params }: Props) {
@@ -59,6 +61,7 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   return (
     <div className="svc-detail">
+      <SeoJsonLd page={`/services/${service.slug}`} />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

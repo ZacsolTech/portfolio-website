@@ -9,6 +9,9 @@ import { BLOG_PATH, blogPath, formatBlogDate } from "@/lib/blog";
 import { getPublishedPost, getPublishedPosts } from "@/lib/blog/store";
 import { team } from "@/lib/content";
 import { absoluteUrl, pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
+import { postPageId } from "@/lib/site-pages";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -28,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = await getPublishedPost(slug);
   if (!article) return {};
-  return pageMetadata({
+  const base = pageMetadata({
     title: article.title,
     description: article.excerpt,
     path: blogPath(slug),
@@ -52,6 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         }
       : {}),
   });
+  return article.id ? withSeo(postPageId(article.id), base) : base;
 }
 
 export default async function BlogArticlePage({ params }: Props) {
@@ -69,6 +73,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
   return (
     <>
+      {article.id ? <SeoJsonLd page={postPageId(article.id)} /> : null}
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

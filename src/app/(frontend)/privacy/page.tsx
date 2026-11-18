@@ -2,18 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "Privacy policy",
   description: `How ${site.name} collects, uses and protects personal data.`,
   path: "/privacy",
 });
+
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/privacy", baseMetadata);
+}
 
 const UPDATED = "27 August 2026";
 
 export default function PrivacyPage() {
   return (
     <section className="section section--paper section--after-nav">
+      <SeoJsonLd page="/privacy" />
       <div className="container">
         <article className="legal">
           <span className="overline">Legal</span>

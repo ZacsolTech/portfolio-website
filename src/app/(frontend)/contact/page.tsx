@@ -2,17 +2,24 @@ import type { Metadata } from "next";
 import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/seo/json-ld";
 import { ContactExpectations, ContactForm } from "@/components/shared/contact-form";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "Contact",
   description:
     "Tell ZACSOL what's broken. A senior engineer replies within one business day — or ask ZAC Consultant for a roadmap in three minutes.",
   path: "/contact",
 });
 
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/contact", baseMetadata);
+}
+
 export default function ContactPage() {
   return (
     <section className="section section--paper section--after-nav">
+      <SeoJsonLd page="/contact" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

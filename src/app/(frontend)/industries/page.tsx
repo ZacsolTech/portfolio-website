@@ -8,8 +8,10 @@ import { ServiceIcon } from "@/components/shared/service-icon";
 import { IconTile } from "@/components/ui";
 import { industries } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "Industries",
   description:
     "Retail, healthcare, fintech, logistics, real estate, education, manufacturing and professional services — software shaped by the problems we see.",
@@ -23,9 +25,14 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/industries", baseMetadata);
+}
+
 export default async function IndustriesPage() {
   return (
     <>
+      <SeoJsonLd page="/industries" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

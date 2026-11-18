@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/seo/json-ld";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
 const panelSkeleton = (
   <div
@@ -21,7 +23,7 @@ const BookingPanel = dynamic(
   { loading: () => panelSkeleton },
 );
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "Book a consultation",
   description:
     "Book thirty minutes with a ZACSOL senior engineer. Not a sales call — an honest look at the bottleneck.",
@@ -33,9 +35,14 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/book", baseMetadata);
+}
+
 export default function BookPage() {
   return (
     <section className="section section--paper section--after-nav">
+      <SeoJsonLd page="/book" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

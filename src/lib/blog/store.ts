@@ -16,6 +16,7 @@ type MediaDoc = {
 };
 
 type PostRow = {
+  id?: number | string;
   slug: string;
   title: string;
   excerpt: string;
@@ -80,6 +81,7 @@ function toInsight(doc: PostRow): Insight {
       ? markdownToBlocks(doc.body)
       : (doc.body ?? []).map((row) => row.paragraph ?? "").filter(Boolean);
   return {
+    ...(doc.id !== undefined ? { id: String(doc.id) } : {}),
     slug: doc.slug,
     title: doc.title,
     excerpt: doc.excerpt ?? "",

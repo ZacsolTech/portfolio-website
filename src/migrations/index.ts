@@ -11,6 +11,7 @@ import * as migration_20260827_180000_posts_editor from './20260827_180000_posts
 
 import * as migration_20260827_190000_media from './20260827_190000_media'
 import * as migration_20260827_200000_post_tags from './20260827_200000_post_tags'
+import * as migration_20261118_120000_zacbos_seo_redirects from './20261118_120000_zacbos_seo_redirects'
 
 export const migrations = [
   {
@@ -72,5 +73,10 @@ export const migrations = [
     up: migration_20260827_200000_post_tags.up,
     down: migration_20260827_200000_post_tags.down,
     name: '20260827_200000_post_tags',
+  },
+  {
+    up: migration_20261118_120000_zacbos_seo_redirects.up,
+    down: migration_20261118_120000_zacbos_seo_redirects.down,
+    name: '20261118_120000_zacbos_seo_redirects',
   },
 ]

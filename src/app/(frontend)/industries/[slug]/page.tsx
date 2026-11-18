@@ -9,6 +9,8 @@ import { ProjectCardGrid } from "@/components/shared/project-cards";
 import { ServiceIcon } from "@/components/shared/service-icon";
 import { getIndustry, getService, industries, portfolio } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -20,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const industry = getIndustry(slug);
   if (!industry) return {};
-  return pageMetadata({
+  return withSeo(`/industries/${slug}`, pageMetadata({
     title: `${industry.name} software`,
     description: industry.seo.description,
     path: `/industries/${slug}`,
@@ -30,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "industry software",
       "custom software development",
     ],
-  });
+  }));
 }
 
 export default async function IndustryDetailPage({ params }: Props) {
@@ -52,6 +54,7 @@ export default async function IndustryDetailPage({ params }: Props) {
 
   return (
     <div className="ind-detail">
+      <SeoJsonLd page={`/industries/${industry.slug}`} />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

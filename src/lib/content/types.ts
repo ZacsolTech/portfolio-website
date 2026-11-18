@@ -119,6 +119,8 @@ export type BlogTool = "consultant" | "estimator";
  * A public blog post.
  */
 export type Insight = {
+  /** Payload row id, when the post came from the CMS. */
+  id?: string;
   slug: string;
   title: string;
   excerpt: string;

@@ -1,8 +1,10 @@
 import type { MetadataRoute } from "next";
-import { industries, portfolio, services } from "@/lib/content";
-import { BLOG_PATH, blogPath } from "@/lib/blog";
+import { portfolio } from "@/lib/content";
+import { blogPath } from "@/lib/blog";
 import { getPublishedPosts } from "@/lib/blog/store";
 import { absoluteUrl } from "@/lib/seo";
+import { getNoindexPageIds } from "@/lib/seo-overrides";
+import { postPageId, sitePages } from "@/lib/site-pages";
 
 /**
  * Only indexable URLs belong here.
@@ -12,48 +14,21 @@ import { absoluteUrl } from "@/lib/seo";
  * indexed is a contradictory signal that costs crawl budget on every fetch.
  * Their indexable counterparts — `/ai-consultant` and
  * `/software-cost-calculator` — carry the priority instead.
+ *
+ * For the same reason, any page set to noindex from ZACBOS is dropped.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const hidden = await getNoindexPageIds();
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { path: "", priority: 1, changeFrequency: "weekly" as const },
-    { path: "/ai-consultant", priority: 0.95, changeFrequency: "weekly" as const },
-    {
-      path: "/software-cost-calculator",
-      priority: 0.95,
-      changeFrequency: "weekly" as const,
-    },
-    { path: "/services", priority: 0.9, changeFrequency: "weekly" as const },
-    { path: "/portfolio", priority: 0.85, changeFrequency: "weekly" as const },
-    { path: "/industries", priority: 0.85, changeFrequency: "monthly" as const },
-    { path: BLOG_PATH, priority: 0.8, changeFrequency: "weekly" as const },
-    { path: "/book", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "/contact", priority: 0.75, changeFrequency: "monthly" as const },
-    { path: "/about", priority: 0.7, changeFrequency: "monthly" as const },
-    { path: "/privacy", priority: 0.2, changeFrequency: "yearly" as const },
-    { path: "/terms", priority: 0.2, changeFrequency: "yearly" as const },
-    { path: "/cookies", priority: 0.2, changeFrequency: "yearly" as const },
-  ].map(({ path, priority, changeFrequency }) => ({
-    url: absoluteUrl(path || "/"),
-    lastModified: now,
-    changeFrequency,
-    priority,
-  }));
-
-  const serviceRoutes = services.map((s) => ({
-    url: absoluteUrl(`/services/${s.slug}`),
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.85,
-  }));
-
-  const industryRoutes = industries.map((i) => ({
-    url: absoluteUrl(`/industries/${i.slug}`),
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.75,
-  }));
+  const pageRoutes: MetadataRoute.Sitemap = sitePages()
+    .filter((page) => !hidden.has(page.id))
+    .map((page) => ({
+      url: absoluteUrl(page.path),
+      lastModified: now,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+    }));
 
   /* Query-string URLs, because `/portfolio/:slug` permanently redirects here.
      They stay listed so the redirect target is what gets crawled. */
@@ -65,18 +40,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const articles = await getPublishedPosts();
-  const insightRoutes = articles.map((article) => ({
-    url: absoluteUrl(blogPath(article.slug)),
-    lastModified: new Date(article.date),
-    changeFrequency: "monthly" as const,
-    priority: 0.65,
-  }));
+  const insightRoutes = articles
+    .filter((article) => !article.id || !hidden.has(postPageId(article.id)))
+    .map((article) => ({
+      url: absoluteUrl(blogPath(article.slug)),
+      lastModified: new Date(article.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.65,
+    }));
 
-  return [
-    ...staticRoutes,
-    ...serviceRoutes,
-    ...industryRoutes,
-    ...portfolioRoutes,
-    ...insightRoutes,
-  ];
+  return [...pageRoutes, ...portfolioRoutes, ...insightRoutes];
 }

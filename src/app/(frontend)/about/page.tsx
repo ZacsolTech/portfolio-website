@@ -9,8 +9,10 @@ import { ReviewsSlider } from "@/components/shared/reviews-slider";
 import { Stat } from "@/components/ui";
 import { aboutMission, aboutStats, portfolio, team } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "About us",
   description:
     "ZACSOL is a software company that designs and delivers production systems for support, logistics, commerce and automation — with clear scope, staged releases and full client ownership.",
@@ -24,11 +26,16 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/about", baseMetadata);
+}
+
 export default async function AboutPage() {
   const featured = portfolio.slice(0, 3);
 
   return (
     <div className="about-page">
+      <SeoJsonLd page="/about" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

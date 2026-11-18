@@ -14,6 +14,8 @@ import {
   Roadmaps,
   Bookings,
   Subscribers,
+  Seo,
+  Redirects,
 } from './collections'
 import { normalizeDatabaseUrl } from './lib/db'
 import { site } from './lib/content/site'
@@ -78,6 +80,8 @@ export default buildConfig({
     Roadmaps,
     Bookings,
     Subscribers,
+    Seo,
+    Redirects,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

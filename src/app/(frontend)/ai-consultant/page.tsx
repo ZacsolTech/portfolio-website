@@ -15,10 +15,12 @@ import { ServiceIcon } from "@/components/shared/service-icon";
 import { ZacLink } from "@/components/zac/zac-link";
 import { consultantLanding, consultantSteps, services, toolComparison, zac } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
 const PATH = "/ai-consultant";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: consultantLanding.metaTitle,
   description: consultantLanding.metaDescription,
   path: PATH,
@@ -26,6 +28,10 @@ export const metadata: Metadata = pageMetadata({
   keywords: [...consultantLanding.keywords],
   useRouteImage: true,
 });
+
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/ai-consultant", baseMetadata);
+}
 
 /**
  * `/ai-consultant` — the indexable page for ZAC Consultant.
@@ -39,6 +45,7 @@ export const metadata: Metadata = pageMetadata({
 export default function AiConsultantPage() {
   return (
     <div className="tool-page">
+      <SeoJsonLd page="/ai-consultant" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

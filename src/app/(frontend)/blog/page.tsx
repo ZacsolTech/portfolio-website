@@ -5,21 +5,28 @@ import { BlogBrowser } from "@/components/blog/blog-browser";
 import { BLOG_PATH, blogPath } from "@/lib/blog";
 import { getPublishedPosts } from "@/lib/blog/store";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "Blog",
   description: "Articles on AI, automation, and software from ZACSOL.",
   path: BLOG_PATH,
   keywords: ["software blog", "AI blog", "automation", "ZACSOL"],
 });
 
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/blog", baseMetadata);
+}
+
 export default async function BlogPage() {
   const posts = await getPublishedPosts();
 
   return (
     <>
+      <SeoJsonLd page="/blog" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

@@ -15,14 +15,21 @@ import { FaqJsonLd, WebPageJsonLd } from "@/components/seo/json-ld";
 import { ReviewsSlider } from "@/components/shared/reviews-slider";
 import { faqs, site } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
-export const metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: `${site.name} — ${site.tagline}`,
   description: site.description,
   path: "/",
   absolute: true,
   keywords: site.keywords,
 });
+
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/", baseMetadata);
+}
 
 /**
  * Homepage — tease + convert, don't duplicate depth.
@@ -35,6 +42,7 @@ export const metadata = pageMetadata({
 export default function HomePage() {
   return (
     <>
+      <SeoJsonLd page="/" />
       <WebPageJsonLd
         name={`${site.name} — ${site.tagline}`}
         description={site.description}

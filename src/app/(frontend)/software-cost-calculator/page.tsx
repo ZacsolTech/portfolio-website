@@ -15,10 +15,12 @@ import { estimatorLanding, toolComparison, zac } from "@/lib/content";
 import { PRICES_AS_OF } from "@/lib/estimator/catalog";
 import { PROJECT_TYPES, indicativeCostBand } from "@/lib/estimator/pricing";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
 const PATH = "/software-cost-calculator";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: estimatorLanding.metaTitle,
   description: estimatorLanding.metaDescription,
   path: PATH,
@@ -26,6 +28,10 @@ export const metadata: Metadata = pageMetadata({
   keywords: [...estimatorLanding.keywords],
   useRouteImage: true,
 });
+
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/software-cost-calculator", baseMetadata);
+}
 
 const usd = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -75,6 +81,7 @@ export default function SoftwareCostCalculatorPage() {
 
   return (
     <div className="tool-page">
+      <SeoJsonLd page="/software-cost-calculator" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },

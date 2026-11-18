@@ -8,8 +8,10 @@ import { PortfolioFilterGrid } from "@/components/shared/portfolio-filter";
 import { ReviewsSlider } from "@/components/shared/reviews-slider";
 import { portfolio } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
+import { SeoJsonLd } from "@/components/seo/seo-overrides";
+import { withSeo } from "@/lib/seo-overrides";
 
-export const metadata: Metadata = pageMetadata({
+const baseMetadata: Metadata = pageMetadata({
   title: "Projects",
   description:
     "Selected software projects shipped by ZACSOL — AI automation, ops platforms, commerce systems and content pipelines with measurable outcomes.",
@@ -21,6 +23,10 @@ export const metadata: Metadata = pageMetadata({
     "product engineering portfolio",
   ],
 });
+
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo("/portfolio", baseMetadata);
+}
 
 const portfolioStandards = [
   {
@@ -51,6 +57,7 @@ export default async function PortfolioPage({
 
   return (
     <div className="portfolio-page">
+      <SeoJsonLd page="/portfolio" />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", path: "/" },
